@@ -1,0 +1,555 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Pays;
+use App\Models\Banque;
+use App\Models\Filiere;
+use App\Models\Etudiant;
+use App\Models\Derogation;
+use App\Models\Parametres;
+use App\Models\Universite;
+use App\Models\DemandeTemp;
+use Illuminate\Http\Request;
+use App\Models\Etablissement;
+use App\Models\AnneeAcademique;
+use Illuminate\Validation\Rule;
+use App\Models\SelectionNouveau;
+use App\Models\ArchiveAllocataire;
+use Illuminate\Support\Facades\DB;
+use App\Models\DemandeAllocationUPB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Http;
+use App\Models\CorrespondanceFiliere;
+use App\Models\DemandeAllocationTemp;
+use Illuminate\Support\Facades\Session;
+use App\Models\Inscriptionuniversite2022;
+
+class DemandeAllocController extends Controller
+{
+    //
+    public function index()
+    {
+
+        return view('upb.form-demande');
+    }
+    public function premier_traitement()
+    {
+        // Validation du formulaire
+        request()->validate([
+            'Universite' => 'required',
+            // 'Matricule' => 'required|numeric',
+            // 'NumeroDeTable' => 'required|alpha_num',
+            'DateNaissanceEtudiant' => 'required|date|before:today',
+            'DipDeBase' => 'required',
+            // 'AnneeObtention' => 'required|numeric|between:2000,2022',
+        ]);
+        //$all contient les donnnées du formulaire
+        $all = request()->all();
+        //Vérification si Universiyté du formulaire existe dans les parametres de base
+        $params = Parametres::UNIVERSITE[$all['Universite']] ?? null;
+        if ($params == null) {
+            return abort(404, 'Univers
+            ité non parametré');
+        }
+
+        // Un tableau de tous les année scolaire .
+        $cursus = [
+            2020 => ['TYPE' => '', 'DISPO' => ''],
+            2021 => ['TYPE' => '', 'DISPO' => ''],
+            2022 => ['TYPE' => '', 'DISPO' => ''],
+        ];
+
+        foreach ($cursus as $codeAnnee => $anneeCourant) {
+
+            $resp_annee = $this->algoParAnee($codeAnnee, $all);
+            $cursus[$codeAnnee] = $resp_annee;
+
+            if ($cursus[$codeAnnee] != false && ($cursus[$codeAnnee]['DISPO'] ?? null) == 'MAINTENANT') {
+                // réflexion
+                // Insérer dans etudiant temporaire et demande temporaire puis mettre à jour au niveau 2
+                $cursus[$codeAnnee]['DATA'];
+                $cursus[$codeAnnee]['DATA']['CodeUniversite'] = $all['Universite'];
+                $cursus[$codeAnnee]['DATA']['CodeAnneeAcademique'] = $codeAnnee;
+                $cursus[$codeAnnee]['DATA']['CodeTypeDemande'] = $cursus[$codeAnnee]['TYPE'];
+                $cursus[$codeAnnee]['DATA']['user_id'] = Auth::user()->id;
+                $cursus[$codeAnnee]['DATA']['Email'] = Auth::user()->email;
+                $cursus[$codeAnnee]['DATA']['CodeNatureAllocation'] = $cursus[$codeAnnee]['DATA']['StatutAllocataire'];
+
+                $id = DemandeTemp::create($cursus[$codeAnnee]['DATA']);
+                $old_ids = Session::get('DemandeTemporaire') ?? [];
+                $old_ids[] = $id;
+                Session::put('DemandeTemporaire', $old_ids);
+            } elseif ($cursus[$codeAnnee] != false && !is_null($cursus[$codeAnnee]['TEMP_DATA'] ?? null)) {
+                $old_ids = Session::get('DemandeTemporaire') ?? [];
+                $old_ids[] = $cursus[$codeAnnee]['TEMP_DATA']->id;
+                Session::put('DemandeTemporaire', $old_ids);
+            }
+        }
+
+        //Si cursus ne contient que des false, c'est qu'il ne peut rien faire
+        $queDesFalse = true;
+        $newDemandeDispo = false;
+        foreach ($cursus as $value) {
+            if ($value != false) {
+                $queDesFalse = false;
+                if ($value['DISPO'] == 'MAINTENANT') {
+                    $newDemandeDispo = true;
+                }
+            }
+        }
+        if ($queDesFalse) {
+            $this->putError('Vous n\'avez aucune allocation universitaire non faite. ');
+        }
+        if (!$newDemandeDispo) {
+            $this->putError('Vous n\'avez aucune nouvelle demande allocation universitaire à faire. Pour en modifier, veuillez vous rendre dans le menu "Mes demandes" ');
+        }
+        //dd($cursus);
+        // Si non, il peut continuer
+        //dd(Session::get('errors'));
+        Session::put('cursus', $cursus);
+        return redirect('/step2');
+    }
+    public function algoParAnee(int $codeAnnee, $all)
+    {
+        $univ = $all['Universite'];
+        $UnivParams = Parametres::UNIVERSITE[$univ] ?? null;
+        //$response = $this->callAPI($all['Universite'], $all['Matricule'], $codeAnnee);
+        $apiResponse = null;
+        if (!is_null($UnivParams['api'])) {
+            $apiResponse = $this->callAPI($univ, $all['Matricule'], $codeAnnee);
+        } else {
+            $apiResponse = $this->apiLocal($univ, $all['Matricule']);
+        }
+        if (is_null($apiResponse)) {
+            return false;
+        }
+        $this->insererInscription($apiResponse);
+        $this->preparerDB($univ, $apiResponse);
+        $aretourner = $this->typeDemande($apiResponse, $all, $univ, $codeAnnee);
+
+        if ($aretourner != false) $aretourner['DATA'] = $apiResponse;
+        return $aretourner;
+    }
+
+    public function apiLocal($univ, $matricule)
+    {
+        $table = Parametres::UNIVERSITE[$univ]['table'];
+        $r = DB::select('SELECT * FROM ? WHERE Matricule = ?', [$table, $matricule]);
+        dd($r);
+    }
+
+    public function callAPI($univ, $matricule, $codeAnnee)
+    {
+        $params = Parametres::UNIVERSITE[$univ] ?? null;
+        $champ_validation = '';
+        $champ_type_alloc = '';
+        $alloc_autorise = [];
+        $var_name_api = [];
+        switch ($univ) {
+            case 'UAC':
+                $champ_validation = 'validation1';
+                $champ_type_alloc = 'statut';
+                $alloc_autorise = ['BRS', 'SEC'];
+                $var_name_api = [
+                    'Matricule' => 'matricule',
+                    'NomEtudiant' => 'nom',
+                    'PrenomEtudiant' => 'prenom',
+                    'DateNaissanceEtudiant' => 'date_de_naissance',
+                    'LieuNaissanceEtudiant' => "lieu_de_naissance",
+                    'SexeEtudiant' => "sexe",
+                    'Nationalite' => "nationalite",
+                    "CodeEtablissement" => "etablissement",
+                    'CodeFiliere' => 'filiere',
+                    'LibeleFiliere' => 'filiere',
+                    "CodeAnneeEtude" => 'niveau',
+                    'StatutAllocataire' => $champ_type_alloc,
+
+                ];
+
+                break;
+            case 'UNA':
+                $champ_validation = 'statut';
+                $champ_type_alloc = 'type_alocation';
+                $alloc_autorise = ['BRS'];
+                $var_name_api = [
+                    'Matricule' => 'matricule',
+                    'NomEtudiant' => 'nom',
+                    'PrenomEtudiant' => 'prenoms',
+                    'DateNaissanceEtudiant' => 'date_naissance',
+                    'LieuNaissanceEtudiant' => "lieu_naissance",
+                    'SexeEtudiant' => "sexe",
+                    'Nationalite' => "nationalite",
+                    "CodeEtablissement" => "ecole",
+                    "LibeleEtablissement" => "libspecialite",
+                    'CodeFiliere' => 'specialite',
+                    'LibeleFiliere' => 'libspecialite',
+                    "CodeAnneeEtude" => 'annee_etude',
+                    'StatutAllocataire' => $champ_type_alloc,
+                ];
+
+                str_replace('UNA', '', $matricule);
+                $matricule .= 'UNA';
+                break;
+
+            default:
+                # code...
+                break;
+        }
+        $url_api = str_replace('{Matricule}', $matricule, $params['api']);
+        $url_api = str_replace('{AnneeAcademique}', $codeAnnee, $url_api);
+        // echo ($url_api) . '<br>';
+
+        $r = Http::withoutVerifying()->accept('application/json')->withToken($params['token'])->withHeaders(['apiToken' => $params['token']])->get($url_api);
+        $response = $r->json();
+        //  dd($response);
+        switch ($univ) {
+            case 'UNA':
+
+                if (in_array('message', array_keys($response))) {
+                    $this->putError($response['message'] . '... Année Scolaire : ' . (AnneeAcademique::find($codeAnnee)->LibelleAnneeAcademique));
+                    return;
+                }
+                $response = array_values($response)[0];
+                break;
+            case 'UNSTIM':
+                if (($response['status'] ?? null) == 500) {
+                    Session::put('error', 'Erreur au niveau du serveur distant');
+                    return null;
+                }
+            default:
+                # code...
+                break;
+        }
+
+        if (count($response) > 1) {
+
+            $correct = null;
+
+            foreach ($response as $resp) {
+                if (!is_null($resp[$champ_validation]) && in_array($resp[$champ_type_alloc], $alloc_autorise)) {
+                    if (is_null($correct)) {
+                        $correct = $resp;
+                    } else {
+                        $this->putError('Anomalie : Plusieurs bourses ont été identifiées, vous devez annuler 1... ' . $codeAnnee);
+                        return;
+                    }
+                }
+            }
+
+            $response = $correct;
+        } else {
+
+            if (count($response) != 0 && !is_null($response[0][$champ_validation]) && in_array($response[0][$champ_type_alloc], $alloc_autorise)) {
+                $response = $response[0];
+            } else {
+                $response = null;
+            }
+        }
+
+        if (is_null($response)) {
+            //Session::put('error', 'Aucune correspondance trouvé');
+           // $this->putError('Aucune correspondance : ' . $codeAnnee);
+            return null;
+        }
+        switch ($univ) {
+            case 'UAC':
+                if ($response['cycle'] === 2) {
+                    $response[$var_name_api['CodeAnneeEtude']] += 3;
+                }
+                break;
+
+            default:
+                # code...
+                break;
+        }
+        $aretourner = [
+            'Matricule' => '',
+            'NomEtudiant' => '',
+            'PrenomEtudiant' => '',
+            'DateNaissanceEtudiant' => '',
+            'LieuNaissanceEtudiant' => "",
+            'SexeEtudiant' => "",
+            'Nationalite' => "",
+            "CodeEtablissement" => "",
+            'CodeFiliere' => '',
+            "CodeAnneeEtude" => '',
+            'StatutAllocataire' => '',
+            'LibeleFiliere' => ''
+        ];
+
+        // echo '<pre>';
+        // var_dump($response);
+        // echo '</pre>';
+
+        foreach ($aretourner as $key => $value) {
+            $aretourner[$key] = $response[$var_name_api[$key]];
+        }
+        $aretourner['LibelleCourtUniversite'] = $univ;
+        if (strlen($aretourner['Nationalite']) == 2) {
+            $r = Pays::where("code2", $aretourner['Nationalite'])->first() ?? null;
+            if (!is_null($r)) {
+                $aretourner['Nationalite'] = $r['nationalite'];
+            }
+        }
+        $aretourner['StatutAllocataire'] = str_replace('SEC', 'AIDES', $aretourner['StatutAllocataire']);
+        $aretourner['StatutAllocataire'] = str_replace('BRS', 'BOURSE', $aretourner['StatutAllocataire']);
+
+
+        return ($aretourner);
+    }
+
+    public function preparerDB($univ, &$map)
+    {
+        if (is_null($map)) {
+            return;
+        }
+        $ets = null;
+        if (!is_null($map['CodeEtablissement'])) {
+            $r = Etablissement::where("CodeEtablissement", $map['CodeEtablissement'] . '-' . $univ)->where("CodeUniversite", $univ)->exists();
+            $ets = null;
+            if (!$r) {
+                $ets = Etablissement::create([
+                    'CodeEtablissement' => $map['CodeEtablissement'] . '-' . $univ,
+                    'LibelleEtablissement' => $map['CodeEtablissement'] . '-' . $univ,
+                    'CodeUniversite' => $univ,
+                    'CodeTypeEtablissement' => ($univ == 'UAC' ? 'Faculté' : 'Ecole'),
+                    'valider' => 'non'
+                ]);
+            } else {
+                $ets = Etablissement::where("CodeEtablissement", $map['CodeEtablissement'] . '-' . $univ)->where("CodeUniversite", $univ)->first();
+            }
+            $map['CodeEtablissement'] = $map['CodeEtablissement'] . '-' . $univ;
+        }
+
+        if (!is_null($map['CodeFiliere'])) {
+            $r = Filiere::where("CodeFiliere", $map['CodeFiliere'] . '-' . $ets->CodeEtablissement)->where("CodeEtablissement", $ets->CodeEtablissement)->exists();
+
+            if (!$r) {
+                Filiere::create([
+                    'CodeFiliere' => $map['CodeFiliere'] . '-' . $ets->CodeEtablissement,
+                    'LibelleFiliere' => $map['LibeleFiliere'],
+                    'CodeEtablissement' => $ets->CodeEtablissement,
+                ]);
+            }
+            $map['CodeFiliere'] = $map['CodeFiliere'] . '-' . $ets->CodeEtablissement;
+        }
+    }
+
+    public function insererInscription($map)
+    {
+        $map['user_id'] = Auth::user()->id;
+        $res = Inscriptionuniversite2022::where('Matricule', $map['Matricule'])
+            ->where('LibelleCourtUniversite', $map['LibelleCourtUniversite'])
+            ->where('DateNaissanceEtudiant', $map['DateNaissanceEtudiant'])
+            ->where('CodeFiliere', $map['CodeFiliere'])
+            ->where('CodeAnneeEtude', $map['CodeAnneeEtude']);
+
+        if ($res->exists()) {
+            ///Session::put('success', 'Demande modifier');
+            $old = $res->first();
+            $old->update($map);
+            return $old;
+        } else {
+            //Session::put('success', 'Demande effectué');
+            $r = Inscriptionuniversite2022::create($map);
+            return $r;
+        }
+
+        return false;
+    }
+    public function putError(string $err)
+    {
+        $errors = Session::get('errorsDem') ?? [];
+        $errors[] = $err;
+        Session::put('errorsDem', $errors);
+    }
+
+    public function typeDemande($map, $saisi, $univ, $codeAnnee)
+    {
+
+        /* Vérifier s'il bénéficie déjà d'une allocation antérieur,
+        ou s'il vient de faire et que c'est encore dans la table demandeAllocationUPB */
+
+        $allocAnnePasse =  ArchiveAllocataire::rechercher($codeAnnee - 1, $map) ?? DemandeTemp::rechercher($codeAnnee - 1, $map) ?? DemandeAllocationUPB::rechercher($codeAnnee - 1, $map);
+        $allocAnneSurpasse = ArchiveAllocataire::rechercher($codeAnnee - 2, $map) ?? DemandeTemp::rechercher($codeAnnee - 2, $map) ?? DemandeAllocationUPB::rechercher($codeAnnee - 2, $map);
+
+        /* Vérifer s'il a déjà fait une demande cette année */
+        $deja_fait = DemandeAllocationUPB::rechercher($codeAnnee, $map) ?? DemandeTemp::rechercher($codeAnnee, $map);
+        if (!is_null($deja_fait)) {
+            return ['TYPE' => $deja_fait['CodeTypeDemande'], 'DISPO' => 'OUI', 'TEMP_DATA' => (DemandeTemp::rechercher($codeAnnee, $map))];
+        }
+
+        // Si aucune demande trouvé en son nom pour 2 dernieres année et est passé en année supérieur
+        // cas d'une probable attributionf
+
+        if ($map['CodeAnneeEtude'] == 1 && is_null($allocAnnePasse) && is_null($allocAnneSurpasse)) {
+            //S'il est sélectionner pour l'année de la variable $codeAnnée
+
+            $selection = SelectionNouveau::rechercher($codeAnnee, $map, $saisi);
+
+            if (!is_null($selection)) {
+
+                // Si il y a correspondance entre les filiere de sa sélection et la filiere de l'API :: Attribution confirmé
+                if (
+                    $selection->CodeUniversite == $univ &&
+                    Etablissement::correspondreSelection($map['CodeEtablissement'], $selection->etablissementSelection) &&
+                    Filiere::correspondreSelection($map['CodeFiliere'], $selection->libfiliere)
+                ) {
+                    //dd("c");
+                    $type_demande = 'Attribution';
+                    return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT'];
+                } else {
+                    $this->putError('Cas d\'une probable Attribution');
+                    $this->putError("L'étudiant a été retrouvé dans la liste des sélections, mais ne s'est pas inscrit dans la bonne filière / bon Etablissement ... Filière de sélection : " . $selection->libfiliere . ' | ' . " Filière d'inscription : " . $map['CodeFiliere'] . ' | ' . " Etablissement de sélection : " . $selection->etablissementSelection . ' | ' . " Etablissement d'inscription : " . $map['CodeEtablissement']);
+                }
+            } else {
+                $this->putError('Cas d\'une probable Attribution');
+                $this->putError("L'étudiant n'a pas été retrouvé dans la liste des sélections");
+            }
+        }
+        // Si demande de l'année passé trouvé et est passé en classe supérieur : cas d'un Renouvellement
+        if (!is_null($allocAnnePasse) && ($allocAnnePasse->CodeAnneeEtude + 1) == $map['CodeAnneeEtude']) {
+            //Si correspondance entre la filiere de l'année passé et celle ci
+
+            if (
+                Etablissement::correspondre($map['CodeEtablissement'], $allocAnnePasse->CodeEtablissement)
+                && Filiere::correspondre($map['CodeFiliere'], $allocAnnePasse->CodeFiliere)
+            ) {
+                $type_demande = 'Renouvellement';
+                return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT'];
+            } else {
+                $this->putError("Cas d'un renouvellement");
+                $this->putError("La filière / etablissement de l'année précédente, n'est pas conforme à celle de cette année ... Filiere Année précédente : " . $allocAnnePasse->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement année précédente : " . $allocAnnePasse->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
+            }
+        } elseif (!is_null($allocAnneSurpasse) && ($allocAnneSurpasse->CodeAnneeEtude + 1) == $map['CodeAnneeEtude']) {
+            // ^^ Si demande de l'année surpassé trouvé et est passé en classe supérieur : cas d'un rétablissement
+            //Si correspondance entre la filiere de l'année passé et celle ci
+
+            if (
+                Etablissement::correspondre($map['CodeEtablissement'], $allocAnneSurpasse->CodeEtablissement)
+                && Filiere::correspondre($map['CodeFiliere'], $allocAnneSurpasse->CodeFiliere)
+            ) {
+                $type_demande = 'Rétablissement';
+                return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT'];
+            } else {
+                $this->putError("Cas d'un rétablissement ");
+                $this->putError("La filière / etablissement de l'année précédente, n'est pas conforme à celle de cette année ... Filiere Année précédente : " . $allocAnnePasse->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement année précédente : " . $allocAnnePasse->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
+            }
+        }
+        //S'il dispose d'une dérogation
+        $derogation = Derogation::rechercher($codeAnnee, $map);
+
+        if (!is_null($derogation)) {
+            if (
+                Etablissement::correspondre($map['CodeEtablissement'], $derogation->CodeEtablissement)
+                && Filiere::correspondre($map['CodeFiliere'], $derogation->CodeFiliere)
+            ) {
+                $type_demande = 'Rétablissement';
+                return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT'];
+            } else {
+                $this->putError("Cas d'une dérogation ");
+                $this->putError("La filière / etablissement de la dérogation , n'est pas conforme à celle de l'inscription ... Filiere dérogation : " . $derogation->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement derogation : " . $derogation->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
+            }
+        } else {
+            if ($codeAnnee == 2022) {
+                dd('dero non trouvé');
+            }
+        }
+        $this->putError('Clarification de cursus');
+
+
+        return false;
+    }
+
+
+    public function step2()
+    {
+        $v = DemandeTemp::where('user_id', Auth::user()->id);
+        if (!$v->exists() || is_null(Session::get('cursus') ?? null)) {
+            return redirect('/')->with("error", "Veuillez procéder étape par étape");
+        }
+        $cursus = Session::get('cursus');
+
+        return view('upb.step2', ['demTemp' => $v->get()])->with([
+            'cursus' => $cursus
+        ]);
+    }
+    public function step2post()
+    {
+        // if ($inscription_id = Session::get('CodeEtudiant')) {
+        //     $ins = Inscriptionuniversite2022::findOrFail($inscription_id)->toArray();
+        // }
+
+        $demAttente = DemandeTemp::where('user_id', Auth::user()->id);
+        if (!$demAttente->exists() || is_null(Session::get('cursus') ?? null)) {
+            return redirect('/')->with("error", "Veuillez procéder étape par étape");
+        }
+        $demAttente = $demAttente->get();
+        $all = request()->all();
+        $banques = array_values(Banque::pluck('CodeBanque')->toArray());
+
+        request()->validate([
+            'Banque' => 'required|in:' . implode(',', $banques),
+            "RIB" => [
+                "required", "min:24",
+                Rule::unique('demande_allocation')->ignore(Auth::user()->id, 'UtilisateurDemande')
+            ],
+            'Telephone' => [
+                "required", "numeric", "digits:8",
+                Rule::unique('etudiant')->ignore(Auth::user()->id, 'user_id')
+            ],
+            "NPI" => [
+                "required", "digits_between:10,12", "numeric",
+                Rule::unique('etudiant')->ignore(Auth::user()->id, 'user_id')
+            ]
+        ],
+        ['RIB.unique' => 'Ce RIB a déjà été utilisé', 'Telephone.unique' => 'Ce N° de Téléphone a déjà été utilisé',
+        'NPI.unique' => "Ce NPI a déjà été utilisé"]);
+
+
+        $banque = Banque::findOrFail($all['Banque']);
+        request()->validate([
+            "RIB" => "required|regex:/^" . $banque->regex . '/',
+        ]);
+
+        foreach ($demAttente as $demande) {
+            $ins = array_merge($demande->toArray(), $all);
+            $ins['CodeBanque'] = $ins['Banque'];
+            $ins['CodeSerie'] = '';
+            $ins['UtilisateurDemande'] = Auth::user()->id;
+            $ins['DateDemande'] = date('Y-m-d');
+            $ins['idtransaction'] = '';
+            $ins['user_id'] = Auth::user()->id;
+
+
+            $etu = Etudiant::rechercher($ins);
+            if (!is_null($etu)) {
+                if ($etu->user_id != Auth::user()->id) {
+                    $demande->delete();
+                    return redirect('/mes-demandes')->with('error', "Vous n'êtes pas autorisé à faire une demande pour un autre étudiant");
+                }
+                $etu->update($ins);
+            } else {
+                if (Etudiant::where('user_id', Auth::user()->id)->exists()) {
+                    $demande->delete();
+                    return redirect('/mes-demandes')->with('error', "Vous n'êtes pas autorisé à faire une demande pour un autre étudiant");
+                }
+
+                $etu = Etudiant::create($ins);
+            }
+            $ins['CodeEtudiant'] = $etu->CodeEtudiant;
+
+            $demUPB = DemandeAllocationUPB::rechercher($ins['CodeAnneeAcademique'], $ins);
+            if (!is_null($demUPB)) {
+                $demUPB->update($ins);
+            } else {
+                $etu = DemandeAllocationUPB::create($ins);
+            }
+            //DemandeTemp::where('user_id', Auth::user()->id)->delete();
+            $demande->delete();
+        }
+
+        return redirect('/mes-demandes')->with('success','Demande effectué avec success');
+    }
+}
