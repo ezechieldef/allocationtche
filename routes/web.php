@@ -1,14 +1,15 @@
 <?php
 
-use App\Http\Controllers\DemandeAllocController;
-use App\Http\Controllers\DerogationController;
-use App\Http\Controllers\MesDemandes;
-use App\Http\Controllers\RIBValidationController;
-use App\Http\Controllers\UniversiteController;
-use App\Models\DemandeAllocationUPB;
-use App\Models\DemandeTemp;
 use App\Models\Universite;
+use App\Models\DemandeTemp;
+use App\Models\ArchiveAllocataire;
+use App\Models\DemandeAllocationUPB;
+use App\Http\Controllers\MesDemandes;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\DerogationController;
+use App\Http\Controllers\UniversiteController;
+use App\Http\Controllers\DemandeAllocController;
+use App\Http\Controllers\RIBValidationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -43,16 +44,14 @@ Route::middleware(["auth"])->group(function () {
     Route::post('/importerRIB/{codebanque}', [App\Http\Controllers\ExcelController::class, 'importer']);
 
     Route::any('/mes-demandes', [App\Http\Controllers\MesDemandes::class, 'index']);
-    Route::get('/imprimer-fiche/{code}', [MesDemandes::class,'imprimerFiche' ]);
+    Route::get('/imprimer-fiche/{code}', [MesDemandes::class, 'imprimerFiche']);
 
-    Route::any('/joindre-fichier/{codeEtudiant}', [MesDemandes::class,'joindrefichier' ])->name('joindre-fichier');
-    Route::get('/modifier-demande/{codedemande}', [MesDemandes::class,'modifierDemande' ])->name('modifier-demande');
-    Route::post('/modifier-demande/{codedemande}', [MesDemandes::class,'postModifierDemande' ])->name('modifier-demande');
-    Route::get('/voir-demande/{codedemande}', [MesDemandes::class,'voirDemande' ])->name('voir-demande');
-    Route::get('/apres-paiement/{codedemande}/{idtransaction}', [MesDemandes::class,'payer' ])->name('payer');
-    Route::get('/apres-paiement/{codedemande}/?transaction_id={idtransaction}', [MesDemandes::class,'payer' ])->name('payer');
-
-
+    Route::any('/joindre-fichier/{codeEtudiant}', [MesDemandes::class, 'joindrefichier'])->name('joindre-fichier');
+    Route::get('/modifier-demande/{codedemande}', [MesDemandes::class, 'modifierDemande'])->name('modifier-demande');
+    Route::post('/modifier-demande/{codedemande}', [MesDemandes::class, 'postModifierDemande'])->name('modifier-demande');
+    Route::get('/voir-demande/{codedemande}', [MesDemandes::class, 'voirDemande'])->name('voir-demande');
+    Route::get('/apres-paiement/{codedemande}/{idtransaction}', [MesDemandes::class, 'payer'])->name('payer');
+    Route::get('/apres-paiement/{codedemande}/?transaction_id={idtransaction}', [MesDemandes::class, 'payer'])->name('payer');
 });
 
 Route::redirect('/', 'nouvelle-demande-allocation', 302);
@@ -91,9 +90,36 @@ Route::get('/sudo', function () {
 Route::get('/test', function () {
     //$v = DemandeAllocationUPB::join('etudiant', 'etudiant.CodeEtudiant','demande_allocation.CodeEtudiant');
     // return $v->get();
+
+
+    $map = [
+        "Matricule" => "11012808221UNA",
+        "NomEtudiant" => "ODJO",
+        "PrenomEtudiant" => "Adéniran Anael Astrid",
+
+        "DateNaissanceEtudiant" => "28/03/2004",
+        "LieuNaissanceEtudiant" => "Godomey",
+        "SexeEtudiant" => "M",
+        "Nationalite" => "Béninoise",
+        "CodeEtablissement" => "EAq-UNA",
+        "CodeFiliere" => "EAq-EAq-UNA",
+        "CodeAnneeEtude" => 2,
+        "StatutAllocataire" => "BOURSE",
+        "LibeleFiliere" => "DEUXIEME ANNEE DE EAq",
+        "LibelleCourtUniversite" => "UNA",
+    ];
+    echo date("d/m/Y", strtotime($map['DateNaissanceEtudiant']));
+
+    $codeAnnee = 2021;
+    $allocAnnePasse =  ArchiveAllocataire::rechercher($codeAnnee - 1, $map) ?? DemandeTemp::rechercher($codeAnnee - 1, $map) ?? DemandeAllocationUPB::rechercher($codeAnnee - 1, $map);
+    $allocAnneSurpasse = ArchiveAllocataire::rechercher($codeAnnee - 2, $map) ?? DemandeTemp::rechercher($codeAnnee - 2, $map) ?? DemandeAllocationUPB::rechercher($codeAnnee - 2, $map);
+    if ($codeAnnee == 2021) {
+        dd($allocAnnePasse);
+    }
+
     $v = DemandeAllocationUPB::join("etudiant", 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')->where('CodeBanque', Auth::user()->banque_assigner)
-    ->where('RIB_valide','!=','oui')
-    ->get(['CodeDemandeAllocation','NPI','NomEtudiant', 'PrenomEtudiant','RIB']);
+        ->where('RIB_valide', '!=', 'oui')
+        ->get(['CodeDemandeAllocation', 'NPI', 'NomEtudiant', 'PrenomEtudiant', 'RIB']);
     dd($v);
 });
 Route::get('/temp', function () {
