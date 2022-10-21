@@ -85,7 +85,7 @@ class DemandeAllocController extends Controller
             }
         }
 
-        dd($cursus);
+        //dd($cursus);
         //Si cursus ne contient que des false, c'est qu'il ne peut rien faire
         $queDesFalse = true;
         $newDemandeDispo = false;
@@ -126,7 +126,7 @@ class DemandeAllocController extends Controller
         // echo '<br>'.$codeAnnee.'<br>';
         //var_dump($apiResponse);
         $this->insererInscription($apiResponse);
-        $this->preparerDB($univ, $apiResponse);
+        $apiResponse = $this->preparerDB($univ, $apiResponse);
 
         if (str_contains($apiResponse['DateNaissanceEtudiant'], '-')) {
             $apiResponse['DateNaissanceEtudiant'] = date("d/m/Y", strtotime($apiResponse['DateNaissanceEtudiant']));
@@ -159,7 +159,10 @@ class DemandeAllocController extends Controller
         //dd($apiResponse);
         //var_dump($apiResponse);
         $aretourner = $this->typeDemande($apiResponse, $all, $univ, $codeAnnee);
-        if ($aretourner == false)  return false;
+        if ($aretourner == false) {
+
+            return false;
+        };
 
 
 
@@ -241,7 +244,7 @@ class DemandeAllocController extends Controller
             case 'UNSTIM':
                 $champ_validation = 'isValidated';
                 $champ_type_alloc = 'scholarship';
-                $alloc_autorise = ['BRS'];
+                $alloc_autorise = ['BRS','AU'];
                 $var_name_api = [
                     'Matricule' => 'matricule',
                     'NomEtudiant' => 'lastName',
@@ -309,7 +312,7 @@ class DemandeAllocController extends Controller
             case 'UNSTIM':
                 if (($response['status'] ?? null) == 500) {
                     Session::put('error', 'Erreur au niveau du serveur distant');
-                    return null;
+                    return null ;
                 }
                 if (in_array('error', array_keys($response))) {
                     $this->putError($response['message'] . '... Année Scolaire : ' . (AnneeAcademique::find($codeAnnee)->LibelleAnneeAcademique));
@@ -409,46 +412,58 @@ class DemandeAllocController extends Controller
         }
         $aretourner['StatutAllocataire'] = str_replace('SEC', 'AIDES', $aretourner['StatutAllocataire']);
         $aretourner['StatutAllocataire'] = str_replace('BRS', 'BOURSE', $aretourner['StatutAllocataire']);
+        $aretourner['StatutAllocataire'] = str_replace('AU', 'AIDES', $aretourner['StatutAllocataire']);
 
 
         return ($aretourner);
     }
 
-    public function preparerDB($univ, &$map)
+    public function preparerDB($univ, $map)
     {
         if (is_null($map)) {
             return;
         }
         $ets = null;
         if (!is_null($map['CodeEtablissement'])) {
-            $r = Etablissement::where("CodeEtablissement", $map['CodeEtablissement'] . '-' . $univ)->where("CodeUniversite", $univ)->exists();
-            $ets = null;
-            if (!$r) {
-                $ets = Etablissement::create([
-                    'CodeEtablissement' => $map['CodeEtablissement'] . '-' . $univ,
-                    'LibelleEtablissement' => $map['CodeEtablissement'] . '-' . $univ,
-                    'CodeUniversite' => $univ,
-                    'CodeTypeEtablissement' => ($univ == 'UAC' ? 'Faculté' : 'Ecole'),
-                    'valider' => 'non'
-                ]);
-            } else {
-                $ets = Etablissement::where("CodeEtablissement", $map['CodeEtablissement'] . '-' . $univ)->where("CodeUniversite", $univ)->first();
+            $ets = Etablissement::find($map['CodeEtablissement']);
+            if (is_null($ets)) {
+                $r = Etablissement::where("CodeEtablissement", $map['CodeEtablissement'] . '-' . $univ)->where("CodeUniversite", $univ)->exists();
+
+                if (!$r) {
+
+                    $ets = Etablissement::create([
+                        'CodeEtablissement' => $map['CodeEtablissement'] . '-' . $univ,
+                        'LibelleEtablissement' => $map['CodeEtablissement'] . '-' . $univ,
+                        'CodeUniversite' => $univ,
+                        'CodeTypeEtablissement' => ($univ == 'UAC' ? 'Faculté' : 'Ecole'),
+                        'valider' => 'non'
+                    ]);
+                } else {
+                    $ets = Etablissement::where("CodeEtablissement", $map['CodeEtablissement'] . '-' . $univ)->where("CodeUniversite", $univ)->first();
+                }
+                $map['CodeEtablissement'] = $map['CodeEtablissement'] . '-' . $univ;
             }
-            $map['CodeEtablissement'] = $map['CodeEtablissement'] . '-' . $univ;
+
+
         }
 
         if (!is_null($map['CodeFiliere'])) {
-            $r = Filiere::where("CodeFiliere", $map['CodeFiliere'] . '-' . $ets->CodeEtablissement)->where("CodeEtablissement", $ets->CodeEtablissement)->exists();
+            $fil=Filiere::find($map['CodeFiliere']);
+            if (is_null($fil)) {
+                $r = Filiere::where("CodeFiliere", $map['CodeFiliere'] . '-' . $ets->CodeEtablissement)->where("CodeEtablissement", $ets->CodeEtablissement)->exists();
 
-            if (!$r) {
-                Filiere::create([
-                    'CodeFiliere' => $map['CodeFiliere'] . '-' . $ets->CodeEtablissement,
-                    'LibelleFiliere' => $map['LibeleFiliere'],
-                    'CodeEtablissement' => $ets->CodeEtablissement,
-                ]);
+                if (!$r) {
+
+                    Filiere::create([
+                        'CodeFiliere' => $map['CodeFiliere'] . '-' . $ets->CodeEtablissement,
+                        'LibelleFiliere' => $map['CodeFiliere'] . '-' . $ets->CodeEtablissement,
+                        'CodeEtablissement' => $ets->CodeEtablissement,
+                    ]);
+                }
+                $map['CodeFiliere'] = $map['CodeFiliere'] . '-' . $ets->CodeEtablissement;
             }
-            $map['CodeFiliere'] = $map['CodeFiliere'] . '-' . $ets->CodeEtablissement;
         }
+        return $map;
     }
 
     public function insererInscription($map)
@@ -502,7 +517,7 @@ class DemandeAllocController extends Controller
 
         if ($map['CodeAnneeEtude'] == 1 && is_null($allocAnnePasse) && is_null($allocAnneSurpasse)) {
             //S'il est sélectionner pour l'année de la variable $codeAnnée
-
+            echo 'cas attrib';
             $selection = SelectionNouveau::rechercher($codeAnnee, $map, $saisi);
 
             if (!is_null($selection)) {
@@ -547,13 +562,20 @@ class DemandeAllocController extends Controller
 
                 return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT', 'COMPLEMENT' => $complement];
             } else {
+                echo 'cas renew fil echec';
+                var_dump($map);
+                dd([
 
+                    'ets' =>    Etablissement::correspondre($map['CodeEtablissement'], $allocAnnePasse->CodeEtablissement),
+                    'fil' => Filiere::correspondre($map['CodeFiliere'], $allocAnnePasse->CodeFiliere)
+                ]);
                 $this->putError("Cas d'un renouvellement");
                 $this->putError("La filière / etablissement de l'année précédente, n'est pas conforme à celle de cette année ... Filiere Année précédente : " . $allocAnnePasse->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement année précédente : " . $allocAnnePasse->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
             }
         } elseif (!is_null($allocAnneSurpasse) && ($allocAnneSurpasse->CodeAnneeEtude + 1) == $map['CodeAnneeEtude']) {
             // ^^ Si demande de l'année surpassé trouvé et est passé en classe supérieur : cas d'un rétablissement
             //Si correspondance entre la filiere de l'année passé et celle ci
+
             $annedebut = Parametres::AnneeDebutFormation($codeAnnee, $map);
             if ($annedebut != 0) {
                 $dureeformation = (Filiere::find($map['CodeFiliere'])->DureFormation);
