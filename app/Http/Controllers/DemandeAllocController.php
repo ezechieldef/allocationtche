@@ -38,7 +38,7 @@ class DemandeAllocController extends Controller
         // Validation du formulaire
         request()->validate([
             'Universite' => 'required',
-            // 'Matricule' => 'required|numeric',
+            'Matricule' => 'required',
             // 'NumeroDeTable' => 'required|alpha_num',
             'DateNaissanceEtudiant' => 'required|date|before:today',
             'DipDeBase' => 'required',
@@ -46,12 +46,6 @@ class DemandeAllocController extends Controller
         ]);
         //$all contient les donnnées du formulaire
         $all = request()->all();
-        //Vérification si Universiyté du formulaire existe dans les parametres de base
-        // $params = Parametres::UNIVERSITE[$all['Universite']] ?? null;
-        // if ($params == null) {
-        //     return abort(404, 'Univers
-        //     ité non parametré');
-        // }
 
         // Un tableau de tous les année scolaire .
         $cursus = [
@@ -75,7 +69,11 @@ class DemandeAllocController extends Controller
                 $cursus[$codeAnnee]['DATA']['user_id'] = Auth::user()->id;
                 $cursus[$codeAnnee]['DATA']['Email'] = Auth::user()->email;
                 $cursus[$codeAnnee]['DATA']['CodeNatureAllocation'] = $cursus[$codeAnnee]['DATA']['StatutAllocataire'];
-
+                if (!is_null($cursus[$codeAnnee]['COMPLEMENT'])) {
+                    foreach ($cursus[$codeAnnee]['COMPLEMENT'] as $ke => $va) {
+                        $cursus[$codeAnnee]['DATA'][$ke] = $va;
+                    }
+                }
                 $id = DemandeTemp::create($cursus[$codeAnnee]['DATA']);
                 $old_ids = Session::get('DemandeTemporaire') ?? [];
                 $old_ids[] = $id;
@@ -87,6 +85,7 @@ class DemandeAllocController extends Controller
             }
         }
 
+        dd($cursus);
         //Si cursus ne contient que des false, c'est qu'il ne peut rien faire
         $queDesFalse = true;
         $newDemandeDispo = false;
@@ -104,7 +103,7 @@ class DemandeAllocController extends Controller
         if (!$newDemandeDispo) {
             $this->putError('Vous n\'avez aucune nouvelle demande allocation universitaire à faire.');
         }
-       // dd($cursus);
+        //dd($cursus);
         // Si non, il peut continuer
         //dd(Session::get('errors'));
         Session::put('cursus', $cursus);
@@ -124,17 +123,55 @@ class DemandeAllocController extends Controller
         if (is_null($apiResponse)) {
             return false;
         }
+        // echo '<br>'.$codeAnnee.'<br>';
+        //var_dump($apiResponse);
         $this->insererInscription($apiResponse);
         $this->preparerDB($univ, $apiResponse);
 
         if (str_contains($apiResponse['DateNaissanceEtudiant'], '-')) {
             $apiResponse['DateNaissanceEtudiant'] = date("d/m/Y", strtotime($apiResponse['DateNaissanceEtudiant']));
         }
+        $complement = array();
+        $complement['ReferenceSelection'] = '';
+        $complement['TypeSelection'] = '';
+        $complement['SituationAnterieur'] = '';
+        $complement['CodeSerie'] = '';
+        $complement['TresorNatureAllocation'] = '';
+        $complement['TresorMatricule'] = '';
+
+        if ($apiResponse['StatutAllocataire'] == 'AIDES') {
+            $complement['TresorNatureAllocation'] = 'Secours';
+        } else {
+            if (!is_null(Etablissement::find($apiResponse['CodeEtablissement'])) && Etablissement::find($apiResponse['CodeEtablissement'])->CodeTypeEtablissement == 'Ecole') {
+                $complement['TresorNatureAllocation'] = 'Bourse Ecole';
+            } else {
+                $complement['TresorNatureAllocation'] = 'Bourse Faculté';
+            }
+        }
+
+
+        $archive = ArchiveAllocataire::rechercher($codeAnnee - 1, $apiResponse);
+        if (!is_null($archive)) {
+            $complement['TresorMatricule'] = Universite::find($univ)->PrefixMatriculeTresor . $apiResponse['Matricule'];
+        } else {
+            //$complement['TresorMatricule'] = $archive->;
+        }
         //dd($apiResponse);
         //var_dump($apiResponse);
         $aretourner = $this->typeDemande($apiResponse, $all, $univ, $codeAnnee);
+        if ($aretourner == false)  return false;
 
-        if ($aretourner != false) $aretourner['DATA'] = $apiResponse;
+
+
+        $aretourner['DATA'] = $apiResponse;
+        if (in_array('COMPLEMENT', array_keys($aretourner))) {
+            foreach ($aretourner['COMPLEMENT'] as $key => $value) {
+                $complement[$key] = $value;
+            }
+        }
+
+        $aretourner['COMPLEMENT'] = $complement;
+
         return $aretourner;
     }
 
@@ -201,14 +238,44 @@ class DemandeAllocController extends Controller
                 $matricule = str_replace('UNA', '', $matricule);
                 $matricule .= 'UNA';
                 break;
-
+            case 'UNSTIM':
+                $champ_validation = 'isValidated';
+                $champ_type_alloc = 'scholarship';
+                $alloc_autorise = ['BRS'];
+                $var_name_api = [
+                    'Matricule' => 'matricule',
+                    'NomEtudiant' => 'lastName',
+                    'PrenomEtudiant' => 'firstName',
+                    'DateNaissanceEtudiant' => 'dateOfBirth',
+                    'LieuNaissanceEtudiant' => "locationOfBirth",
+                    'SexeEtudiant' => "gender",
+                    'Nationalite' => "nationalite",
+                    "CodeEtablissement" => "school",
+                    "LibeleEtablissement" => "school",
+                    'CodeFiliere' => 'speciality',
+                    'LibeleFiliere' => 'speciality',
+                    "CodeAnneeEtude" => 'currentLevel',
+                    'StatutAllocataire' => $champ_type_alloc,
+                ];
+                break;
             default:
                 # code...
                 break;
         }
-        $url_api = str_replace('{Matricule}', $matricule, $params['api']);
-        $url_api = str_replace('{AnneeAcademique}', $codeAnnee, $url_api);
-        // echo ($url_api) . '<br>';
+
+        $tempmatri = $matricule;
+        $tempAnne = $codeAnnee;
+        if ($univ == 'UNA') {
+            $tempmatri = str_replace('UNA', '', $matricule);
+            $tempmatri .= 'UNA';
+        }
+        if ($univ == 'UAC') {
+            $tempAnne++;
+        }
+
+        $url_api = str_replace('{Matricule}', $tempmatri, $params['api']);
+        $url_api = str_replace('{AnneeAcademique}', $tempAnne, $url_api);
+
 
         $r = Http::withoutVerifying()->accept('application/json')->withToken($params['token'])->withHeaders(['apiToken' => $params['token']])->get($url_api);
         $response = $r->json();
@@ -236,7 +303,6 @@ class DemandeAllocController extends Controller
                     }
                 }
                 if (count($temp) == 0) {
-
                 }
                 $response = $temp;
                 break;
@@ -250,18 +316,22 @@ class DemandeAllocController extends Controller
                     return null;
                 }
                 $etu = $response['student'];
-                $path_ideal =null;
+                $path_ideal = null;
                 foreach ($response['path'] as $key => $path) {
-                    if ($anne_lib == ($path['academicYearDown'].'-'.$path['academicYearUp']) ) {
-                        $path_ideal=$path;
+                    if ($anne_lib == ($path['academicYearDown'] . '-' . $path['academicYearUp'])) {
+                        $path_ideal = $path;
                         break;
                     }
                 }
                 if (is_null($path_ideal)) {
                     return null;
                 }
-                $response= array_merge(array_unique($etu, $path_ideal));
-
+                foreach ($path_ideal as $key => $value) {
+                    $etu[$key] = $value;
+                }
+                $etu['nationalite'] = 'Béninoise';
+                $response = array($etu);
+                //dd($response);
             default:
                 # code...
                 break;
@@ -443,16 +513,21 @@ class DemandeAllocController extends Controller
                     Etablissement::correspondreSelection($map['CodeEtablissement'], $selection->etablissementSelection) &&
                     Filiere::correspondreSelection($map['CodeFiliere'], $selection->libfiliere)
                 ) {
-                    //dd("c");
+
                     $type_demande = 'Attribution';
-                    return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT'];
+                    $complement = array();
+                    $complement['CodeSerie'] = $selection->serie;
+                    $complement['ReferenceSelection'] = $selection->positionnorm;
+                    $complement['TypeSelection'] = $selection->mode;
+
+                    return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT', 'COMPLEMENT' => $complement];
                 } else {
                     $this->putError('Cas d\'une probable Attribution');
                     $this->putError("L'étudiant a été retrouvé dans la liste des sélections, mais ne s'est pas inscrit dans la bonne filière / bon Etablissement ... Filière de sélection : " . $selection->libfiliere . ' | ' . " Filière d'inscription : " . $map['CodeFiliere'] . ' | ' . " Etablissement de sélection : " . $selection->etablissementSelection . ' | ' . " Etablissement d'inscription : " . $map['CodeEtablissement']);
                 }
             } else {
                 $this->putError('Cas d\'une probable Attribution');
-                $this->putError("L'étudiant n'a pas été retrouvé dans la liste des sélections");
+                $this->putError("L'étudiant n'a pas été retrouvé dans la liste des sélections ($codeAnnee)");
             }
         }
         // Si demande de l'année passé trouvé et est passé en classe supérieur : cas d'un Renouvellement
@@ -465,7 +540,12 @@ class DemandeAllocController extends Controller
             ) {
                 $type_demande = 'Renouvellement';
 
-                return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT'];
+                $complement = array();
+                $t = AnneeAcademique::find($codeAnnee - 1)->LibelleAnneeAcademique . '/' . $allocAnnePasse->CodeFiliere . '/' . $allocAnnePasse->CodeAnneeEtude . '/';
+                $t .= ($allocAnnePasse->CodeNatureAllocation ?? $allocAnnePasse->StatutAllocataire);
+                $complement['SituationAnterieur'] = $t;
+
+                return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT', 'COMPLEMENT' => $complement];
             } else {
 
                 $this->putError("Cas d'un renouvellement");
@@ -474,18 +554,34 @@ class DemandeAllocController extends Controller
         } elseif (!is_null($allocAnneSurpasse) && ($allocAnneSurpasse->CodeAnneeEtude + 1) == $map['CodeAnneeEtude']) {
             // ^^ Si demande de l'année surpassé trouvé et est passé en classe supérieur : cas d'un rétablissement
             //Si correspondance entre la filiere de l'année passé et celle ci
+            $annedebut = Parametres::AnneeDebutFormation($codeAnnee, $map);
+            if ($annedebut != 0) {
+                $dureeformation = (Filiere::find($map['CodeFiliere'])->DureFormation);
+                $max = $annedebut + $dureeformation + ($dureeformation > 3 ? 2 : 1);
+                if ($codeAnnee == $max) {
+                    $this->putError("Cas d'un Redoublement successif");
+                    $this->putError("Votre cursus a commencé en " . ($annedebut) . '-' . ($annedebut + 1));
+                    $this->putError("Dans la norme, vous êtes censé finir votre cursus au plus tard dans l'année académique : " . ($max - 1) . '-' . ($max));
+                    return false;
+                }
+            }
 
             if (
                 Etablissement::correspondre($map['CodeEtablissement'], $allocAnneSurpasse->CodeEtablissement)
                 && Filiere::correspondre($map['CodeFiliere'], $allocAnneSurpasse->CodeFiliere)
             ) {
                 $type_demande = 'Rétablissement';
-                return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT'];
+
+                $complement = array();
+                $t = AnneeAcademique::find($codeAnnee - 2)->LibelleAnneeAcademique . '/' . $allocAnneSurpasse->CodeFiliere . '/' . $allocAnneSurpasse->CodeAnneeEtude . '/';
+                $t .= ($allocAnneSurpasse->CodeNatureAllocation ?? $allocAnneSurpasse->StatutAllocataire);
+                $complement['SituationAnterieur'] = $t;
+
+                return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT', 'COMPLEMENT' => $complement];
             } else {
                 $this->putError("Cas d'un rétablissement ");
                 $this->putError("La filière / etablissement de l'année précédente, n'est pas conforme à celle de cette année ... Filiere Année précédente : " . $allocAnnePasse->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement année précédente : " . $allocAnnePasse->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
                 $this->putError("Si vous pensez qu'il s'agit de la même filière / Etablissement anoté différement, veuillez signaler cela à la DBAU ");
-
             }
         }
         //S'il dispose d'une dérogation
@@ -497,6 +593,8 @@ class DemandeAllocController extends Controller
                 && Filiere::correspondre($map['CodeFiliere'], $derogation->CodeFiliere)
             ) {
                 $type_demande = 'Rétablissement';
+                $complement = array();
+                $complement['SituationAnterieur'] = 'Dérogation';
                 return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT'];
             } else {
                 $this->putError("Cas d'une dérogation ");
@@ -571,7 +669,6 @@ class DemandeAllocController extends Controller
         foreach ($demAttente as $demande) {
             $ins = array_merge($demande->toArray(), $all);
             $ins['CodeBanque'] = $ins['Banque'];
-            $ins['CodeSerie'] = '';
             $ins['UtilisateurDemande'] = Auth::user()->id;
             $ins['DateDemande'] = date('Y-m-d');
             $ins['idtransaction'] = '';

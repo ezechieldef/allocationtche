@@ -90,13 +90,10 @@ Route::get('/sudo', function () {
 Route::get('/test', function () {
     //$v = DemandeAllocationUPB::join('etudiant', 'etudiant.CodeEtudiant','demande_allocation.CodeEtudiant');
     // return $v->get();
-
-
     $map = [
         "Matricule" => "11012808221UNA",
         "NomEtudiant" => "ODJO",
         "PrenomEtudiant" => "Adéniran Anael Astrid",
-
         "DateNaissanceEtudiant" => "28/03/2004",
         "LieuNaissanceEtudiant" => "Godomey",
         "SexeEtudiant" => "M",

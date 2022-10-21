@@ -38,6 +38,12 @@ class DemandeTemp extends Model
         'CodeTypeDemande',
         'CodeNatureAllocation',
         'user_id',
+        'CodeSerie',
+        'SituationAnterieur',
+        'ReferenceSelection',
+        'TypeSelection',
+        'TresorNatureAllocation',
+        'TresorMatricule'
     ];
 
 
