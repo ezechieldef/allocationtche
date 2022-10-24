@@ -77,6 +77,17 @@ Route::middleware(["auth", 'role:super-admin'])->group(function () {
     Route::resource('/derogations', App\Http\Controllers\DerogationController::class);
     Route::resource('/taux', App\Http\Controllers\TauxController::class);
     Route::resource('/lots', App\Http\Controllers\LotController::class);
+    Route::resource('/pv', App\Http\Controllers\PvController::class);
+    Route::resource('/motifs_rejets', App\Http\Controllers\MotifsRejetController::class);
+    Route::post('/ajouter-au-lot/{lot_id}', [App\Http\Controllers\LotController::class, 'ajouterAuLot']);
+    Route::get('/cloturer-pv/{pv_id}', [App\Http\Controllers\AvisUPB::class, 'cloturerPV']);
+    Route::post('/avis-UPB/{demande_id}', [App\Http\Controllers\AvisUPB::class, 'aviser']);
+
+    Route::get('/les-demandes', [App\Http\Controllers\AdminDemandeUPB::class, 'index']);
+    Route::get('/consulter', [App\Http\Controllers\AdminDemandeUPB::class, 'consulter']);
+    Route::post('/consulter', [App\Http\Controllers\AdminDemandeUPB::class, 'consulterPost']);
+
+
     Route::resource('/universites', UniversiteController::class);
     Route::post('/permission/{user_id}', [App\Http\Controllers\UserController::class, 'permission']);
     Route::resource('/utilisateur', App\Http\Controllers\UserController::class, [

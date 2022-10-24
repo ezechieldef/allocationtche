@@ -7,23 +7,30 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * Class Lot
  *
- * @property $id
- * @property $libele
- * @property $user_id
+ * @property $CodeLot
+ * @property $CodePV
+ * @property $Commissaire
  * @property $status
  * @property $created_at
  * @property $updated_at
+ * @property $Numero
  *
+ * @property Pv $pv
  * @property User $user
  * @package App
  * @mixin \Illuminate\Database\Eloquent\Builder
  */
 class Lot extends Model
 {
-    
+
+    protected $table ='lots';
+    protected $primaryKey ='CodeLot';
     static $rules = [
-		'user_id' => 'required',
-		'status' => 'required',
+		//'CodeLot' => 'required',
+		'CodePV' => 'required',
+		'Commissaire' => 'required',
+		//'status' => 'required',
+		'Numero' => 'required',
     ];
 
     protected $perPage = 20;
@@ -33,16 +40,31 @@ class Lot extends Model
      *
      * @var array
      */
-    protected $fillable = ['libele','user_id','status'];
+    protected $fillable = ['CodeLot','CodePV','Commissaire','status','Numero'];
 
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function pv()
+    {
+        return $this->hasOne('App\Models\Pv', 'CodePV', 'CodePV');
+    }
 
     /**
      * @return \Illuminate\Database\Eloquent\Relations\HasOne
      */
     public function user()
     {
-        return $this->hasOne('App\Models\User', 'id', 'user_id');
+        return $this->hasOne('App\Models\User', 'id', 'Commissaire');
     }
-    
+
+    public function demandes()
+    {
+
+        return $this->hasMany('App\Models\AssocLotsDemande', 'CodeLot', 'CodeLot');
+
+    }
+
 
 }

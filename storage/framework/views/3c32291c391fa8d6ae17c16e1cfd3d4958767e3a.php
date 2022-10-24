@@ -1,6 +1,5 @@
 <?php $__env->startSection('titre'); ?>
-    Mofier Lot <?php echo e($lot->id); ?>
-
+    Modifier Lot
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -12,13 +11,15 @@
 
                 <div class="card card-default">
                     <div class="card-header d-flex justify-content-between">
-                        <span class="card-title">Formulaire de modification Lot</span>
+                        <span class="card-title">Formulaire Modification Lot</span>
                         <div class="float-right">
-                            <a class="btn btn-warning text-dark text-bold" href="<?php echo e(route('lots.index')); ?>"> Retour</a>
-                        </div>
+                            <a href="<?php echo e(route('lots.index')); ?>" class="btn btn-warning text-dark btn-sm float-right"  data-placement="left">
+                              Retour
+                            </a>
+                          </div>
                     </div>
                     <div class="card-body">
-                        <form method="POST" action="<?php echo e(route('lots.update', $lot->id)); ?>"  role="form" enctype="multipart/form-data">
+                        <form method="POST" action="<?php echo e(route('lots.update', $lot->CodeLot)); ?>"  role="form" enctype="multipart/form-data">
                             <?php echo e(method_field('PATCH')); ?>
 
                             <?php echo csrf_field(); ?>

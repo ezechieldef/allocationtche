@@ -7,7 +7,7 @@
 @endsection
 @section('content')
     <form action="nouvelle-demande-allocation" method="post">
-        <div class="container ">
+        <div class=" ">
             {{-- {{ Session::get('errorsDem') }} --}}
             @if (count(Session::get('errorsDem') ?? []) != 0)
                 <div class="alert alert-danger">

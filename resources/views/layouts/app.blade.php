@@ -58,18 +58,97 @@
         <!-- ============================================================== -->
         <!-- Topbar header - style you can find in pages.scss -->
         <!-- ============================================================== -->
+        <header class="topbar" data-navbarbg="skin6" >
+            <nav class="navbar top-navbar navbar-expand-md navbar-light">
+                <div class="navbar-header" data-logobg="skin6">
+                    <!-- ============================================================== -->
+                    <!-- Logo -->
+                    <!-- ============================================================== -->
+                    <a class="navbar-brand " href="/" style="background: rgba(0, 0, 0, 0.8); border-bottom: 1px solid grey">
+                        <!-- Logo icon -->
+                        <b class="logo-icon">
+                            <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
+                            <!-- Dark Logo icon -->
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Coat_of_arms_of_Benin.svg" height="30px" alt="homepage" class="dark-logo" />
+                            <!-- Light Logo icon -->
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Coat_of_arms_of_Benin.svg" height="30px" alt="homepage" class="light-logo" />
+                        </b>
+                        <!--End Logo icon -->
+                        <!-- Logo text -->
+                        <span class="logo-text text-white">
+                            <strong>D B A U</strong>
+                            <!-- dark Logo text -->
+                            {{-- <img src="../assets/images/logo-text.png" alt="homepage" class="dark-logo" />
+                            <!-- Light Logo text -->
+                            <img src="../assets/images/logo-light-text.png" class="light-logo" alt="homepage" /> --}}
+                        </span>
+                    </a>
 
+                    <!-- ============================================================== -->
+                    <!-- End Logo -->
+                    <!-- ============================================================== -->
+                    <!-- This is for the sidebar toggle which is visible on mobile only -->
+                    <a class="nav-toggler waves-effect waves-light d-block d-md-none" href="javascript:void(0)"><i
+                            class="ti-menu ti-close"></i></a>
+                </div>
+                <!-- ============================================================== -->
+                <!-- End Logo -->
+                <!-- ============================================================== -->
+                {{-- <div class="navbar-collapse collapse" id="navbarSupportedContent" data-navbarbg="skin5">
+                    <!-- ============================================================== -->
+                    <!-- toggle and nav items -->
+                    <!-- ============================================================== -->
+                    <ul class="navbar-nav float-start me-auto">
+                        <!-- ============================================================== -->
+                        <!-- Search -->
+                        <!-- ============================================================== -->
+                        <li class="nav-item search-box"> <a class="nav-link waves-effect waves-dark"
+                                href="javascript:void(0)"><i class="mdi mdi-magnify me-1"></i> <span class="font-16">Search</span></a>
+                            <form class="app-search position-absolute">
+                                <input type="text" class="form-control" placeholder="Search &amp; enter"> <a
+                                    class="srh-btn"><i class="mdi mdi-window-close"></i></a>
+                            </form>
+                        </li>
+                    </ul>
+                    <!-- ============================================================== -->
+                    <!-- Right side toggle and nav items -->
+                    <!-- ============================================================== -->
+                    <ul class="navbar-nav float-end">
+                        <!-- ============================================================== -->
+                        <!-- User profile and search -->
+                        <!-- ============================================================== -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-muted waves-effect waves-dark pro-pic" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="../assets/images/users/profile.png" alt="user" class="rounded-circle" width="31">
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end user-dd animated" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="javascript:void(0)"><i class="ti-user m-r-5 m-l-5"></i>
+                                    My Profile</a>
+                                <a class="dropdown-item" href="javascript:void(0)"><i class="ti-wallet m-r-5 m-l-5"></i>
+                                    My Balance</a>
+                                <a class="dropdown-item" href="javascript:void(0)"><i class="ti-email m-r-5 m-l-5"></i>
+                                    Inbox</a>
+                            </ul>
+                        </li>
+                        <!-- ============================================================== -->
+                        <!-- User profile and search -->
+                        <!-- ============================================================== -->
+                    </ul>
+                </div> --}}
+            </nav>
+        </header>
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
         <!-- ============================================================== -->
         <!-- Left Sidebar - style you can find in sidebar.scss  -->
         <!-- ============================================================== -->
-        <aside class="left-sidebar" data-sidebarbg="skin6" style="background: rgba(0, 0, 0, 0.8); color:white">
+        <aside class="left-sidebar" data-sidebarbg="skin6"
+            style="background: rgba(0, 0, 0, 0.8); color:white; min-height:100vh">
             <!-- Sidebar scroll-->
             <div class="scroll-sidebar">
                 <!-- Sidebar navigation-->
-                <nav class="sidebar-nav" style="background: transparent">
+                <nav class="sidebar-nav" style="">
                     <ul id="sidebarnav" style="background: transparent">
                         {{-- <li class="sidebar-item ">
                             <a class="sidebar-link waves-effect waves-dark sidebar-link " href="/admin"
@@ -118,6 +197,13 @@
                                         class="hide-menu">Validation RIB</span></a></li>
                         @endrole
                         @role('super-admin')
+                            <li class="sidebar-item @if (Request::is('les-demandes/*')) selected @endif"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/les-demandes"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span class="hide-menu">Demandes
+                                        Admin</span></a></li>
+                            <li class="sidebar-item @if (Request::is('consulter/*')) selected @endif"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/consulter"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span class="hide-menu">Consulter Etudiant</span></a></li>
                             <li class="sidebar-item @if (Request::is('utilisateur/*')) selected @endif"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/utilisateur"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
@@ -126,6 +212,15 @@
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/taux"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Taux</span></a></li>
+                            <li class="sidebar-item @if (Request::is('motifs_rejets/*')) selected @endif"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/motifs_rejets"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Motifs
+                                        Rejets</span></a></li>
+                            <li class="sidebar-item @if (Request::is('pv/*')) selected @endif"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/pv"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">PV</span></a></li>
                             <li class="sidebar-item @if (Request::is('lots/*')) selected @endif"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/lots"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span

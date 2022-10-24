@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('template_title')
-    Create Lot
+@section('titre')
+    Créer Lot
 @endsection
 
 @section('content')
@@ -12,8 +12,13 @@
                 @includeif('partials.errors')
 
                 <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">Create Lot</span>
+                    <div class="card-header d-flex justify-content-between">
+                        <span class="card-title">Créer Lot</span>
+                          <div class="float-right">
+                                <a href="{{ route('lots.index') }}" class="btn btn-warning text-dark btn-sm float-right"  data-placement="left">
+                                  Retour
+                                </a>
+                              </div>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="{{ route('lots.store') }}"  role="form" enctype="multipart/form-data">

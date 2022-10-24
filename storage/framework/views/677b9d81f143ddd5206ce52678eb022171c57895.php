@@ -6,7 +6,7 @@
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('content'); ?>
     <form action="nouvelle-demande-allocation" method="post">
-        <div class="container ">
+        <div class=" ">
             
             <?php if(count(Session::get('errorsDem') ?? []) != 0): ?>
                 <div class="alert alert-danger">

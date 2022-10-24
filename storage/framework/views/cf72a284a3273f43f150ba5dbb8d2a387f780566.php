@@ -1,5 +1,5 @@
-<?php $__env->startSection('template_title'); ?>
-    Create Lot
+<?php $__env->startSection('titre'); ?>
+    Créer Lot
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -10,8 +10,13 @@
                 <?php if ($__env->exists('partials.errors')) echo $__env->make('partials.errors', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
                 <div class="card card-default">
-                    <div class="card-header">
-                        <span class="card-title">Create Lot</span>
+                    <div class="card-header d-flex justify-content-between">
+                        <span class="card-title">Créer Lot</span>
+                          <div class="float-right">
+                                <a href="<?php echo e(route('lots.index')); ?>" class="btn btn-warning text-dark btn-sm float-right"  data-placement="left">
+                                  Retour
+                                </a>
+                              </div>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="<?php echo e(route('lots.store')); ?>"  role="form" enctype="multipart/form-data">

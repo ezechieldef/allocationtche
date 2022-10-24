@@ -57,18 +57,55 @@
         <!-- ============================================================== -->
         <!-- Topbar header - style you can find in pages.scss -->
         <!-- ============================================================== -->
+        <header class="topbar" data-navbarbg="skin6" >
+            <nav class="navbar top-navbar navbar-expand-md navbar-light">
+                <div class="navbar-header" data-logobg="skin6">
+                    <!-- ============================================================== -->
+                    <!-- Logo -->
+                    <!-- ============================================================== -->
+                    <a class="navbar-brand " href="/" style="background: rgba(0, 0, 0, 0.8); border-bottom: 1px solid grey">
+                        <!-- Logo icon -->
+                        <b class="logo-icon">
+                            <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
+                            <!-- Dark Logo icon -->
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Coat_of_arms_of_Benin.svg" height="30px" alt="homepage" class="dark-logo" />
+                            <!-- Light Logo icon -->
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Coat_of_arms_of_Benin.svg" height="30px" alt="homepage" class="light-logo" />
+                        </b>
+                        <!--End Logo icon -->
+                        <!-- Logo text -->
+                        <span class="logo-text text-white">
+                            <strong>D B A U</strong>
+                            <!-- dark Logo text -->
+                            
+                        </span>
+                    </a>
 
+                    <!-- ============================================================== -->
+                    <!-- End Logo -->
+                    <!-- ============================================================== -->
+                    <!-- This is for the sidebar toggle which is visible on mobile only -->
+                    <a class="nav-toggler waves-effect waves-light d-block d-md-none" href="javascript:void(0)"><i
+                            class="ti-menu ti-close"></i></a>
+                </div>
+                <!-- ============================================================== -->
+                <!-- End Logo -->
+                <!-- ============================================================== -->
+                
+            </nav>
+        </header>
         <!-- ============================================================== -->
         <!-- End Topbar header -->
         <!-- ============================================================== -->
         <!-- ============================================================== -->
         <!-- Left Sidebar - style you can find in sidebar.scss  -->
         <!-- ============================================================== -->
-        <aside class="left-sidebar" data-sidebarbg="skin6" style="background: rgba(0, 0, 0, 0.8); color:white">
+        <aside class="left-sidebar" data-sidebarbg="skin6"
+            style="background: rgba(0, 0, 0, 0.8); color:white; min-height:100vh">
             <!-- Sidebar scroll-->
             <div class="scroll-sidebar">
                 <!-- Sidebar navigation-->
-                <nav class="sidebar-nav" style="background: transparent">
+                <nav class="sidebar-nav" style="">
                     <ul id="sidebarnav" style="background: transparent">
                         
                         <?php if(auth()->check() && auth()->user()->hasRole('super-admin')): ?>
@@ -113,6 +150,13 @@
                                         class="hide-menu">Validation RIB</span></a></li>
                         <?php endif; ?>
                         <?php if(auth()->check() && auth()->user()->hasRole('super-admin')): ?>
+                            <li class="sidebar-item <?php if(Request::is('les-demandes/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/les-demandes"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span class="hide-menu">Demandes
+                                        Admin</span></a></li>
+                            <li class="sidebar-item <?php if(Request::is('consulter/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/consulter"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span class="hide-menu">Consulter Etudiant</span></a></li>
                             <li class="sidebar-item <?php if(Request::is('utilisateur/*')): ?> selected <?php endif; ?>"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/utilisateur"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
@@ -121,6 +165,15 @@
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/taux"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Taux</span></a></li>
+                            <li class="sidebar-item <?php if(Request::is('motifs_rejets/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/motifs_rejets"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Motifs
+                                        Rejets</span></a></li>
+                            <li class="sidebar-item <?php if(Request::is('pv/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/pv"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">PV</span></a></li>
                             <li class="sidebar-item <?php if(Request::is('lots/*')): ?> selected <?php endif; ?>"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/lots"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
