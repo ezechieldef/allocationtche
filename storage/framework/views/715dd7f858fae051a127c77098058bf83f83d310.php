@@ -10,8 +10,13 @@
                 <?php if ($__env->exists('partials.errors')) echo $__env->make('partials.errors', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
                 <div class="card card-default">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between">
                         <span class="card-title">Formulaire modification PV</span>
+                        <div class="float-right">
+                            <a href="<?php echo e(route('pv.index')); ?>" class="btn btn-warning text-dark text-bold btn-sm float-right"  data-placement="left">
+                              Retour
+                            </a>
+                          </div>
                     </div>
                     <div class="card-body">
                         <form method="POST" action="<?php echo e(route('pv.update', $pv->CodePV)); ?>"  role="form" enctype="multipart/form-data">

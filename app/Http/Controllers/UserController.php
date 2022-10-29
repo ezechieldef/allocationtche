@@ -2,14 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AssocPjUser;
 use App\Models\User;
+use App\Models\AssocPjUser;
 use Illuminate\Http\Request;
+use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
-use Propaganistas\LaravelPhone\PhoneNumber;
-use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
+use RealRashid\SweetAlert\Facades\Alert;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
 /**
  * Class UserController
@@ -176,20 +177,12 @@ class UserController extends Controller
     {
         $user = User::findOrFail($user_id);
         $a = $request->all();
-        if ($a['btn-correspondance-maker'] ?? null === true) {
-            $user->assignRole("correspondance-maker");
-        } else {
-            $user->removeRole("correspondance-maker");
-        }
-        if ($a['btn-super-admin'] ?? null === true) {
-            $user->assignRole("super-admin");
-        } else {
-            $user->removeRole("super-admin");
-        }
-        if ($a['btn-banquier'] ?? null === true) {
-            $user->assignRole("banquier");
-        } else {
-            $user->removeRole("banquier");
+        foreach (Role::all()->pluck('name') as $key => $name) {
+            if ($a['btn-'.$name] ?? null === true) {
+                $user->assignRole($name);
+            } else {
+                $user->removeRole($name);
+            }
         }
 
         return back()->with("message", 'Roles de l\'utilisateur modifié avec succès');

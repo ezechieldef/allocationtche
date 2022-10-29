@@ -25,7 +25,7 @@
                         </div>
 
                         <div class="float-right">
-                            @role('super-admin')
+                            {{-- @role('super-admin')
                                 @if ($user->active == 0)
                                     <a class="btn btn-warning text-dark" href="/profile-toggle/{{ $user->id }}"> Activer le
                                         compte</a>
@@ -34,10 +34,9 @@
                                         le
                                         compte</a>
                                 @endif
-                            @endrole
+                            @endrole --}}
 
-
-                            <a class="btn btn-primary back-btn"> Retour</a>
+                            <a class="btn btn-warning text-dark" href="{{ route('utilisateur.index') }}"> Retour</a>
 
                         </div>
 
@@ -118,36 +117,17 @@
                         <form action="/permission/{{ $user->id }}" method="post">
                             @csrf
                             <ul class="list-group list-group-flush mt-3 mb-2" id="uil">
+                                @foreach (\Spatie\Permission\Models\Role::all()->pluck('name') as $role )
+                                <li class="list-group-item">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" onchange="unhide()" type="checkbox"
+                                            name="btn-{{ $role }}" id=""
+                                            @if (in_array($role, $user->getRoleNames()->toArray())) checked @endif>
+                                        <label class="form-check-label mb-0 ms-3 text-capitalize" for="rememberMe">{{ $role }}</label>
+                                    </div>
+                                </li>
+                                @endforeach
 
-                                <li class="list-group-item">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" onchange="unhide()" type="checkbox"
-                                            name="btn-correspondance-maker" id=""
-                                            @if (in_array('correspondance-maker', $user->getRoleNames()->toArray())) checked @endif>
-                                        <label class="form-check-label mb-0 ms-3" for="rememberMe">Faiseur de
-                                            Correspondance
-                                        </label>
-                                    </div>
-                                </li>
-                                <li class="list-group-item">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" onchange="unhide()" type="checkbox"
-                                            name="btn-banquier" id=""
-                                            @if (in_array('banquier', $user->getRoleNames()->toArray())) checked @endif>
-                                        <label class="form-check-label mb-0 ms-3" for="rememberMe">Banquier
-                                        </label>
-                                    </div>
-                                </li>
-                                <li class="list-group-item">
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" onchange="unhide()" type="checkbox"
-                                            name="btn-super-admin" id=""
-                                            @if (in_array('super-admin', $user->getRoleNames()->toArray())) checked @endif>
-                                        <label class="form-check-label mb-0 ms-3" for="rememberMe">Super
-                                            Administrateur
-                                        </label>
-                                    </div>
-                                </li>
 
                                 <button type="submit" id="sub"
                                     class="btn btn-success text-white font-bold hide">Sauvegarder</button>

@@ -2,12 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnneeAcademique;
 use App\Models\Lot;
 use Illuminate\Http\Request;
 use App\Models\AssocLotsDemande;
+use App\Models\AssocPvDemande;
+use App\Models\DemandeAllocationUPB;
+use App\Models\Pv;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use RealRashid\SweetAlert\Facades\Alert;
+use PDF;
 
 /**
  * Class LotController
@@ -106,7 +111,9 @@ class LotController extends Controller
      */
     public function update(Request $request, Lot $lot)
     {
-        request()->validate(Lot::$rules);
+        $rules = Lot::$rules;
+        $rules['Numero'].=','.$lot->CodeLot.',CodeLot';
+        request()->validate($rules);
 
         $lot->update($request->all());
 
@@ -121,6 +128,10 @@ class LotController extends Controller
      */
     public function destroy($id)
     {
+        if(AssocLotsDemande::where('CodeLot',$id)->count()!=0){
+            return redirect()->route('lots.index')
+            ->with('error', 'Ce lot contient des demandes, suppression non autorisée.');
+        }
         $lot = Lot::find($id)->delete();
 
         return redirect()->route('lots.index')
@@ -158,7 +169,7 @@ class LotController extends Controller
             return redirect('/lots')->with('error', "Aucune demande correspondance n'a été identifé");
         }
         //dd($list_dem);
-        $n=0;
+        $n = 0;
         foreach ($list_dem as $v) {
 
             if (!AssocLotsDemande::where('CodeLot', $lot->CodeLot)
@@ -171,7 +182,60 @@ class LotController extends Controller
                 $n++;
             }
         }
-        return redirect('/lots')->with('success', $n." demande(s) ont été ajouté au lot N° ".$lot->Numero);
+        return redirect('/lots')->with('success', $n . " demande(s) ont été ajouté au lot N° " . $lot->Numero);
+    }
+    public function retirerDuLot($codelot, $codedemande)
+    {
+        $lot = Lot::find($codelot);
+        if (is_null($lot)) {
+            return back()->with('error', 'Lot introuvable');
+        }
 
+        AssocPvDemande::join('pv', 'pv.CodePV', 'assoc_pv_demande.CodePV')
+            ->where('pv.CodePV', $lot->CodePV)
+            ->where('assoc_pv_demande.CodeDemandeAllocation', $codedemande)->delete();
+
+        $res = AssocLotsDemande::where('CodeDemandeAllocation', $codedemande)
+            ->where('CodeLot', $codelot)
+            ->delete();
+        return back()->with('success', "Retrait effectué avec succès (" . $res . ")");
+    }
+
+    public function exporter($codelot)
+    {
+        $lot = Lot::findOrFail($codelot);
+        $pv = $lot->pv()->first();
+        $demandes = $lot->demandes()->get();
+        $groups = array();
+        foreach ($demandes as $assoc) {
+            $dem = DemandeAllocationUPB::join('etudiant', 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')->where('CodeDemandeAllocation', $assoc->CodeDemandeAllocation)->first();
+
+            $cle = $dem->CodeFiliere . '/' . $dem->CodeAnneeEtude . '/' . $dem->CodeNatureAllocation . '/' . (AnneeAcademique::find($dem->CodeAnneeAcademique)->LibelleAnneeAcademique);
+            if (!in_array($cle, $groups)) {
+                $groups[$cle] = [];
+            }
+            $groups[$cle][] = $dem;
+        }
+
+
+        PDF::setOptions([
+            "isHtml5ParserEnabled" => true,
+            "isRemoteEnabled" => true,
+            "defaultPaperSize" => "a4",
+            "dpi" => 350,
+        ]);
+        $data = ['lot' => $lot, 'groups' => $groups, 'pv' => $pv];
+        // return view('upb.pdf_export_lot', $data);
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->getDomPDF()->set_option("enable_php", true);
+        $pdf->getDomPDF()->set_option("enable_remote", false);
+        $pdf->setPaper('a4', 'landscape');
+        $pdf->loadView('upb.pdf_export_lot', $data);
+
+
+        // $pdf = PDF::loadView('upb.pdf_export_lot', ['lot' => $lot, 'groups' => $groups, 'pv'=>$pv])->setPaper('a4', 'landscape');;
+        // $pdf->getDomPDF()->set_option("enable_php", true);
+        return $pdf->download('lot' . $lot->CodeLot . ' N° ' . $lot->Numero . '.pdf');
     }
 }

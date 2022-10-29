@@ -149,6 +149,7 @@
                 <table class="table  table-bordered w-100 " id="mytable">
                     <thead>
                         <th>Matricule</th>
+                        <th>Filière</th>
                         <th>Année Etude</th>
                         <th>Année Académique</th>
                         <th>Type</th>
@@ -159,9 +160,10 @@
                         <?php $__currentLoopData = $demandes; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                             <tr class="odd dt-hasChild parent text-center">
                                 <td class=""><?php echo e($dem->Matricule); ?></td>
+                                <td class="text-info"><?php echo e($dem->CodeFiliere); ?></td>
                                 <td><?php echo e($dem->CodeAnneeEtude); ?></td>
-                                <td><?php echo e($dem->CodeAnneeAcademique); ?></td>
-                                <td><?php echo e($dem->CodeTypeDemande); ?></td>
+                                <td><?php echo e($dem->CodeAnneeAcademique  ?? $dem->Annee); ?></td>
+                                <td><?php echo e($dem->CodeTypeDemande ?? '( Ancienne demande )'); ?></td>
                                 <td><?php echo e($dem->Avicommission == '' ? 'EN COURS DE TRAITEMENT' : 'TRAITÉ'); ?></td>
                                 <td class="">
                                     <a href="/voir-demande/<?php echo e($dem->CodeDemandeAllocation); ?>"
@@ -178,10 +180,13 @@
                                         class="btn btn-sm btn-success text-white text-bold my-1"> <i
                                             class="fa fa-print me-2"></i>
                                         Imprimer </a>
-                                    <?php if($dem->idtransaction == '' && \App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique)->taux != 0): ?>
+                                        <?php
+                                            //dd(['var'=>$dem,'nn'=>\App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique)]);
+                                        ?>
+                                    <?php if($dem->CodeTypeDemande!='' && $dem->idtransaction == '' && \App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique ?? $dem->Annee)->taux != 0): ?>
                                         <button code="<?php echo e($dem->CodeDemandeAllocation); ?>" onclick="loadmodal(this);"
                                             data-bs-toggle="modal" data-bs-target="#modalPayer"
-                                            montant="<?php echo e(\App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique)->taux); ?>"
+                                            montant="<?php echo e(\App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique ?? $dem->Annee)->taux); ?>"
                                             class="btn btn-sm btn-warning text-dark text-bold my-1"> <i
                                                 class="fa fa-credit-card me-2"></i>
                                             Payer </button>

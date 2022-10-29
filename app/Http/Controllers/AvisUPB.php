@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Pv;
+use App\Models\Lot;
+use Illuminate\Http\Request;
 use App\Models\AssocPvDemande;
 use App\Models\DemandeAllocationUPB;
-use App\Models\Pv;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class AvisUPB extends Controller
 {
@@ -23,38 +25,49 @@ class AvisUPB extends Controller
         $all = request()->all();
 
         $dem = DemandeAllocationUPB::findOrFail($codeDemande);
-        //dd('trouvé');
-
-        $pv = Pv::findOrFail($all['pv']?? '');
 
 
-        if ($pv->statut=='cloturé') {
+        $pv = Pv::findOrFail($all['pv'] ?? '');
+        $lot = Lot::where('CodePv', $pv->CodePV)->first();
+        if (is_null($lot)) {
+            return back()->with('error', 'lot introuvable');
+        }
+        if ($lot->Commissaire != Auth::user()->id) {
+            return back()->with('error', 'Ce lot ne vous a pas été attribué, vous ne pouvez donc pas donner votre avis dessus.');
+        }
 
-            return back()->with('error','Ce PV est cloturé déjà');
+        if ($pv->statut == 'cloturé') {
+            return back()->with('error', 'Ce PV est cloturé déjà');
         }
 
 
-        $avis ='';
-        if ($all['avis_id']==1) {
-            $avis= 'Favorable';
-        }elseif($all['avis_id']==2){
-            $avis='Réservé';
-        }else{
-            $avis='Défavorable';
+        $avis = '';
+        if ($all['avis_id'] == 1) {
+            $avis = 'Favorable';
+        } elseif ($all['avis_id'] == 2) {
+            $avis = 'Réservé';
+        } else {
+            $avis = 'Défavorable';
         }
 
-        AssocPvDemande::create([
-            'CodePV' => $all['pv'],
-            'CodeDemandeAllocation' => $codeDemande,
-            'MotifRejet'=>$all['motifs_rejet_id'],
-            'Avis'=>  $avis
-        ]);
-        return back()->with("success",'Succès');
+        $old = AssocPvDemande::where('CodePV', $pv->CodePV,)->where('CodeDemandeAllocation', $codeDemande);
+        if ($old->exists()) {
+            $old = $old->first();
+            $old->update([
+                'MotifRejet' => $all['motifs_rejet_id'],
+                'Avis' =>  $avis
+            ]);
+        } else {
+            AssocPvDemande::create([
+                'CodePV' => $all['pv'],
+                'CodeDemandeAllocation' => $codeDemande,
+                'MotifRejet' => $all['motifs_rejet_id'],
+                'Avis' =>  $avis
+            ]);
+        }
+
+        return back()->with("success", 'Succès');
     }
 
-    public function cloturerPV(int $codePV)
-    {
-        Pv::findOrFail($codePV)->update(['statut'=>'cloturé']);
-        return back();
-    }
+    
 }

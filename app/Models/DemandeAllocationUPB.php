@@ -127,4 +127,9 @@ class DemandeAllocationUPB extends Model
         }
         return $res->first();
     }
+
+    public static function demandeSansLot()
+    {
+        return DemandeAllocationUPB::whereNotIn('CodeDemandeAllocation', AssocLotsDemande::pluck('CodeDemandeAllocation')->toArray());
+    }
 }

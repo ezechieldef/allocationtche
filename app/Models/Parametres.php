@@ -6,7 +6,8 @@ class Parametres
 {
     // 'api'=>'https://beraca-transport.net/envoi_note/c.php?matricule={Matricule}&annee_academique={AnneeAcademique}'
     const UNIVERSITE = [
-        'UAC2022' => ['apiperso' => 'https://beraca-transport.net/envoi_note/c.php?matricule={Matricule}&annee_academique={AnneeAcademique}', 'api' => 'https://scolarite.uac.bj:9443/Higher_Education_UAC/api/inscriptions/{Matricule}/{AnneeAcademique}', 'token' => ''],
+        'UAC2022' => [ 'apiperso' => 'https://beraca-transport.net/envoi_note/c.php?matricule={Matricule}&annee_academique={AnneeAcademique}',
+             'api' => 'https://scolarite.uac.bj:9443/Higher_Education_UAC/api/inscriptions/{Matricule}/{AnneeAcademique}', 'token' => ''],
         'UAC2021' => ['apiperso' => 'https://beraca-transport.net/envoi_note/c.php?matricule={Matricule}&annee_academique={AnneeAcademique}', 'api' => 'https://scolarite.uac.bj:9443/Higher_Education_UAC/api/inscriptions/{Matricule}/{AnneeAcademique}', 'token' => ''],
         'UAC2020' => ['apiperso' => 'https://beraca-transport.net/envoi_note/c.php?matricule={Matricule}&annee_academique={AnneeAcademique}', 'api' => 'https://scolarite.uac.bj:9443/Higher_Education_UAC/api/inscriptions/{Matricule}/{AnneeAcademique}', 'token' => ''],
 

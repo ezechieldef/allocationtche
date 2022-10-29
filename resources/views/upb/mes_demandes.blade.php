@@ -145,6 +145,7 @@
                 <table class="table  table-bordered w-100 " id="mytable">
                     <thead>
                         <th>Matricule</th>
+                        <th>Filière</th>
                         <th>Année Etude</th>
                         <th>Année Académique</th>
                         <th>Type</th>
@@ -155,9 +156,10 @@
                         @foreach ($demandes as $dem)
                             <tr class="odd dt-hasChild parent text-center">
                                 <td class="">{{ $dem->Matricule }}</td>
+                                <td class="text-info">{{ $dem->CodeFiliere }}</td>
                                 <td>{{ $dem->CodeAnneeEtude }}</td>
-                                <td>{{ $dem->CodeAnneeAcademique }}</td>
-                                <td>{{ $dem->CodeTypeDemande }}</td>
+                                <td>{{ $dem->CodeAnneeAcademique  ?? $dem->Annee }}</td>
+                                <td>{{ $dem->CodeTypeDemande ?? '( Ancienne demande )' }}</td>
                                 <td>{{ $dem->Avicommission == '' ? 'EN COURS DE TRAITEMENT' : 'TRAITÉ' }}</td>
                                 <td class="">
                                     <a href="/voir-demande/{{ $dem->CodeDemandeAllocation }}"
@@ -174,10 +176,13 @@
                                         class="btn btn-sm btn-success text-white text-bold my-1"> <i
                                             class="fa fa-print me-2"></i>
                                         Imprimer </a>
-                                    @if ($dem->idtransaction == '' && \App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique)->taux != 0)
+                                        @php
+                                            //dd(['var'=>$dem,'nn'=>\App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique)]);
+                                        @endphp
+                                    @if ($dem->CodeTypeDemande!='' && $dem->idtransaction == '' && \App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique ?? $dem->Annee)->taux != 0)
                                         <button code="{{ $dem->CodeDemandeAllocation }}" onclick="loadmodal(this);"
                                             data-bs-toggle="modal" data-bs-target="#modalPayer"
-                                            montant="{{ \App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique)->taux }}"
+                                            montant="{{ \App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique ?? $dem->Annee)->taux }}"
                                             class="btn btn-sm btn-warning text-dark text-bold my-1"> <i
                                                 class="fa fa-credit-card me-2"></i>
                                             Payer </button>

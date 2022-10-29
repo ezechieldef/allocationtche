@@ -72,21 +72,26 @@ Route::middleware(["auth", 'role:banquier|super-admin'])->group(function () {
     Route::any('/validation-RIB', [RIBValidationController::class, 'index']);
 });
 
-
+Route::middleware(["auth", 'role:super-admin|commissaire-CNABAU'])->group(function () {
+    Route::resource('/lots', App\Http\Controllers\LotController::class);
+    Route::post('/avis-UPB/{demande_id}', [App\Http\Controllers\AvisUPB::class, 'aviser']);
+});
 Route::middleware(["auth", 'role:super-admin'])->group(function () {
+
     Route::resource('/derogations', App\Http\Controllers\DerogationController::class);
     Route::resource('/taux', App\Http\Controllers\TauxController::class);
-    Route::resource('/lots', App\Http\Controllers\LotController::class);
+
     Route::resource('/pv', App\Http\Controllers\PvController::class);
     Route::resource('/motifs_rejets', App\Http\Controllers\MotifsRejetController::class);
     Route::post('/ajouter-au-lot/{lot_id}', [App\Http\Controllers\LotController::class, 'ajouterAuLot']);
-    Route::get('/cloturer-pv/{pv_id}', [App\Http\Controllers\AvisUPB::class, 'cloturerPV']);
-    Route::post('/avis-UPB/{demande_id}', [App\Http\Controllers\AvisUPB::class, 'aviser']);
+    Route::post('/retirer-du-lot/{codelot}/{codedemande}', [App\Http\Controllers\LotController::class, 'retirerDuLot']);
+    Route::any('/exporter-lot/{codelot}', [App\Http\Controllers\LotController::class, 'exporter']);
+
+    Route::get('/cloturer-pv/{pv_id}', [App\Http\Controllers\PvController::class, 'cloturerPV']);
 
     Route::get('/les-demandes', [App\Http\Controllers\AdminDemandeUPB::class, 'index']);
     Route::get('/consulter', [App\Http\Controllers\AdminDemandeUPB::class, 'consulter']);
     Route::post('/consulter', [App\Http\Controllers\AdminDemandeUPB::class, 'consulterPost']);
-
 
     Route::resource('/universites', UniversiteController::class);
     Route::post('/permission/{user_id}', [App\Http\Controllers\UserController::class, 'permission']);

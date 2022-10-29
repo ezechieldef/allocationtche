@@ -58,20 +58,23 @@
         <!-- ============================================================== -->
         <!-- Topbar header - style you can find in pages.scss -->
         <!-- ============================================================== -->
-        <header class="topbar" data-navbarbg="skin6" >
+        <header class="topbar" data-navbarbg="skin6">
             <nav class="navbar top-navbar navbar-expand-md navbar-light">
                 <div class="navbar-header" data-logobg="skin6">
                     <!-- ============================================================== -->
                     <!-- Logo -->
                     <!-- ============================================================== -->
-                    <a class="navbar-brand " href="/" style="background: rgba(0, 0, 0, 0.8); border-bottom: 1px solid grey">
+                    <a class="navbar-brand " href="/"
+                        style="background: rgba(0, 0, 0, 0.8); border-bottom: 1px solid grey">
                         <!-- Logo icon -->
                         <b class="logo-icon">
                             <!--You can put here icon as well // <i class="wi wi-sunset"></i> //-->
                             <!-- Dark Logo icon -->
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Coat_of_arms_of_Benin.svg" height="30px" alt="homepage" class="dark-logo" />
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Coat_of_arms_of_Benin.svg"
+                                height="30px" alt="homepage" class="dark-logo" />
                             <!-- Light Logo icon -->
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Coat_of_arms_of_Benin.svg" height="30px" alt="homepage" class="light-logo" />
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/13/Coat_of_arms_of_Benin.svg"
+                                height="30px" alt="homepage" class="light-logo" />
                         </b>
                         <!--End Logo icon -->
                         <!-- Logo text -->
@@ -199,11 +202,13 @@
                         @role('super-admin')
                             <li class="sidebar-item @if (Request::is('les-demandes/*')) selected @endif"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/les-demandes"
-                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span class="hide-menu">Demandes
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Demandes
                                         Admin</span></a></li>
                             <li class="sidebar-item @if (Request::is('consulter/*')) selected @endif"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/consulter"
-                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span class="hide-menu">Consulter Etudiant</span></a></li>
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Consulter Etudiant</span></a></li>
                             <li class="sidebar-item @if (Request::is('utilisateur/*')) selected @endif"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/utilisateur"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
@@ -221,12 +226,13 @@
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/pv"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">PV</span></a></li>
+                        @endrole
+                        @role('commissaire-CNABAU|super-admin')
                             <li class="sidebar-item @if (Request::is('lots/*')) selected @endif"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/lots"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Lots</span></a></li>
                         @endrole
-
                         <li class="sidebar-item @if (Request::is('nouvelle-demande-allocation/*')) selected @endif"> <a
                                 class="sidebar-link waves-effect waves-dark sidebar-link"
                                 href="/nouvelle-demande-allocation" aria-expanded="false"><i
@@ -268,7 +274,7 @@
             <!-- ============================================================== -->
             <div class="page-breadcrumb ">
                 <div class="row align-items-center ">
-                    <div class="col-8">
+                    <div class="col-md-8 col-12">
                         <nav aria-label="breadcrumb">
                             <ol class="breadcrumb mb-0 d-flex align-items-center">
                                 <li class="breadcrumb-item"><a href="/" class="link"><i
@@ -280,7 +286,7 @@
                         </nav>
                         <h1 class="mb-0 fw-bold">@yield('titre')</h1>
                     </div>
-                    <div class="col-4">
+                    <div class="col-md-4 col-12">
                         <div class="text-end">
                             <label class=" btn btn-dark text-white">{{ Auth::user()->email }} </label>
                         </div>
@@ -357,6 +363,7 @@
     <script>
         $('.card-header').addClass('bg-success text-white text-bold');
         $('.card').addClass('border-success text-black');
+        $('.card.border-none').removeClass('border-success');
         $('.sidebar-link').addClass('text-white');
 
         // $('.sidebar-item.selected').addClass('bg-success');
@@ -451,6 +458,14 @@
             $('#datatable').DataTable({
                 responsive: true,
 
+                language: {
+                    "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json"
+                },
+            });
+        });
+        $(".datatable").each(function() {
+            $(this).DataTable({
+                responsive: true,
                 language: {
                     "url": "//cdn.datatables.net/plug-ins/9dcbecd42ad/i18n/French.json"
                 },

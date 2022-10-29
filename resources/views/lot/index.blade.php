@@ -16,11 +16,12 @@
                                 {{ __('Lot') }}
                             </span>
 
-                             <div class="float-right">
-                                <a href="{{ route('lots.create') }}" class="btn btn-warning text-dark btn-sm float-right"  data-placement="left">
-                                  Nouveau
+                            <div class="float-right">
+                                <a href="{{ route('lots.create') }}" class="btn btn-warning text-dark btn-sm float-right"
+                                    data-placement="left">
+                                    Nouveau
                                 </a>
-                              </div>
+                            </div>
                         </div>
                     </div>
                     @if ($message = Session::get('success'))
@@ -36,11 +37,10 @@
                                     <tr>
                                         <td>ID</td>
                                         <th>Numero</th>
-										<th>Référence PV</th>
-										<th>Commissaire</th>
-										<th>Status</th>
-
-
+                                        <th>Référence PV</th>
+                                        <th>Commissaire</th>
+                                        <th>Nbr Demande</th>
+                                        <th>Status</th>
                                         <th></th>
                                     </tr>
                                 </thead>
@@ -48,19 +48,28 @@
                                     @foreach ($lots as $lot)
                                         <tr>
 
-											<td>{{ $lot->CodeLot }}</td>
-											<td>{{ $lot->Numero }}</td>
-											<td>{{ \App\Models\Pv::find($lot->CodePV)->Reference_PV }}</td>
-											<td>{{ \App\Models\User::find($lot->Commissaire)->email }}</td>
-											<td>{{ $lot->status }}</td>
+                                            <td>{{ $lot->CodeLot }}</td>
+                                            <td>{{ $lot->Numero }}</td>
+                                            <td>{{ \App\Models\Pv::find($lot->CodePV)->Reference_PV }}</td>
+                                            <td>{{ \App\Models\User::find($lot->Commissaire)->name }}</td>
+                                            <td>{{ \App\Models\AssocLotsDemande::where('CodeLot', $lot->CodeLot)->count() }}</td>
+                                            <td>{{ $lot->status }}</td>
 
                                             <td>
-                                                <form action="{{ route('lots.destroy',$lot->CodeLot) }}" method="POST">
-                                                    <a class="btn btn-sm btn-info text-white " href="{{ route('lots.show',$lot->CodeLot) }}"><i class="fa fa-fw fa-eye"></i> Voir</a>
-                                                    <a class="btn btn-sm btn-success text-white" href="{{ route('lots.edit',$lot->CodeLot) }}"><i class="fa fa-fw fa-edit"></i> Modifier</a>
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm text-white show_confirm2"><i class="fa fa-fw fa-trash"></i> Supprimer</button>
+                                                <form action="{{ route('lots.destroy', $lot->CodeLot) }}" method="POST">
+                                                    <a class="btn btn-sm btn-info text-white "
+                                                        href="{{ route('lots.show', $lot->CodeLot) }}"><i
+                                                            class="fa fa-fw fa-eye"></i> Voir</a>
+                                                    @role('super-admin')
+                                                        <a class="btn btn-sm btn-success text-white"
+                                                            href="{{ route('lots.edit', $lot->CodeLot) }}"><i
+                                                                class="fa fa-fw fa-edit"></i> Modifier</a>
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit"
+                                                            class="btn btn-danger btn-sm text-white show_confirm2"><i
+                                                                class="fa fa-fw fa-trash"></i> Supprimer</button>
+                                                    @endrole
                                                 </form>
                                             </td>
                                         </tr>

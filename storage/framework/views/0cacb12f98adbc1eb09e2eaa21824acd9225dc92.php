@@ -40,6 +40,7 @@
                                         <th>Période</th>
                                         <th>Session</th>
                                         <th>Anneecivile</th>
+                                        <th>Nbr Lots</th>
 
 
                                         <th></th>
@@ -56,16 +57,18 @@
                                             <td><?php echo e($pv->Session); ?></td>
 
                                             <td><?php echo e($pv->AnneeCivile); ?></td>
-
+                                            <td><?php echo e(\App\Models\Lot::where('CodePV', $pv->CodePV)->count()); ?> </td>
 
                                             <td class="d-flex">
                                                 <form action="<?php echo e(route('pv.destroy', $pv->CodePV)); ?>" method="POST">
                                                     <a class="btn btn-sm btn-secondary text-white "
                                                         href="<?php echo e(route('pv.show', $pv->CodePV)); ?>"><i
                                                             class="fa fa-fw fa-eye"></i> Voir</a>
-                                                    <a class="btn btn-sm btn-success text-white"
-                                                        href="<?php echo e(route('pv.edit', $pv->CodePV)); ?>"><i
-                                                            class="fa fa-fw fa-edit"></i> Modifier</a>
+                                                    <?php if($pv->statut != 'cloturé'): ?>
+                                                        <a class="btn btn-sm btn-success text-white"
+                                                            href="<?php echo e(route('pv.edit', $pv->CodePV)); ?>"><i
+                                                                class="fa fa-fw fa-edit"></i> Modifier</a>
+                                                    <?php endif; ?>
 
                                                     <?php echo csrf_field(); ?>
                                                     <?php echo method_field('DELETE'); ?>
@@ -76,9 +79,10 @@
 
                                                 </form>
                                                 <?php if($pv->statut != 'cloturé'): ?>
-                                                        <a class="btn btn-sm btn-info text-white text-bold mx-3 "
-                                                            href="/cloturer-pv/<?php echo e($pv->CodePV); ?>" onclick="(){return confirm('Voulez-vous vraiment confirmer cette cloture ?')}">Cloturer</a>
-                                                    <?php endif; ?>
+                                                    <a class="btn btn-sm btn-info text-white text-bold mx-3 "
+                                                        href="/cloturer-pv/<?php echo e($pv->CodePV); ?>"
+                                                        onclick="(){return confirm('Voulez-vous vraiment confirmer cette cloture ?')}">Cloturer</a>
+                                                <?php endif; ?>
                                             </td>
                                         </tr>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

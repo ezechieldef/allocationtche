@@ -13,7 +13,7 @@
             <div class="col-md-4 col-12 my-2">
                 <?php echo e(Form::label('PV')); ?>
 
-                <?php echo e(Form::select('CodePV',\App\Models\Pv::pluck('Reference_PV','CodePV'), $lot->CodePV, ['class' => 'form-select' . ($errors->has('CodePV') ? ' is-invalid' : ''), 'placeholder' => '-- Sélectionner --'])); ?>
+                <?php echo e(Form::select('CodePV',\App\Models\Pv::where('statut','!=','cloturé')->pluck('Reference_PV','CodePV'), $lot->CodePV, ['class' => 'form-select' . ($errors->has('CodePV') ? ' is-invalid' : ''), 'placeholder' => '-- Sélectionner --'])); ?>
 
                 <?php echo $errors->first('CodePV', '<div class="invalid-feedback">:message</div>'); ?>
 
@@ -21,7 +21,7 @@
             <div class="col-md-4 col-12 my-2">
                 <?php echo e(Form::label('Commissaire')); ?>
 
-                <?php echo e(Form::select('Commissaire', \App\Models\User::pluck('email','id'), $lot->Commissaire, ['class' => 'form-select' . ($errors->has('Commissaire') ? ' is-invalid' : ''), 'placeholder' => '-- Sélectionner --'])); ?>
+                <?php echo e(Form::select('Commissaire', \App\Models\User::role('commissaire-CNABAU')->pluck('name','id'), $lot->Commissaire, ['class' => 'form-select' . ($errors->has('Commissaire') ? ' is-invalid' : ''), 'placeholder' => '-- Sélectionner --'])); ?>
 
                 <?php echo $errors->first('Commissaire', '<div class="invalid-feedback">:message</div>'); ?>
 
@@ -29,7 +29,7 @@
             <div class="col-md-12 col-12 my-2">
                 <?php echo e(Form::label('status')); ?>
 
-                <?php echo e(Form::text('status', $lot->status, ['class' => 'form-control' . ($errors->has('status') ? ' is-invalid' : ''), 'placeholder' => 'Status'])); ?>
+                <?php echo e(Form::select('status', ['OUVERT'=>'OUVERT','FERMÉ'=>'FERMÉ'], $lot->status, ['class' => 'form-select' . ($errors->has('status') ? ' is-invalid' : ''),])); ?>
 
                 <?php echo $errors->first('status', '<div class="invalid-feedback">:message</div>'); ?>
 

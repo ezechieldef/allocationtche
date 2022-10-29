@@ -1,6 +1,5 @@
 <?php $__env->startSection('template_title'); ?>
-    <?php echo e($pv->name ?? 'Show Pv'); ?>
-
+    Détail PV
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
@@ -8,61 +7,49 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between">
                         <div class="float-left">
-                            <span class="card-title">Show Pv</span>
+                            <span class="card-title">Détail PV</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary" href="<?php echo e(route('pv.index')); ?>"> Back</a>
+                            <a class="btn btn-warning text-dark" href="<?php echo e(route('pv.index')); ?>"> Retour</a>
                         </div>
                     </div>
 
                     <div class="card-body">
-                        
+
                         <div class="form-group">
                             <strong>Codepv:</strong>
-                            <?php echo e($pv->CodePV); ?>
-
+                            <input type="text" readonly class="form-control" value="<?php echo e($pv->CodePV); ?>">
                         </div>
                         <div class="form-group">
-                            <strong>Reference Pv:</strong>
-                            <?php echo e($pv->Reference_PV); ?>
-
+                            <strong>Reference PV:</strong>
+                            <input type="text" readonly class="form-control" value="<?php echo e($pv->Reference_PV); ?>">
                         </div>
                         <div class="form-group">
                             <strong>Datedebutsession:</strong>
-                            <?php echo e($pv->DateDebutSession); ?>
-
+                            <input type="text" readonly class="form-control" value="<?php echo e($pv->DateDebutSession); ?>">
                         </div>
-                        <div class="form-group">
-                            <strong>Session:</strong>
-                            <?php echo e($pv->Session); ?>
 
-                        </div>
                         <div class="form-group">
                             <strong>Datefinsession:</strong>
-                            <?php echo e($pv->DateFinSession); ?>
-
+                            <input type="text" readonly class="form-control" value="<?php echo e($pv->DateFinSession); ?>">
                         </div>
                         <div class="form-group">
                             <strong>Anneecivile:</strong>
-                            <?php echo e($pv->AnneeCivile); ?>
-
+                            <input type="text" readonly class="form-control" value="<?php echo e($pv->AnneeCivile); ?>">
                         </div>
                         <div class="form-group">
                             <strong>Notebaspage:</strong>
-                            <?php echo e($pv->NoteBasPage); ?>
-
+                            <input type="text" readonly class="form-control" value="<?php echo e($pv->NoteBasPage); ?>">
                         </div>
                         <div class="form-group">
                             <strong>Datetransmissionliste:</strong>
-                            <?php echo e($pv->DateTransmissionListe); ?>
-
+                            <input type="text" readonly class="form-control" value="<?php echo e($pv->DateTransmissionListe); ?>">
                         </div>
                         <div class="form-group">
                             <strong>Reflettretransmisionliste:</strong>
-                            <?php echo e($pv->RefLettreTransmisionListe); ?>
-
+                            <input type="text" readonly class="form-control" value="<?php echo e($pv->RefLettreTransmisionListe); ?>">
                         </div>
 
                     </div>

@@ -5,6 +5,11 @@
 @endsection
 
 @section('content')
+
+@php
+    $eff_total= count($lot->demandes()->get());
+    $pourcent_total=(\App\Models\DemandeAllocationUPB::demandeAvecLot()->count() * 100) / $eff_total;
+@endphp
     <form method="POST" action="" role="form" id="formulaire" enctype="multipart/form-data">
         <!-- The Modal -->
         <div class="modal fade" id="myModal">
@@ -120,8 +125,8 @@
                             <tbody>
                                 @foreach (DB::select(
             "SELECT E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation, count(E.CodeEtudiant) as effectif from
-                                             demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND  D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
-                                             GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation ",
+                                                                                     demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND  D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
+                                                                                     GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation ",
             [],
         ) as $list)
                                     <tr>
@@ -140,7 +145,7 @@
                                                 <input type="text" class="hide" name="CodeNatureAllocation"
                                                     value="{{ $list->CodeNatureAllocation }}">
                                                 <input type="number" name="effectif" placeholder="Effectif à insérer"
-                                                    class="form-control">
+                                                    class="form-control" max="{{ $list->effectif }}">
                                                 <button type="submit" class="btn btn-sm btn-success ms-2">OK</button>
                                             </form>
                                         </td>
@@ -157,17 +162,20 @@
     </div>
 
     <section class="">
-        <div class="row">
-            <div class="col-md-12">
+        <div class="">
+            <div class="">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="float-left">
                             <span class="card-title">Détail Lot</span>
                         </div>
                         <div class="float-right">
-
-                            <button class="btn btn-light shadow mx-2" data-bs-toggle="modal"
-                                data-bs-target="#modalPayer">Ajouter au lot</button>
+                            @role('super-admin')
+                                <button class="btn btn-light shadow mx-2" data-bs-toggle="modal"
+                                    data-bs-target="#modalPayer">Ajouter au lot</button>
+                                    <a href="/exporter-lot/{{ $lot->CodeLot }}">
+                                    <button class="btn btn-secondary text-white text-bold mx-2" >Exporter</button></a>
+                            @endrole
                             <a class="btn btn-warning text-dark" href="{{ route('lots.index') }}"> Retour</a>
                         </div>
                     </div>
@@ -196,64 +204,147 @@
                             </div>
 
                         </div>
-                        <div class="card-header text-center my-3">Liste des Demandes inclus </div>
-                        <div class="table-responsive">
-                            <table id="mytable" class="table table-striped">
-                                <thead>
-                                    <th>Code</th>
-                                    <th>Matricule</th>
-                                    <td>Nom & Prénoms</td>
-                                    <th>Date Naiss.</th>
-                                    <td>Type demande</td>
-                                    <td>Année Acadé. / d'étu.</td>
-                                    <td>Filiere</td>
-                                    <td>Référence</td>
-                                    <td>Situation Antérieur</td>
-                                    <th>Avis</th>
-                                    <th>Actions</th>
-                                </thead>
-                                @foreach ($lot->demandes()->get() as $dem)
-                                    @php
-                                        $demjoin = \App\Models\DemandeAllocationUPB::find($dem->CodeDemandeAllocation)
-                                            ->join('etudiant', 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')
-                                            ->first();
-                                    @endphp
-                                    <tr>
-                                        <td>{{ $demjoin->CodeDemandeAllocation }}</td>
-                                        <td class="text-dark text-bold">{{ $demjoin->Matricule }}</td>
-                                        <td>{{ $demjoin->NomEtudiant . ' ' . $demjoin->PrenomEtudiant }}</td>
-                                        <td>{{ $demjoin->DateNaissanceEtudiant }}</td>
-                                        <td>{{ $demjoin->CodeTypeDemande }}</td>
-                                        <td>{{ \App\Models\AnneeAcademique::find($demjoin->CodeAnneeAcademique)->LibelleAnneeAcademique }}
-                                            / Niveau : {{ $demjoin->CodeAnneeEtude }}</td>
-                                        <td class="text-dark text-bold">{{ $demjoin->CodeFiliere }}</td>
-                                        <td>{{ $demjoin->referencesselection }}</td>
-                                        <td>{{ $demjoin->Situationanterieure }}</td>
-                                        @php
-                                            $avis = \App\Models\AssocPvDemande::where('CodeDemandeAllocation', $demjoin->CodeDemandeAllocation)
-                                                ->where('CodePV', $lot->CodePV)
-                                                ->get();
-                                            $avis = count($avis) == 0 ? '-' : $avis[0]->Avis;
-                                        @endphp
-                                        <td
-                                            class=" text-bold @if ($avis == 'Favorable') text-success
-                                            @elseif($avis == 'Réservé')
-                                            text-warning
-                                            @elseif ($avis== 'Défavorable')
-                                            text-danger
-                                            @endif">
-                                            {{ $avis }}</td>
-                                        <td>
-                                            <button class="btn btn-secondary text-white text-bold" data-bs-toggle="modal"
-                                                data-bs-target="#myModal"
-                                                onclick="loadmodal('{{ $demjoin->CodeDemandeAllocation }}')">Traiter</button>
-                                        </td>
 
-                                        {{-- <td>{{ $demjoin->NomEtudiant.' '.$demjoin->PrenomEtudiant }}</td> --}}
-                                    </tr>
-                                @endforeach
-                            </table>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <ul>
+                                    @foreach (Session::get('errorImport') ?? [] as $error)
+                                        <li class="text-danger">{{ $error }}</li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                            @php
+                                Session::remove('errorImport');
+                            @endphp
+                            <div class="col-12 col-md-4">
+                                <div class="shadow p-3 rounded my-3" style="background: #fff">
+                                    <p>Effectif Total : <strong> {{ $eff_total }} ( {{ $pourcent_total }}% des demandes classé par lot ) </strong> </p>
+                                    <div class="progress" style="height:10px">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar"
+                                            aria-valuenow="{{ $pourcent_total }}" aria-valuemin="0"
+                                            aria-valuemax="100" style="width: 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="shadow p-3 rounded my-3" style="background: #fff">
+                                    <p>Effectif Non traité : <strong>{{ 50 }} (
+                                            {{ 50 }} % )</strong></p>
+
+                                    <div class="progress" style="height:10px">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                            role="progressbar" aria-valuenow="{{ 50 }}"
+                                            aria-valuemin="0" aria-valuemax="100"
+                                            style="width: {{ 100 }}%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <div class="shadow p-3 rounded my-3" style="background: #fff">
+
+                                    <p>Effectif traité : <strong>{{ 50 }} (
+                                            {{ 50 }} % )</strong></p>
+                                    <div class="progress" style="height:10px">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
+                                            role="progressbar"
+                                            aria-valuenow="{{ 50 }}"
+                                            aria-valuemin="0" aria-valuemax="100"
+                                            style="width: {{ 50 }}%;"></div>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
+
+
+                        <div class="card-header text-center my-3">Liste des Demandes inclus
+
+
+                        </div>
+                        @forelse ($lot->groups() as $grp)
+                            @php
+                                $i = 1;
+                            @endphp
+                            <p>
+                                <button class="btn btn-secondary text-white text-bold w-100" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseExample{{ $i }}"
+                                    aria-expanded="false" aria-controls="collapseExample{{ $i }}">
+                                    {{ $grp->CodeFiliere . ' / ' . $grp->CodeNatureAllocation . ' / ' . \App\Models\AnneeAcademique::find($grp->CodeAnneeAcademique)->LibelleAnneeAcademique . ' / ' . $grp->CodeAnneeEtude }}
+                                </button>
+                            </p>
+                            <div class="collapse w-100" id="collapseExample{{ $i++ }}">
+                                <div class="table-responsive w-100">
+                                    <table id="" class="table table-striped w-100 datatable">
+                                        <thead>
+                                            <th>Code</th>
+                                            <th>Matricule</th>
+                                            <td>Nom & Prénoms</td>
+                                            <th>Date Naiss.</th>
+                                            <td>Type demande</td>
+                                            <td>Référence</td>
+                                            <td>Situation Antérieur</td>
+                                            <th>Avis</th>
+                                            <th>Actions</th>
+                                        </thead>
+
+                                        @foreach ($lot->detailGroup($grp) as $demjoin)
+                                            <tr>
+                                                <td>{{ $demjoin->CodeDemandeAllocation }}</td>
+                                                <td class="text-dark text-bold">{{ $demjoin->Matricule }}</td>
+                                                <td>{{ $demjoin->NomEtudiant . ' ' . $demjoin->PrenomEtudiant }}</td>
+                                                <td>{{ $demjoin->DateNaissanceEtudiant }}</td>
+                                                <td>{{ $demjoin->CodeTypeDemande }}</td>
+
+                                                <td>{{ $demjoin->referencesselection }}</td>
+                                                <td>{{ $demjoin->Situationanterieure }}</td>
+                                                @php
+                                                    $avis = \App\Models\AssocPvDemande::where('CodeDemandeAllocation', $demjoin->CodeDemandeAllocation)
+                                                        ->where('CodePV', $lot->CodePV)
+                                                        ->get();
+                                                    $avis = count($avis) == 0 ? '-' : $avis[0]->Avis;
+                                                @endphp
+                                                <td
+                                                    class=" text-bold @if ($avis == 'Favorable') text-success
+                                                    @elseif($avis == 'Réservé')
+                                                    text-warning
+                                                    @elseif ($avis == 'Défavorable')
+                                                    text-danger @endif">
+                                                    {{ $avis }}</td>
+                                                <td class="">
+                                                    @if ($lot->Commissaire == Auth::user()->id)
+                                                        <button class="btn btn-secondary text-white text-bold"
+                                                            data-bs-toggle="modal" data-bs-target="#myModal"
+                                                            onclick="loadmodal('{{ $demjoin->CodeDemandeAllocation }}')">Traiter</button>
+                                                    @endif
+                                                    @role('super-admin')
+                                                        <form
+                                                            action="/retirer-du-lot/{{ $lot->CodeLot }}/{{ $demjoin->CodeDemandeAllocation }}"
+                                                            method="post">
+                                                            @csrf
+                                                            <button
+                                                                class="btn btn-sm btn-danger text-white py-2 show_confirm2 ">
+                                                                <i class="fa fa-trash text-white"></i> </button>
+                                                        </form>
+                                                    @endrole
+
+                                                </td>
+
+
+                                            </tr>
+                                        @endforeach
+                                    </table>
+                                </div>
+                            </div>
+                        @empty
+
+                            <div class="text-center py-4">
+                                <h4>Aucune demande incluse</h4>
+                            </div>
+                        @endforelse
+
 
                     </div>
                 </div>

@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
 @section('template_title')
-    {{ $pv->name ?? 'Show Pv' }}
+    Détail PV
 @endsection
 
 @section('content')
@@ -9,52 +9,49 @@
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header d-flex justify-content-between">
                         <div class="float-left">
-                            <span class="card-title">Show Pv</span>
+                            <span class="card-title">Détail PV</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary" href="{{ route('pv.index') }}"> Back</a>
+                            <a class="btn btn-warning text-dark" href="{{ route('pv.index') }}"> Retour</a>
                         </div>
                     </div>
 
                     <div class="card-body">
-                        
+
                         <div class="form-group">
                             <strong>Codepv:</strong>
-                            {{ $pv->CodePV }}
+                            <input type="text" readonly class="form-control" value="{{ $pv->CodePV }}">
                         </div>
                         <div class="form-group">
-                            <strong>Reference Pv:</strong>
-                            {{ $pv->Reference_PV }}
+                            <strong>Reference PV:</strong>
+                            <input type="text" readonly class="form-control" value="{{ $pv->Reference_PV }}">
                         </div>
                         <div class="form-group">
                             <strong>Datedebutsession:</strong>
-                            {{ $pv->DateDebutSession }}
+                            <input type="text" readonly class="form-control" value="{{ $pv->DateDebutSession }}">
                         </div>
-                        <div class="form-group">
-                            <strong>Session:</strong>
-                            {{ $pv->Session }}
-                        </div>
+
                         <div class="form-group">
                             <strong>Datefinsession:</strong>
-                            {{ $pv->DateFinSession }}
+                            <input type="text" readonly class="form-control" value="{{ $pv->DateFinSession }}">
                         </div>
                         <div class="form-group">
                             <strong>Anneecivile:</strong>
-                            {{ $pv->AnneeCivile }}
+                            <input type="text" readonly class="form-control" value="{{ $pv->AnneeCivile }}">
                         </div>
                         <div class="form-group">
                             <strong>Notebaspage:</strong>
-                            {{ $pv->NoteBasPage }}
+                            <input type="text" readonly class="form-control" value="{{ $pv->NoteBasPage }}">
                         </div>
                         <div class="form-group">
                             <strong>Datetransmissionliste:</strong>
-                            {{ $pv->DateTransmissionListe }}
+                            <input type="text" readonly class="form-control" value="{{ $pv->DateTransmissionListe }}">
                         </div>
                         <div class="form-group">
                             <strong>Reflettretransmisionliste:</strong>
-                            {{ $pv->RefLettreTransmisionListe }}
+                            <input type="text" readonly class="form-control" value="{{ $pv->RefLettreTransmisionListe }}">
                         </div>
 
                     </div>

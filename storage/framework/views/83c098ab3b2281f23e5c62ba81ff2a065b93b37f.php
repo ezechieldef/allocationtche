@@ -114,8 +114,8 @@
                             <tbody>
                                 <?php $__currentLoopData = DB::select(
             "SELECT E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation, count(E.CodeEtudiant) as effectif from
-                                             demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND  D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
-                                             GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation ",
+                                                                                     demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND  D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
+                                                                                     GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation ",
             [],
         ); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $list): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
@@ -134,7 +134,7 @@
                                                 <input type="text" class="hide" name="CodeNatureAllocation"
                                                     value="<?php echo e($list->CodeNatureAllocation); ?>">
                                                 <input type="number" name="effectif" placeholder="Effectif à insérer"
-                                                    class="form-control">
+                                                    class="form-control" max="<?php echo e($list->effectif); ?>">
                                                 <button type="submit" class="btn btn-sm btn-success ms-2">OK</button>
                                             </form>
                                         </td>
@@ -151,17 +151,20 @@
     </div>
 
     <section class="">
-        <div class="row">
-            <div class="col-md-12">
+        <div class="">
+            <div class="">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between">
                         <div class="float-left">
                             <span class="card-title">Détail Lot</span>
                         </div>
                         <div class="float-right">
-
-                            <button class="btn btn-light shadow mx-2" data-bs-toggle="modal"
-                                data-bs-target="#modalPayer">Ajouter au lot</button>
+                            <?php if(auth()->check() && auth()->user()->hasRole('super-admin')): ?>
+                                <button class="btn btn-light shadow mx-2" data-bs-toggle="modal"
+                                    data-bs-target="#modalPayer">Ajouter au lot</button>
+                                    <a href="/exporter-lot/<?php echo e($lot->CodeLot); ?>">
+                                    <button class="btn btn-secondary text-white text-bold mx-2" >Exporter</button></a>
+                            <?php endif; ?>
                             <a class="btn btn-warning text-dark" href="<?php echo e(route('lots.index')); ?>"> Retour</a>
                         </div>
                     </div>
@@ -190,65 +193,148 @@
                             </div>
 
                         </div>
-                        <div class="card-header text-center my-3">Liste des Demandes inclus </div>
-                        <div class="table-responsive">
-                            <table id="mytable" class="table table-striped">
-                                <thead>
-                                    <th>Code</th>
-                                    <th>Matricule</th>
-                                    <td>Nom & Prénoms</td>
-                                    <th>Date Naiss.</th>
-                                    <td>Type demande</td>
-                                    <td>Année Acadé. / d'étu.</td>
-                                    <td>Filiere</td>
-                                    <td>Référence</td>
-                                    <td>Situation Antérieur</td>
-                                    <th>Avis</th>
-                                    <th>Actions</th>
-                                </thead>
-                                <?php $__currentLoopData = $lot->demandes()->get(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <?php
-                                        $demjoin = \App\Models\DemandeAllocationUPB::find($dem->CodeDemandeAllocation)
-                                            ->join('etudiant', 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')
-                                            ->first();
-                                    ?>
-                                    <tr>
-                                        <td><?php echo e($demjoin->CodeDemandeAllocation); ?></td>
-                                        <td class="text-dark text-bold"><?php echo e($demjoin->Matricule); ?></td>
-                                        <td><?php echo e($demjoin->NomEtudiant . ' ' . $demjoin->PrenomEtudiant); ?></td>
-                                        <td><?php echo e($demjoin->DateNaissanceEtudiant); ?></td>
-                                        <td><?php echo e($demjoin->CodeTypeDemande); ?></td>
-                                        <td><?php echo e(\App\Models\AnneeAcademique::find($demjoin->CodeAnneeAcademique)->LibelleAnneeAcademique); ?>
 
-                                            / Niveau : <?php echo e($demjoin->CodeAnneeEtude); ?></td>
-                                        <td class="text-dark text-bold"><?php echo e($demjoin->CodeFiliere); ?></td>
-                                        <td><?php echo e($demjoin->referencesselection); ?></td>
-                                        <td><?php echo e($demjoin->Situationanterieure); ?></td>
-                                        <?php
-                                            $avis = \App\Models\AssocPvDemande::where('CodeDemandeAllocation', $demjoin->CodeDemandeAllocation)
-                                                ->where('CodePV', $lot->CodePV)
-                                                ->get();
-                                            $avis = count($avis) == 0 ? '-' : $avis[0]->Avis;
-                                        ?>
-                                        <td
-                                            class=" text-bold <?php if($avis == 'Favorable'): ?> text-success
-                                            <?php elseif($avis == 'Réservé'): ?>
-                                            text-warning
-                                            <?php elseif($avis== 'Défavorable'): ?>
-                                            text-danger
-                                            <?php endif; ?>">
-                                            <?php echo e($avis); ?></td>
-                                        <td>
-                                            <button class="btn btn-secondary text-white text-bold" data-bs-toggle="modal"
-                                                data-bs-target="#myModal"
-                                                onclick="loadmodal('<?php echo e($demjoin->CodeDemandeAllocation); ?>')">Traiter</button>
-                                        </td>
 
-                                        
-                                    </tr>
-                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                            </table>
+                        <div class="row">
+                            <div class="col-12">
+                                <ul>
+                                    <?php $__currentLoopData = Session::get('errorImport') ?? []; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                        <li class="text-danger"><?php echo e($error); ?></li>
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                </ul>
+                            </div>
+                            <?php
+                                Session::remove('errorImport');
+                            ?>
+                            <div class="col-12 col-md-4">
+                                <div class="shadow p-3 rounded my-3" style="background: #fff">
+                                    <p>Effectif Total : <strong> <?php echo e(count($lot->demandes()->get())); ?> </strong> </p>
+                                    <div class="progress" style="height:10px">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar"
+                                            aria-valuenow="<?php echo e(100); ?>" aria-valuemin="0"
+                                            aria-valuemax="100" style="width: 100%;"></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-md-4">
+                                <div class="shadow p-3 rounded my-3" style="background: #fff">
+                                    <p>Effectif Non traité : <strong><?php echo e(50); ?> (
+                                            <?php echo e(50); ?> % )</strong></p>
+
+                                    <div class="progress" style="height:10px">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                            role="progressbar" aria-valuenow="<?php echo e(50); ?>"
+                                            aria-valuemin="0" aria-valuemax="100"
+                                            style="width: <?php echo e(100); ?>%;">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-md-4">
+                                <div class="shadow p-3 rounded my-3" style="background: #fff">
+
+                                    <p>Effectif traité : <strong><?php echo e(50); ?> (
+                                            <?php echo e(50); ?> % )</strong></p>
+                                    <div class="progress" style="height:10px">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
+                                            role="progressbar"
+                                            aria-valuenow="<?php echo e(50); ?>"
+                                            aria-valuemin="0" aria-valuemax="100"
+                                            style="width: <?php echo e(50); ?>%;"></div>
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
+
+
+                        <div class="card-header text-center my-3">Liste des Demandes inclus
+
+
+                        </div>
+                        <?php $__empty_1 = true; $__currentLoopData = $lot->groups(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $grp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                            <?php
+                                $i = 1;
+                            ?>
+                            <p>
+                                <button class="btn btn-secondary text-white text-bold w-100" type="button"
+                                    data-bs-toggle="collapse" data-bs-target="#collapseExample<?php echo e($i); ?>"
+                                    aria-expanded="false" aria-controls="collapseExample<?php echo e($i); ?>">
+                                    <?php echo e($grp->CodeFiliere . ' / ' . $grp->CodeNatureAllocation . ' / ' . \App\Models\AnneeAcademique::find($grp->CodeAnneeAcademique)->LibelleAnneeAcademique . ' / ' . $grp->CodeAnneeEtude); ?>
+
+                                </button>
+                            </p>
+                            <div class="collapse w-100" id="collapseExample<?php echo e($i++); ?>">
+                                <div class="table-responsive w-100">
+                                    <table id="" class="table table-striped w-100 datatable">
+                                        <thead>
+                                            <th>Code</th>
+                                            <th>Matricule</th>
+                                            <td>Nom & Prénoms</td>
+                                            <th>Date Naiss.</th>
+                                            <td>Type demande</td>
+                                            <td>Référence</td>
+                                            <td>Situation Antérieur</td>
+                                            <th>Avis</th>
+                                            <th>Actions</th>
+                                        </thead>
+
+                                        <?php $__currentLoopData = $lot->detailGroup($grp); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $demjoin): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <tr>
+                                                <td><?php echo e($demjoin->CodeDemandeAllocation); ?></td>
+                                                <td class="text-dark text-bold"><?php echo e($demjoin->Matricule); ?></td>
+                                                <td><?php echo e($demjoin->NomEtudiant . ' ' . $demjoin->PrenomEtudiant); ?></td>
+                                                <td><?php echo e($demjoin->DateNaissanceEtudiant); ?></td>
+                                                <td><?php echo e($demjoin->CodeTypeDemande); ?></td>
+
+                                                <td><?php echo e($demjoin->referencesselection); ?></td>
+                                                <td><?php echo e($demjoin->Situationanterieure); ?></td>
+                                                <?php
+                                                    $avis = \App\Models\AssocPvDemande::where('CodeDemandeAllocation', $demjoin->CodeDemandeAllocation)
+                                                        ->where('CodePV', $lot->CodePV)
+                                                        ->get();
+                                                    $avis = count($avis) == 0 ? '-' : $avis[0]->Avis;
+                                                ?>
+                                                <td
+                                                    class=" text-bold <?php if($avis == 'Favorable'): ?> text-success
+                                                    <?php elseif($avis == 'Réservé'): ?>
+                                                    text-warning
+                                                    <?php elseif($avis == 'Défavorable'): ?>
+                                                    text-danger <?php endif; ?>">
+                                                    <?php echo e($avis); ?></td>
+                                                <td class="">
+                                                    <?php if($lot->Commissaire == Auth::user()->id): ?>
+                                                        <button class="btn btn-secondary text-white text-bold"
+                                                            data-bs-toggle="modal" data-bs-target="#myModal"
+                                                            onclick="loadmodal('<?php echo e($demjoin->CodeDemandeAllocation); ?>')">Traiter</button>
+                                                    <?php endif; ?>
+                                                    <?php if(auth()->check() && auth()->user()->hasRole('super-admin')): ?>
+                                                        <form
+                                                            action="/retirer-du-lot/<?php echo e($lot->CodeLot); ?>/<?php echo e($demjoin->CodeDemandeAllocation); ?>"
+                                                            method="post">
+                                                            <?php echo csrf_field(); ?>
+                                                            <button
+                                                                class="btn btn-sm btn-danger text-white py-2 show_confirm2 ">
+                                                                <i class="fa fa-trash text-white"></i> </button>
+                                                        </form>
+                                                    <?php endif; ?>
+
+                                                </td>
+
+
+                                            </tr>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </table>
+                                </div>
+                            </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
+
+                            <div class="text-center py-4">
+                                <h4>Aucune demande incluse</h4>
+                            </div>
+                        <?php endif; ?>
+
 
                     </div>
                 </div>

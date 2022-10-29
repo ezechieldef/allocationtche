@@ -42,6 +42,7 @@
                                         <th>Période</th>
                                         <th>Session</th>
                                         <th>Anneecivile</th>
+                                        <th>Nbr Lots</th>
 
 
                                         <th></th>
@@ -58,16 +59,18 @@
                                             <td>{{ $pv->Session }}</td>
 
                                             <td>{{ $pv->AnneeCivile }}</td>
-
+                                            <td>{{ \App\Models\Lot::where('CodePV', $pv->CodePV)->count() }} </td>
 
                                             <td class="d-flex">
                                                 <form action="{{ route('pv.destroy', $pv->CodePV) }}" method="POST">
                                                     <a class="btn btn-sm btn-secondary text-white "
                                                         href="{{ route('pv.show', $pv->CodePV) }}"><i
                                                             class="fa fa-fw fa-eye"></i> Voir</a>
-                                                    <a class="btn btn-sm btn-success text-white"
-                                                        href="{{ route('pv.edit', $pv->CodePV) }}"><i
-                                                            class="fa fa-fw fa-edit"></i> Modifier</a>
+                                                    @if ($pv->statut != 'cloturé')
+                                                        <a class="btn btn-sm btn-success text-white"
+                                                            href="{{ route('pv.edit', $pv->CodePV) }}"><i
+                                                                class="fa fa-fw fa-edit"></i> Modifier</a>
+                                                    @endif
 
                                                     @csrf
                                                     @method('DELETE')
@@ -78,9 +81,10 @@
 
                                                 </form>
                                                 @if ($pv->statut != 'cloturé')
-                                                        <a class="btn btn-sm btn-info text-white text-bold mx-3 "
-                                                            href="/cloturer-pv/{{ $pv->CodePV }}" onclick="(){return confirm('Voulez-vous vraiment confirmer cette cloture ?')}">Cloturer</a>
-                                                    @endif
+                                                    <a class="btn btn-sm btn-info text-white text-bold mx-3 "
+                                                        href="/cloturer-pv/{{ $pv->CodePV }}"
+                                                        onclick="(){return confirm('Voulez-vous vraiment confirmer cette cloture ?')}">Cloturer</a>
+                                                @endif
                                             </td>
                                         </tr>
                                     @endforeach
