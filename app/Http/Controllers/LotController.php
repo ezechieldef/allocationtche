@@ -237,6 +237,7 @@ class LotController extends Controller
 
         // $pdf = PDF::loadView('upb.pdf_export_lot', ['lot' => $lot, 'groups' => $groups, 'pv'=>$pv])->setPaper('a4', 'landscape');;
         // $pdf->getDomPDF()->set_option("enable_php", true);
+       
         return $pdf->download('lot' . $lot->CodeLot . ' N° ' . $lot->Numero . '.pdf');
     }
 }

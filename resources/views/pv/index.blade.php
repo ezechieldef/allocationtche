@@ -67,7 +67,7 @@
                                                         href="{{ route('pv.show', $pv->CodePV) }}"><i
                                                             class="fa fa-fw fa-eye"></i> Voir</a>
                                                     @if ($pv->statut != 'cloturé')
-                                                        <a class="btn btn-sm btn-success text-white"
+                                                        <a class="btn btn-sm btn-warning text-white"
                                                             href="{{ route('pv.edit', $pv->CodePV) }}"><i
                                                                 class="fa fa-fw fa-edit"></i> Modifier</a>
                                                     @endif
@@ -83,7 +83,10 @@
                                                 @if ($pv->statut != 'cloturé')
                                                     <a class="btn btn-sm btn-info text-white text-bold mx-3 "
                                                         href="/cloturer-pv/{{ $pv->CodePV }}"
-                                                        onclick="(){return confirm('Voulez-vous vraiment confirmer cette cloture ?')}">Cloturer</a>
+                                                        onclick="return confirm('Voulez-vous vraiment confirmer cette cloture ?')">Cloturer</a>
+                                                @else
+                                                    <a class="btn btn-sm  btn-success text-white text-bold mx-3 "
+                                                        href="/liste-definitive/{{ $pv->CodePV }}">Liste définitive ( {{ $pv->demandes()->where('avis','Favorable')->count() }} ) </a>
                                                 @endif
                                             </td>
                                         </tr>

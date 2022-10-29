@@ -2,10 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use PDF;
 use App\Models\Pv;
 use App\Models\Lot;
+use App\Models\Filiere;
 use Illuminate\Http\Request;
 use App\Models\AssocPvDemande;
+use App\Models\AnneeAcademique;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
 use RealRashid\SweetAlert\Facades\Alert;
 
@@ -70,8 +74,55 @@ class PvController extends Controller
     public function show($id)
     {
         $pv = Pv::find($id);
+        // $list = AssocPvDemande::join('demande_allocation', 'demande_allocation.CodeDemandeAllocation', 'assoc_pv_demande.CodeDemandeAllocation')
+        //     ->join('etudiant', 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')
+        //     ->join('filiere', 'filiere.CodeFiliere', 'etudiant.CodeFiliere')
+        //     ->join('etablissement', 'etablissement.CodeEtablissement', 'filiere.CodeEtablissement')
+        //     ->where('CodePV', $id)->get();
 
-        return view('pv.show', compact('pv'));
+        $res = DB::select("select Ets.CodeUniversite, D.CodeAnneeAcademique, U.LibelleLongUniversite, U.CodeUniversite
+        ,D.CodeNatureAllocation, Ets.LibelleEtablissement , count(*) nbr,
+        (SELECT Count(*) from assoc_pv_demande AA WHERE AA.CodePV=A.CodePV AND AA.avis='Favorable' ) nbr_fav,
+        (SELECT Count(*) from assoc_pv_demande AA WHERE AA.CodePV=A.CodePV AND AA.avis='Réservé' ) nbr_res,
+        (SELECT Count(*) from assoc_pv_demande AA WHERE AA.CodePV=A.CodePV AND AA.avis='Défavorable' ) nbr_def
+         from assoc_pv_demande A, demande_allocation D, etudiant E, filiere F ,etablissement Ets, universite U
+        WHERE A.CodeDemandeAllocation= D.CodeDemandeAllocation AND
+        D.CodeEtudiant=E.CodeEtudiant AND
+        E.CodeFiliere=F.CodeFiliere AND
+        F.CodeEtablissement= Ets.CodeEtablissement AND
+        U.CodeUniversite= Ets.CodeUniversite AND
+        A.CodePV='" . $id . "'
+        GROUP BY D.CodeAnneeAcademique, Ets.CodeEtablissement, D.CodeNatureAllocation
+
+        ", []);
+        //dd($res);
+
+        $groups = array();
+        foreach ($res as $dem) {
+            $annee = $dem->CodeAnneeAcademique;
+            $univ = $dem->LibelleLongUniversite;
+            $nature = $dem->CodeNatureAllocation;
+
+            // Filiere::find($dem->CodeFiliere)->etablissement()->first()->universite()->first()->CodeUniversite;
+            //$ets= Filiere::find($dem->CodeFiliere)->etablissement()->first()->CodeEtablissement;
+            if (!in_array($annee, array_keys($groups))) {
+                $groups[$annee] = [];
+            }
+            if (!in_array($univ, array_keys($groups[$annee]))) {
+                $groups[$annee][$univ] = [];
+            }
+            if (!in_array($nature , array_keys($groups[$annee][$univ]))) {
+                $groups[$annee][$univ][$nature]=[];
+            }
+            // $groups[$annee][$univ][$ets][]=[
+            //     "libEts"=>$ets->LibelleEtablissement,
+            //     "total"=>
+            // ];
+            $groups[$annee][$univ][$nature][] = $dem;
+        }
+
+
+        return view('pv.show', compact('pv', 'groups'));
     }
 
     /**
@@ -129,10 +180,51 @@ class PvController extends Controller
         if (AssocPvDemande::where('CodePV', $codePV)->count() < 1) {
             return back()->with('error', 'Ce PV ne contient aucun avis d\'aucun commissaire pour le moment, cloture impossible');
         }
-        
+
         Lot::where('CodePV', $codePV)->delete();
         $pv = Pv::findOrFail($codePV);
         $pv->update(['statut' => 'cloturé']);
         return back()->with('success', 'PV :' . $pv->Refence_PV . ' Cloturé avec succès');
+    }
+
+    public function listeDefinitive(int $codePV)
+    {
+        $pv = Pv::findOrFail($codePV);
+        if ($pv->statut != 'cloturé') {
+            return back()->with('error', 'Ce PV n\'est pas cloturé');
+        }
+        $list = AssocPvDemande::join('demande_allocation', 'demande_allocation.CodeDemandeAllocation', 'assoc_pv_demande.CodeDemandeAllocation')
+            ->join('etudiant', 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')
+            ->where('CodePV', $codePV)
+            ->where('avis', 'Favorable')->get();
+        $groups = array();
+        foreach ($list as $dem) {
+            $cle = $dem->CodeFiliere . '/' . $dem->CodeAnneeEtude . '/' . $dem->CodeNatureAllocation . '/' . (AnneeAcademique::find($dem->CodeAnneeAcademique)->LibelleAnneeAcademique);
+            if (!in_array($cle, $groups)) {
+                $groups[$cle] = [];
+            }
+            $groups[$cle][] = $dem;
+        }
+
+        PDF::setOptions([
+            "isHtml5ParserEnabled" => true,
+            "isRemoteEnabled" => true,
+            "defaultPaperSize" => "a4",
+            "dpi" => 350,
+        ]);
+
+        $data = ['list' => $list, 'pv' => $pv, 'groups' => $groups];
+        return view('upb.pdf_export_liste_definitive', $data);
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->getDomPDF()->set_option("enable_php", true);
+        $pdf->getDomPDF()->set_option("enable_remote", false);
+        $pdf->setPaper('a4', 'landscape');
+        $pdf->loadView('upb.pdf_export_liste_definitive', $data);
+
+
+        // $pdf = PDF::loadView('upb.pdf_export_lot', ['lot' => $lot, 'groups' => $groups, 'pv'=>$pv])->setPaper('a4', 'landscape');;
+        // $pdf->getDomPDF()->set_option("enable_php", true);
+        return $pdf->download('liste definitive PV Ref ' . $pv->Reference_PV . '.pdf');
     }
 }

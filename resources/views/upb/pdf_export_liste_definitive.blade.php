@@ -14,7 +14,15 @@
 <style>
     body {
         font-family: 'Source Sans Pro';
-        font-size: 15px;
+        font-size: 17px;
+    }
+
+    .title {
+        font-weight: 600;
+    }
+
+    .p-4 {
+        padding: 1.5rem !important;
     }
 
     .text-underline {
@@ -38,6 +46,11 @@
     }
 
     .borderd {
+        border: 2px solid rgba(128, 128, 128, 0.3);
+        border-radius: 3px;
+    }
+
+    .border-se {
         border: 2px solid rgba(128, 128, 128, 0.3);
         border-radius: 3px;
     }
@@ -152,6 +165,26 @@
         page-break-after: always;
     }
 
+    .text-end {
+        text-align: right;
+    }
+
+    .m-5 {
+        margin: 3rem !important;
+    }
+
+    .m-4 {
+        margin: 1.5rem !important;
+    }
+
+    .m-3 {
+        margin: 1rem !important;
+    }
+
+    .m-2 {
+        margin: 0.5rem !important;
+    }
+
     /* .bg-gray-100{
         background: rgba(128, 128, 128, 0.3)
     } */
@@ -160,7 +193,7 @@
 <body class="p-0">
     {{-- <center><img width="100%" src="http://beraca-transport.net/EGLISEDEVILLE/v.png" alt=""></center> --}}
     {{-- <center><img width="100%" src="http://127.0.0.1/dbau-barner.png" alt=""></center> --}}
-
+    {{--
     <table class="w-100">
         <tr>
             <td>
@@ -172,44 +205,46 @@
 
             </td>
         </tr>
-    </table>
-    <center>
-        <h4>SESSION DE LA CNABAU DU : <strong> {{ $pv->Reference_PV }} </strong></h4>
-    </center>
+    </table> --}}
+    <div class="title text-center bg-gray-200 p-4 border-se ">
+        LISTE DES BENEFICIARE D'ALLOCATION D'ÉTUDES UNIVERSITAIRES
+    </div>
+    <div class="text-end m-3">
+        <span>Référence PV : <strong>{{ $pv->Reference_PV }}</strong> , du
+            <strong>{{ $pv->DateDebutSession }}</strong> au <strong>{{ $pv->DateFinSession }}</strong></span>
+    </div>
+
+
     @foreach ($groups as $key => $grp)
+        <label for="">
+            Année Académique :
+            <strong>{{ \App\Models\AnneeAcademique::find($grp[0]->CodeAnneeAcademique)->LibelleAnneeAcademique }}</strong>
+        </label>
+
+        <center class="text-up"> <h3 class="underline" style=""> {{ \App\Models\Filiere::find($grp[0]->CodeFiliere)->etablissement()->first()->universite()->first()->LibelleLongUniversite }}</h3></center>
+
         <h4 class="bg-gray-100 p-2">{{ str_replace('/', ' / ', $key) }}</h4>
         <table class="w-100 table" border="all">
             <thead class="bg-gray-300">
                 <th>Matricule</th>
-                <th>Nom et Prénoms</th>
+                <th>Nom </th>
+                <th>Prénoms </th>
                 <th>DateNaiss</th>
-                <th>Type</th>
-                <th>Référence</th>
-                <th>Situation Antérieur</th>
-                <th>
-                    <table class="w-100 text-center" border style="border-style: hidden">
-                        <tr>
-                            <td colspan="3">Avis de la commission</td>
-                        </tr>
-                        <tr>
-                            <td>F</td>
-                            <td>D</td>
-                            <td>R</td>
-                        </tr>
-                    </table>
-                </th>
+                <th>RIB</th>
+                <th>Banque</th>
+                <th>Taux Mensuel</th>
+
             </thead>
             <tbody>
                 @foreach ($grp as $dem)
-                    <td>{{ $dem->Matricule }}</td>
-                    <td>{{ $dem->NomEtudiant . ' ' . $dem->PrenomEtudiant }}</td>
+                    <td class="text-center">{{ $dem->Matricule }}</td>
+                    <td>{{ $dem->NomEtudiant }}</td>
+                    <td>{{ $dem->PrenomEtudiant }}</td>
                     <td class="text-center">{{ $dem->DateNaissanceEtudiant }} </td>
-                    <td>{{ $dem->CodeTypeDemande }}</td>
-                    <td>Page : <br>N°: <br><br></td>
-                    <td>{{ $dem->Situationanterieure }}</td>
-                    <td class="text-white" style="">
+                    <td class="text-center">{{ $dem->RIB }}</td>
+                    <td class="text-center">{{ $dem->CodeBanque }}</td>
 
-                    </td>
+                    <td class="text-center"></td>
                 @endforeach
                 <tr>
                     <td colspan='7' class='text-center'>TOTAL : {{ count($grp) }}</td>
@@ -220,9 +255,18 @@
         @if (!$loop->last)
             <div class="page-break"></div>
         @endif
-
     @endforeach
-    <h4></h4>
+    <center> <h5>Pour la Ministre de l'Enseignement Supérieur et de la Recherche Scientifique et P.D</h5> </center>
+    <table class="w-100">
+        <tr>
+            <td> Le président de la commission Nationale des Bourses et Aides Universitaires. <br><br><br><br><br><br>
+            <strong>{{ \App\Models\ReglageDeBase::first()->president_CNABAU }}</strong>
+            </td>
+            <td>Le Directeur des Bourses et Aides Universitaires PI<br><br><br><br><br><br>
+                <strong>{{ \App\Models\ReglageDeBase::first()->DBAU }}</strong>
+            </td>
+        </tr>
+    </table>
 
 
     <script type="text/php">

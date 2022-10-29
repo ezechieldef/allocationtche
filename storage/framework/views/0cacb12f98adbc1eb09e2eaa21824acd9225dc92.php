@@ -65,7 +65,7 @@
                                                         href="<?php echo e(route('pv.show', $pv->CodePV)); ?>"><i
                                                             class="fa fa-fw fa-eye"></i> Voir</a>
                                                     <?php if($pv->statut != 'cloturé'): ?>
-                                                        <a class="btn btn-sm btn-success text-white"
+                                                        <a class="btn btn-sm btn-warning text-white"
                                                             href="<?php echo e(route('pv.edit', $pv->CodePV)); ?>"><i
                                                                 class="fa fa-fw fa-edit"></i> Modifier</a>
                                                     <?php endif; ?>
@@ -81,7 +81,10 @@
                                                 <?php if($pv->statut != 'cloturé'): ?>
                                                     <a class="btn btn-sm btn-info text-white text-bold mx-3 "
                                                         href="/cloturer-pv/<?php echo e($pv->CodePV); ?>"
-                                                        onclick="(){return confirm('Voulez-vous vraiment confirmer cette cloture ?')}">Cloturer</a>
+                                                        onclick="return confirm('Voulez-vous vraiment confirmer cette cloture ?')">Cloturer</a>
+                                                <?php else: ?>
+                                                    <a class="btn btn-sm  btn-success text-white text-bold mx-3 "
+                                                        href="/liste-definitive/<?php echo e($pv->CodePV); ?>">Liste définitive ( <?php echo e($pv->demandes()->where('avis','Favorable')->count()); ?> ) </a>
                                                 <?php endif; ?>
                                             </td>
                                         </tr>

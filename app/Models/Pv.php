@@ -62,4 +62,9 @@ class Pv extends Model
     {
         return $this->hasMany('App\Models\Signer', 'CodePV', 'CodePV');
     }
+    public function demandes()
+    {
+        return $this->hasMany('App\Models\AssocPvDemande', 'CodePV', 'CodePV');
+    }
+
 }

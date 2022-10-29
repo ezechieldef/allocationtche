@@ -88,6 +88,7 @@ Route::middleware(["auth", 'role:super-admin'])->group(function () {
     Route::any('/exporter-lot/{codelot}', [App\Http\Controllers\LotController::class, 'exporter']);
 
     Route::get('/cloturer-pv/{pv_id}', [App\Http\Controllers\PvController::class, 'cloturerPV']);
+    Route::get('/liste-definitive/{pv_id}', [App\Http\Controllers\PvController::class, 'listeDefinitive']);
 
     Route::get('/les-demandes', [App\Http\Controllers\AdminDemandeUPB::class, 'index']);
     Route::get('/consulter', [App\Http\Controllers\AdminDemandeUPB::class, 'consulter']);

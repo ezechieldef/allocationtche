@@ -14,7 +14,15 @@
 <style>
     body {
         font-family: 'Source Sans Pro';
-        font-size: 15px;
+        font-size: 17px;
+    }
+
+    .title {
+        font-weight: 600;
+    }
+
+    .p-4 {
+        padding: 1.5rem !important;
     }
 
     .text-underline {
@@ -38,6 +46,11 @@
     }
 
     .borderd {
+        border: 2px solid rgba(128, 128, 128, 0.3);
+        border-radius: 3px;
+    }
+
+    .border-se {
         border: 2px solid rgba(128, 128, 128, 0.3);
         border-radius: 3px;
     }
@@ -152,6 +165,26 @@
         page-break-after: always;
     }
 
+    .text-end {
+        text-align: right;
+    }
+
+    .m-5 {
+        margin: 3rem !important;
+    }
+
+    .m-4 {
+        margin: 1.5rem !important;
+    }
+
+    .m-3 {
+        margin: 1rem !important;
+    }
+
+    .m-2 {
+        margin: 0.5rem !important;
+    }
+
     /* .bg-gray-100{
         background: rgba(128, 128, 128, 0.3)
     } */
@@ -160,56 +193,46 @@
 <body class="p-0">
     
     
+    
+    <div class="title text-center bg-gray-200 p-4 border-se ">
+        LISTE DES BENEFICIARE D'ALLOCATION D'ÉTUDES UNIVERSITAIRES
+    </div>
+    <div class="text-end m-3">
+        <span>Référence PV : <strong><?php echo e($pv->Reference_PV); ?></strong> , du
+            <strong><?php echo e($pv->DateDebutSession); ?></strong> au <strong><?php echo e($pv->DateFinSession); ?></strong></span>
+    </div>
 
-    <table class="w-100">
-        <tr>
-            <td>
-                <h4 class="underline text-up">Lot N° <?php echo e($lot->Numero); ?></h4>
-            </td>
-            <td style="text-align: right">
-                <span>Référence PV : <strong><?php echo e($pv->Reference_PV); ?></strong> , du
-                    <strong><?php echo e($pv->DateDebutSession); ?></strong> au <strong><?php echo e($pv->DateFinSession); ?></strong></span>
 
-            </td>
-        </tr>
-    </table>
-    <center>
-        <h4>SESSION DE LA CNABAU DU : <strong> <?php echo e($pv->Reference_PV); ?> </strong></h4>
-    </center>
     <?php $__currentLoopData = $groups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $grp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+        <label for="">
+            Année Académique :
+            <strong><?php echo e(\App\Models\AnneeAcademique::find($grp[0]->CodeAnneeAcademique)->LibelleAnneeAcademique); ?></strong>
+        </label>
+
+        <center class="text-up"> <h3 class="underline" style=""> <?php echo e(\App\Models\Filiere::find($grp[0]->CodeFiliere)->etablissement()->first()->universite()->first()->LibelleLongUniversite); ?></h3></center>
+
         <h4 class="bg-gray-100 p-2"><?php echo e(str_replace('/', ' / ', $key)); ?></h4>
         <table class="w-100 table" border="all">
             <thead class="bg-gray-300">
                 <th>Matricule</th>
-                <th>Nom et Prénoms</th>
+                <th>Nom </th>
+                <th>Prénoms </th>
                 <th>DateNaiss</th>
-                <th>Type</th>
-                <th>Référence</th>
-                <th>Situation Antérieur</th>
-                <th>
-                    <table class="w-100 text-center" border style="border-style: hidden">
-                        <tr>
-                            <td colspan="3">Avis de la commission</td>
-                        </tr>
-                        <tr>
-                            <td>F</td>
-                            <td>D</td>
-                            <td>R</td>
-                        </tr>
-                    </table>
-                </th>
+                <th>RIB</th>
+                <th>Banque</th>
+                <th>Taux Mensuel</th>
+
             </thead>
             <tbody>
                 <?php $__currentLoopData = $grp; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <td><?php echo e($dem->Matricule); ?></td>
-                    <td><?php echo e($dem->NomEtudiant . ' ' . $dem->PrenomEtudiant); ?></td>
+                    <td class="text-center"><?php echo e($dem->Matricule); ?></td>
+                    <td><?php echo e($dem->NomEtudiant); ?></td>
+                    <td><?php echo e($dem->PrenomEtudiant); ?></td>
                     <td class="text-center"><?php echo e($dem->DateNaissanceEtudiant); ?> </td>
-                    <td><?php echo e($dem->CodeTypeDemande); ?></td>
-                    <td>Page : <br>N°: <br><br></td>
-                    <td><?php echo e($dem->Situationanterieure); ?></td>
-                    <td class="text-white" style="">
+                    <td class="text-center"><?php echo e($dem->RIB); ?></td>
+                    <td class="text-center"><?php echo e($dem->CodeBanque); ?></td>
 
-                    </td>
+                    <td class="text-center"></td>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 <tr>
                     <td colspan='7' class='text-center'>TOTAL : <?php echo e(count($grp)); ?></td>
@@ -220,9 +243,18 @@
         <?php if(!$loop->last): ?>
             <div class="page-break"></div>
         <?php endif; ?>
-
     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-    <h4></h4>
+    <center> <h5>Pour la Ministre de l'Enseignement Supérieur et de la Recherche Scientifique et P.D</h5> </center>
+    <table class="w-100">
+        <tr>
+            <td> Le président de la commission Nationale des Bourses et Aides Universitaires. <br><br><br><br><br><br>
+            <strong><?php echo e(\App\Models\ReglageDeBase::first()->president_CNABAU); ?></strong>
+            </td>
+            <td>Le Directeur des Bourses et Aides Universitaires PI<br><br><br><br><br><br>
+                <strong><?php echo e(\App\Models\ReglageDeBase::first()->DBAU); ?></strong>
+            </td>
+        </tr>
+    </table>
 
 
     <script type="text/php">
@@ -244,4 +276,4 @@
 </body>
 
 </html>
-<?php /**PATH /home/ezechiel/AllocationTche/resources/views/upb/pdf_export_lot.blade.php ENDPATH**/ ?>
+<?php /**PATH /home/ezechiel/AllocationTche/resources/views/upb/pdf_export_liste_definitive.blade.php ENDPATH**/ ?>
