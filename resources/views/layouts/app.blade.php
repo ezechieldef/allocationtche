@@ -288,7 +288,7 @@
                     </div>
                     <div class="col-md-4 col-12">
                         <div class="text-end">
-                            <label class=" btn btn-dark text-white">{{ Auth::user()->email }} </label>
+                            <label class=" btn btn-dark text-white">{{ Auth::user()->email.' | '.Auth::user()->name }} </label>
                         </div>
                     </div>
                 </div>

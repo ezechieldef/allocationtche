@@ -112,7 +112,7 @@ class LotController extends Controller
     public function update(Request $request, Lot $lot)
     {
         $rules = Lot::$rules;
-        $rules['Numero'].=','.$lot->CodeLot.',CodeLot';
+        $rules['Numero'] .= ',' . $lot->CodeLot . ',CodeLot';
         request()->validate($rules);
 
         $lot->update($request->all());
@@ -128,9 +128,9 @@ class LotController extends Controller
      */
     public function destroy($id)
     {
-        if(AssocLotsDemande::where('CodeLot',$id)->count()!=0){
+        if (AssocLotsDemande::where('CodeLot', $id)->count() != 0) {
             return redirect()->route('lots.index')
-            ->with('error', 'Ce lot contient des demandes, suppression non autorisée.');
+                ->with('error', 'Ce lot contient des demandes, suppression non autorisée.');
         }
         $lot = Lot::find($id)->delete();
 
@@ -154,7 +154,7 @@ class LotController extends Controller
 
         $list_dem = DB::select("SELECT D.CodeDemandeAllocation from
         demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant
-        AND E.CodeFiliere = ? AND D.CodeAnneeEtude = ? AND D.CodeNatureAllocation= ?
+        AND E.CodeFiliere = ? AND D.CodeAnneeEtude = ? AND D.CodeNatureAllocation= ? AND D.CodeAnneeAcademique=?
         AND D.idtransaction!='' AND D.CodeDemandeAllocation not in
 
             (SELECT A.CodeDemandeAllocation from assoc_lots_demande A )
@@ -162,7 +162,8 @@ class LotController extends Controller
             $all['CodeFiliere'],
             $all['CodeAnneeEtude'],
             $all['CodeNatureAllocation'],
-            $all['effectif']
+            $all['CodeAnneeAcademique'],
+            $all['effectif'],
         ]);
 
         if (count($list_dem) == 0) {

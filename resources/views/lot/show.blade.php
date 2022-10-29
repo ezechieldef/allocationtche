@@ -6,10 +6,24 @@
 
 @section('content')
 
-@php
-    $eff_total= count($lot->demandes()->get());
-    $pourcent_total=(\App\Models\DemandeAllocationUPB::demandeAvecLot()->count() * 100) / $eff_total;
-@endphp
+    @php
+        $eff_total = count($lot->demandes()->get());
+        $pourcent_total = (\App\Models\DemandeAllocationUPB::demandeAvecLot()->count() * 100) / ($eff_total == 0 ? 1 : $eff_total);
+        $eff_nontraite = $lot->demandesSansAvis()->count();
+        $pourcent_nontraite = ($eff_nontraite * 100) / ($eff_total == 0 ? 1 : $eff_total);
+        $eff_traite = $lot->demandesAvecAvis()->count();
+        $pourcent_traite = ($eff_traite * 100) / ($eff_total == 0 ? 1 : $eff_total);
+
+        $eff_fav = $lot->demandesAvecAvisParticulier('Favorable')->count();
+        $pourcent_fav = ($eff_fav * 100) / ($eff_total == 0 ? 1 : $eff_total);
+
+        $eff_res = $lot->demandesAvecAvisParticulier('Réservé')->count();
+        $pourcent_res = ($eff_res * 100) / ($eff_total == 0 ? 1 : $eff_total);
+
+        $eff_def = $lot->demandesAvecAvisParticulier('Défavorable')->count();
+        $pourcent_def = ($eff_def * 100) / ($eff_total == 0 ? 1 : $eff_total);
+
+    @endphp
     <form method="POST" action="" role="form" id="formulaire" enctype="multipart/form-data">
         <!-- The Modal -->
         <div class="modal fade" id="myModal">
@@ -119,20 +133,25 @@
                                 <th class="text-white">Filiere</th>
                                 <th class="text-white">Année d'Étude</th>
                                 <th class="text-white">Nature Allocation</th>
+                                <th class="text-white">Année Academique</th>
                                 <th class="text-white">Effectif</th>
                                 <th class="text-white">Action</th>
                             </thead>
                             <tbody>
                                 @foreach (DB::select(
-            "SELECT E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation, count(E.CodeEtudiant) as effectif from
-                                                                                     demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND  D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
-                                                                                     GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation ",
+            "SELECT E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation,D.CodeAnneeAcademique, count(E.CodeEtudiant) as effectif from
+                        demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND
+                        D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
+                        AND D.CodeDemandeAllocation NOT IN (SELECT CodeDemandeAllocation from assoc_pv_demande WHERE avis ='Favorable' or avis='Défavorable' )
+                    GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation, D.CodeAnneeAcademique ",
             [],
         ) as $list)
                                     <tr>
                                         <td>{{ $list->CodeFiliere }}</td>
                                         <td>{{ $list->CodeAnneeEtude }}</td>
                                         <td>{{ $list->CodeNatureAllocation }}</td>
+                                        <td>{{ \App\Models\AnneeAcademique::find($list->CodeAnneeAcademique)->LibelleAnneeAcademique }}
+                                        </td>
                                         <td>{{ $list->effectif }}</td>
                                         <td>
                                             <form action="/ajouter-au-lot/{{ $lot->CodeLot }}" class="d-flex"
@@ -144,6 +163,8 @@
                                                     value="{{ $list->CodeAnneeEtude }}">
                                                 <input type="text" class="hide" name="CodeNatureAllocation"
                                                     value="{{ $list->CodeNatureAllocation }}">
+                                                <input type="text" class="hide" name="CodeAnneeAcademique"
+                                                    value="{{ $list->CodeAnneeAcademique }}">
                                                 <input type="number" name="effectif" placeholder="Effectif à insérer"
                                                     class="form-control" max="{{ $list->effectif }}">
                                                 <button type="submit" class="btn btn-sm btn-success ms-2">OK</button>
@@ -173,8 +194,8 @@
                             @role('super-admin')
                                 <button class="btn btn-light shadow mx-2" data-bs-toggle="modal"
                                     data-bs-target="#modalPayer">Ajouter au lot</button>
-                                    <a href="/exporter-lot/{{ $lot->CodeLot }}">
-                                    <button class="btn btn-secondary text-white text-bold mx-2" >Exporter</button></a>
+                                <a href="/exporter-lot/{{ $lot->CodeLot }}">
+                                    <button class="btn btn-secondary text-white text-bold mx-2">Exporter</button></a>
                             @endrole
                             <a class="btn btn-warning text-dark" href="{{ route('lots.index') }}"> Retour</a>
                         </div>
@@ -219,24 +240,25 @@
                             @endphp
                             <div class="col-12 col-md-4">
                                 <div class="shadow p-3 rounded my-3" style="background: #fff">
-                                    <p>Effectif Total : <strong> {{ $eff_total }} ( {{ $pourcent_total }}% des demandes classé par lot ) </strong> </p>
+                                    <p>Effectif Total : <strong> {{ $eff_total }} ( {{ $pourcent_total }}% des demandes
+                                            classé par lot ) </strong> </p>
                                     <div class="progress" style="height:10px">
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar"
-                                            aria-valuenow="{{ $pourcent_total }}" aria-valuemin="0"
-                                            aria-valuemax="100" style="width: 100%;"></div>
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-info"
+                                            role="progressbar" aria-valuenow="{{ $pourcent_total }}" aria-valuemin="0"
+                                            aria-valuemax="100" style="width: {{ $pourcent_total }}%;"></div>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-12 col-md-4">
                                 <div class="shadow p-3 rounded my-3" style="background: #fff">
-                                    <p>Effectif Non traité : <strong>{{ 50 }} (
-                                            {{ 50 }} % )</strong></p>
+                                    <p>Effectif Non traité : <strong>{{ $eff_nontraite }} (
+                                            {{ $pourcent_nontraite }} % des demandes de ce lot )</strong></p>
 
                                     <div class="progress" style="height:10px">
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
-                                            role="progressbar" aria-valuenow="{{ 50 }}"
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
+                                            role="progressbar" aria-valuenow="{{ $pourcent_nontraite }}"
                                             aria-valuemin="0" aria-valuemax="100"
-                                            style="width: {{ 100 }}%;">
+                                            style="width: {{ $pourcent_nontraite }}%;">
                                         </div>
                                     </div>
                                 </div>
@@ -245,14 +267,26 @@
                             <div class="col-12 col-md-4">
                                 <div class="shadow p-3 rounded my-3" style="background: #fff">
 
-                                    <p>Effectif traité : <strong>{{ 50 }} (
-                                            {{ 50 }} % )</strong></p>
-                                    <div class="progress" style="height:10px">
-                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-danger"
-                                            role="progressbar"
-                                            aria-valuenow="{{ 50 }}"
-                                            aria-valuemin="0" aria-valuemax="100"
-                                            style="width: {{ 50 }}%;"></div>
+                                    {{-- <p>Effectif traité : <strong>{{ 50 }} (
+                                            {{ 50 }} % )</strong></p> --}}
+
+                                    <div class="d-flex justify-content-between ">
+                                        <div class="">
+                                            Favorable : <strong> {{ $eff_fav }} ( {{ $pourcent_fav }} % )</strong>
+                                        </div>
+                                        <div class="">
+                                            Réservé : <strong> {{ $eff_res }} ( {{ $pourcent_res }} % )</strong>
+                                        </div>
+                                        <div class="">
+                                            Défavorable : <strong> {{ $eff_def }} ( {{ $pourcent_def }} % )</strong>
+                                        </div>
+                                    </div>
+
+
+                                    <div class="progress mt-3" style="height:10px">
+                                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-success"
+                                            role="progressbar" aria-valuenow="{{ $pourcent_traite }}" aria-valuemin="0"
+                                            aria-valuemax="100" style="width: {{ $pourcent_traite }}%;"></div>
                                     </div>
 
                                 </div>
@@ -314,7 +348,7 @@
                                                     text-danger @endif">
                                                     {{ $avis }}</td>
                                                 <td class="">
-                                                    @if ($lot->Commissaire == Auth::user()->id)
+                                                    @if ($lot->status == 'OUVERT' && $lot->Commissaire == Auth::user()->id)
                                                         <button class="btn btn-secondary text-white text-bold"
                                                             data-bs-toggle="modal" data-bs-target="#myModal"
                                                             onclick="loadmodal('{{ $demjoin->CodeDemandeAllocation }}')">Traiter</button>

@@ -32,6 +32,9 @@ class AvisUPB extends Controller
         if (is_null($lot)) {
             return back()->with('error', 'lot introuvable');
         }
+        if ($lot->status != 'OUVERT') {
+            return back()->with('error', 'Ce lot n\'est pas ouvert. Aucun avis ne peut être prise en compte pour le moment');
+        }
         if ($lot->Commissaire != Auth::user()->id) {
             return back()->with('error', 'Ce lot ne vous a pas été attribué, vous ne pouvez donc pas donner votre avis dessus.');
         }
@@ -69,5 +72,5 @@ class AvisUPB extends Controller
         return back()->with("success", 'Succès');
     }
 
-    
+
 }

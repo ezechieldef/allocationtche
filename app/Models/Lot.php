@@ -88,12 +88,33 @@ class Lot extends Model
     public function detailGroup($map)
     {
         return $this->hasMany('App\Models\AssocLotsDemande', 'CodeLot', 'CodeLot')
-        ->join('demande_allocation', 'demande_allocation.CodeDemandeAllocation', 'assoc_lots_demande.CodeDemandeAllocation')
-        ->join('etudiant', 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')
-        ->where('CodeAnneeAcademique', $map->CodeAnneeAcademique)
-        ->where('CodeFiliere', $map->CodeFiliere)
-        ->where('CodeNatureAllocation', $map->CodeNatureAllocation)
-        ->where('CodeAnneeEtude', $map->CodeAnneeEtude)->get()
-        ;
+            ->join('demande_allocation', 'demande_allocation.CodeDemandeAllocation', 'assoc_lots_demande.CodeDemandeAllocation')
+            ->join('etudiant', 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')
+            ->where('CodeAnneeAcademique', $map->CodeAnneeAcademique)
+            ->where('CodeFiliere', $map->CodeFiliere)
+            ->where('CodeNatureAllocation', $map->CodeNatureAllocation)
+            ->where('CodeAnneeEtude', $map->CodeAnneeEtude)->get();
+    }
+
+    public function demandesSansAvis()
+    {
+        return $this->demandes()->whereNotIn(
+            'CodeDemandeAllocation',
+            AssocPvDemande::where('CodePV', $this->CodePV)->pluck('CodeDemandeAllocation')->toArray()
+        );
+    }
+    public function demandesAvecAvis()
+    {
+        return $this->demandes()->whereIn(
+            'CodeDemandeAllocation',
+            AssocPvDemande::where('CodePV', $this->CodePV)->pluck('CodeDemandeAllocation')->toArray()
+        );
+    }
+    public function demandesAvecAvisParticulier(string $avis)
+    {
+        return $this->demandes()->whereIn(
+            'CodeDemandeAllocation',
+            AssocPvDemande::where('CodePV', $this->CodePV)->where('avis', $avis)->pluck('CodeDemandeAllocation')->toArray()
+        );
     }
 }

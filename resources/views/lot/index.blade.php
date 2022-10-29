@@ -52,14 +52,16 @@
                                             <td>{{ $lot->Numero }}</td>
                                             <td>{{ \App\Models\Pv::find($lot->CodePV)->Reference_PV }}</td>
                                             <td>{{ \App\Models\User::find($lot->Commissaire)->name }}</td>
-                                            <td>{{ \App\Models\AssocLotsDemande::where('CodeLot', $lot->CodeLot)->count() }}</td>
+                                            <td>{{ \App\Models\AssocLotsDemande::where('CodeLot', $lot->CodeLot)->count() }}
+                                            </td>
                                             <td>{{ $lot->status }}</td>
 
-                                            <td>
+                                            <td class="d-flex ">
                                                 <form action="{{ route('lots.destroy', $lot->CodeLot) }}" method="POST">
                                                     <a class="btn btn-sm btn-info text-white "
                                                         href="{{ route('lots.show', $lot->CodeLot) }}"><i
                                                             class="fa fa-fw fa-eye"></i> Voir</a>
+
                                                     @role('super-admin')
                                                         <a class="btn btn-sm btn-success text-white"
                                                             href="{{ route('lots.edit', $lot->CodeLot) }}"><i
@@ -70,7 +72,11 @@
                                                             class="btn btn-danger btn-sm text-white show_confirm2"><i
                                                                 class="fa fa-fw fa-trash"></i> Supprimer</button>
                                                     @endrole
+
                                                 </form>
+                                                <a href="/exporter-lot/{{ $lot->CodeLot }}">
+                                                    <button
+                                                        class="btn btn-sm btn-secondary text-white text-bold mx-3">Exporter</button></a>
                                             </td>
                                         </tr>
                                     @endforeach

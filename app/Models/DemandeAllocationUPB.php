@@ -132,4 +132,8 @@ class DemandeAllocationUPB extends Model
     {
         return DemandeAllocationUPB::whereNotIn('CodeDemandeAllocation', AssocLotsDemande::pluck('CodeDemandeAllocation')->toArray());
     }
+    public static function demandeAvecLot()
+    {
+        return DemandeAllocationUPB::whereIn('CodeDemandeAllocation', AssocLotsDemande::pluck('CodeDemandeAllocation')->toArray());
+    }
 }
