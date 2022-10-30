@@ -58,25 +58,26 @@
                             </div>
                         </div>
 
-                        <div class="bg-gray-200 text-dark text-bold text-center py-2 my-3">
-                            Statistique
+                        <div class="bg-gray-200 text-dark text-bold p-2 my-3 d-flex justify-content-between align-items-center ">
+                            <span>Statistique</span>
+                            <a href="/exporter-statistique-pv/{{ $pv->CodePV }}" class="btn btn-success btn-sm text-white text-bold">Exporter</a>
                         </div>
                         @php
                             $i = 0;
                         @endphp
-                        <ul>
+
 
                             @foreach ($groups as $an => $data1)
-                                <li>
-                                    <div class="h5">Année Académique : <strong>{{ $an }}</strong></div>
-<ul>
+
+                                    <div class="h5"></div>
+
                                     @foreach ($data1 as $univ=>$data2)
-                                        <li><div class="h6 text-center ">Université : <strong>{{ $univ }}</strong></div></li>
+                                        <div class="h5 text-center ">Année Académique : <strong>{{ \App\Models\AnneeAcademique::find($an)->LibelleAnneeAcademique }}</strong> | <strong>{{ $univ }}</strong></div>
 
                                         @foreach ($data2 as $nature=>$data3 )
                                         <table class="table">
                                             <tr class="bg-gray-200">
-                                                <td colspan="5" class="text-center bg-gray-200" >{{ $nature }}</td>
+                                                <td colspan="5" class="text-center bg-gray-200 table-border" >{{ $nature }}</td>
                                             </tr>
                                             <tr class="bg-gray-200">
                                                 <td>Etablissements</td>
@@ -95,18 +96,15 @@
                                                         <td>{{ $ets->nbr_res }}</td>
                                                     </tr>
                                                 @endforeach
-                                                <tr>
 
-                                                </tr>
                                             </tbody>
                                         </table>
                                         @endforeach
 
                                     @endforeach
-                                </ul>
-                                </li>
+
                             @endforeach
-                        </ul>
+
 
                     </div>
                 </div>

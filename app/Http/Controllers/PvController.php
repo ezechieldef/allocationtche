@@ -73,12 +73,14 @@ class PvController extends Controller
      */
     public function show($id)
     {
-        $pv = Pv::find($id);
-        // $list = AssocPvDemande::join('demande_allocation', 'demande_allocation.CodeDemandeAllocation', 'assoc_pv_demande.CodeDemandeAllocation')
-        //     ->join('etudiant', 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')
-        //     ->join('filiere', 'filiere.CodeFiliere', 'etudiant.CodeFiliere')
-        //     ->join('etablissement', 'etablissement.CodeEtablissement', 'filiere.CodeEtablissement')
-        //     ->where('CodePV', $id)->get();
+        $pv = Pv::findOrFail($id);
+
+        $groups = $this->statsGroups($id);
+
+        return view('pv.show', compact('pv', 'groups'));
+    }
+    public function statsGroups(int $id)
+    {
 
         $res = DB::select("select Ets.CodeUniversite, D.CodeAnneeAcademique, U.LibelleLongUniversite, U.CodeUniversite
         ,D.CodeNatureAllocation, Ets.LibelleEtablissement , count(*) nbr,
@@ -92,9 +94,7 @@ class PvController extends Controller
         F.CodeEtablissement= Ets.CodeEtablissement AND
         U.CodeUniversite= Ets.CodeUniversite AND
         A.CodePV='" . $id . "'
-        GROUP BY D.CodeAnneeAcademique, Ets.CodeEtablissement, D.CodeNatureAllocation
-
-        ", []);
+        GROUP BY D.CodeAnneeAcademique, Ets.CodeEtablissement, D.CodeNatureAllocation ", []);
         //dd($res);
 
         $groups = array();
@@ -102,7 +102,6 @@ class PvController extends Controller
             $annee = $dem->CodeAnneeAcademique;
             $univ = $dem->LibelleLongUniversite;
             $nature = $dem->CodeNatureAllocation;
-
             // Filiere::find($dem->CodeFiliere)->etablissement()->first()->universite()->first()->CodeUniversite;
             //$ets= Filiere::find($dem->CodeFiliere)->etablissement()->first()->CodeEtablissement;
             if (!in_array($annee, array_keys($groups))) {
@@ -111,18 +110,12 @@ class PvController extends Controller
             if (!in_array($univ, array_keys($groups[$annee]))) {
                 $groups[$annee][$univ] = [];
             }
-            if (!in_array($nature , array_keys($groups[$annee][$univ]))) {
-                $groups[$annee][$univ][$nature]=[];
+            if (!in_array($nature, array_keys($groups[$annee][$univ]))) {
+                $groups[$annee][$univ][$nature] = [];
             }
-            // $groups[$annee][$univ][$ets][]=[
-            //     "libEts"=>$ets->LibelleEtablissement,
-            //     "total"=>
-            // ];
             $groups[$annee][$univ][$nature][] = $dem;
         }
-
-
-        return view('pv.show', compact('pv', 'groups'));
+        return $groups;
     }
 
     /**
@@ -166,7 +159,14 @@ class PvController extends Controller
             return redirect()->route('pv.index')
                 ->with('error', 'Impossible de supprimer ce PV, Un ou plusieurs lots y sont encore associé (même si ces lots sont vide) ');
         }
-        $pv = Pv::find($id)->delete();
+        $pv = Pv::find($id);
+
+        try {
+            $pv->delete();
+        } catch (\Throwable $th) {
+            return redirect()->route('pv.index')
+            ->with('error', 'Ce PV ne peut être supprimé');
+        }
 
         return redirect()->route('pv.index')
             ->with('success', 'Pv supprimé avecc succes');
@@ -214,7 +214,7 @@ class PvController extends Controller
         ]);
 
         $data = ['list' => $list, 'pv' => $pv, 'groups' => $groups];
-        return view('upb.pdf_export_liste_definitive', $data);
+        //return view('upb.pdf_export_liste_definitive', $data);
 
         $pdf = app('dompdf.wrapper');
         $pdf->getDomPDF()->set_option("enable_php", true);
@@ -226,5 +226,28 @@ class PvController extends Controller
         // $pdf = PDF::loadView('upb.pdf_export_lot', ['lot' => $lot, 'groups' => $groups, 'pv'=>$pv])->setPaper('a4', 'landscape');;
         // $pdf->getDomPDF()->set_option("enable_php", true);
         return $pdf->download('liste definitive PV Ref ' . $pv->Reference_PV . '.pdf');
+    }
+
+    public function exporterStatistique(int $codePV)
+    {
+        $pv= Pv::findOrFail($codePV);
+        $groups = $this->statsGroups($codePV);
+        PDF::setOptions([
+            "isHtml5ParserEnabled" => true,
+            "isRemoteEnabled" => true,
+            "defaultPaperSize" => "a4",
+            "dpi" => 350,
+        ]);
+
+        $data = ['pv' => $pv, 'groups' => $groups];
+        // return view('upb.pdf_export_stats_pv', $data);
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->getDomPDF()->set_option("enable_php", true);
+        $pdf->getDomPDF()->set_option("enable_remote", false);
+        $pdf->setPaper('a4', 'landscape');
+        $pdf->loadView('upb.pdf_export_stats_pv', $data);
+
+        return $pdf->download('statistique PV Ref ' . $pv->Reference_PV . '.pdf');
     }
 }

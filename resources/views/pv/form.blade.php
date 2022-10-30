@@ -9,7 +9,7 @@
             </div>
             <div class="col-md-4 col-12 my-2">
                 {{ Form::label('Année Civile') }}
-                {{ Form::select('AnneeCivile',\App\Models\AnneeAcademique::orderby('CodeAnneeAcademique', 'DESC')->pluck('CodeAnneeAcademique','CodeAnneeAcademique'), $pv->AnneeCivile, ['class' => 'form-select' . ($errors->has('AnneeCivile') ? ' is-invalid' : ''), 'placeholder' => '-- Sélectionner --']) }}
+                {{ Form::select('AnneeCivile',['2024'=>'2024', '2023'=>'2023', '2022'=>'2022','2021'=>'2021'], $pv->AnneeCivile, ['class' => 'form-select' . ($errors->has('AnneeCivile') ? ' is-invalid' : ''), 'placeholder' => '-- Sélectionner --']) }}
                 {!! $errors->first('AnneeCivile', '<div class="invalid-feedback">:message</div>') !!}
             </div>
             <div class="col-md-6 col-12 my-2">

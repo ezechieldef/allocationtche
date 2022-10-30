@@ -142,7 +142,7 @@
                     </div>
 
                     <div class="text-center">
-                        <button class="btn btn-success my-3 px-5 text-bold text-white">Soumettre</button>
+                        <button class="btn btn-success my-3 px-5 text-bold text-white">Valider ma demande</button>
                     </div>
                 </form>
 

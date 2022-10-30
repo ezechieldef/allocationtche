@@ -227,7 +227,7 @@ class MesDemandes extends Controller
         } elseif ($res->status == 'SUCCESS' && $res->amount != $taux) {
             return redirect('/mes-demandes')->with('error', 'Paiement non prise en compte : Le montant du paiement fourni (' . $res->amount . ' ) n\'est pas ce que êtes censé payé ( ' . $taux . ' ) ');
         }else{
-            dd($res);
+            //dd($res);
             return redirect('/mes-demandes')->with('error', 'Paiement non retrouvé');
         }
         //dd($res);

@@ -52,19 +52,16 @@
                         </div>
                     @endif
 
-                    <div class="card-body">
+                    <div class="">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover" id="mytable">
+                            <table class="table table-striped table-hover" id="">
                                 <thead class="thead">
                                     <tr>
-
-
                                         <th>Université</th>
                                         <th>Etablissement</th>
                                         <th>Correspond à</th>
                                         <th>Synonymes</th>
-
-                                        <th></th>
+                                        <th>  </th>
                                     </tr>
                                 </thead>
                                 <tbody>

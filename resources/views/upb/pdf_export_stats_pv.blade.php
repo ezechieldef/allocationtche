@@ -14,7 +14,15 @@
 <style>
     body {
         font-family: 'Source Sans Pro';
-        font-size: 15px;
+        font-size: 17px;
+    }
+
+    .title {
+        font-weight: 600;
+    }
+
+    .p-4 {
+        padding: 1.5rem !important;
     }
 
     .text-underline {
@@ -38,6 +46,11 @@
     }
 
     .borderd {
+        border: 2px solid rgba(128, 128, 128, 0.3);
+        border-radius: 3px;
+    }
+
+    .border-se {
         border: 2px solid rgba(128, 128, 128, 0.3);
         border-radius: 3px;
     }
@@ -152,6 +165,26 @@
         page-break-after: always;
     }
 
+    .text-end {
+        text-align: right;
+    }
+
+    .m-5 {
+        margin: 3rem !important;
+    }
+
+    .m-4 {
+        margin: 1.5rem !important;
+    }
+
+    .m-3 {
+        margin: 1rem !important;
+    }
+
+    .m-2 {
+        margin: 0.5rem !important;
+    }
+
     /* .bg-gray-100{
         background: rgba(128, 128, 128, 0.3)
     } */
@@ -160,7 +193,7 @@
 <body class="p-0">
     {{-- <center><img width="100%" src="http://beraca-transport.net/EGLISEDEVILLE/v.png" alt=""></center> --}}
     {{-- <center><img width="100%" src="http://127.0.0.1/dbau-barner.png" alt=""></center> --}}
-
+    {{--
     <table class="w-100">
         <tr>
             <td>
@@ -172,52 +205,56 @@
 
             </td>
         </tr>
-    </table>
-    <center>
-        <h4>SESSION DE LA CNABAU DU : <strong> {{ $pv->Reference_PV }} </strong></h4>
-    </center>
-    @foreach ($groups as $key => $grp)
-        <h4 class="bg-gray-100 p-2">{{ str_replace('/', ' / ', $key) }}</h4>
-        <table class="w-100 table" border="all">
-            <tr class="bg-gray-300">
-                <th rowspan="2">Matricule</th>
-                <th rowspan="2">Nom et Prénoms</th>
-                <th rowspan="2">DateNaiss</th>
-                <th rowspan="2">Type</th>
-                <th rowspan="2">Référence</th>
-                <th rowspan="2">Situation Antérieur</th>
-                <th colspan="3"> Avis de la commission
-                </th>
-            </tr>
-            <tr class="bg-gray-300">
-                <th>F</th>
-                <th>D</th>
-                <th>R</th>
-            </tr>
-            <tbody>
-                @foreach ($grp as $dem)
-                    <td>{{ $dem->Matricule }}</td>
-                    <td>{{ $dem->NomEtudiant . ' ' . $dem->PrenomEtudiant }}</td>
-                    <td class="text-center">{{ $dem->DateNaissanceEtudiant }} </td>
-                    <td>{{ $dem->CodeTypeDemande }}</td>
-                    <td>Page : <br>N°: <br><br></td>
-                    <td>{{ $dem->Situationanterieure }}</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                @endforeach
-                <tr>
-                    <td colspan='9' class='text-center'>TOTAL : {{ count($grp) }}</td>
-                </tr>
-            </tbody>
+    </table> --}}
+    <div class="title text-center bg-gray-200 p-4 border-se ">
+        STATISTIQUES DU PV {{ $pv->Reference_PV }}
+    </div>
+    <div class="text-end m-3">
+        <span>Référence PV : <strong>{{ $pv->Reference_PV }}</strong> , du
+            <strong>{{ $pv->DateDebutSession }}</strong> au <strong>{{ $pv->DateFinSession }}</strong></span>
+    </div>
 
-        </table>
-        @if (!$loop->last)
-            <div class="page-break"></div>
-        @endif
 
+    @foreach ($groups as $an => $data1)
+        <div class="h5"></div>
+
+        @foreach ($data1 as $univ => $data2)
+            <div class="h5 text-center m-4">Année Académique :
+                <strong>{{ \App\Models\AnneeAcademique::find($an)->LibelleAnneeAcademique }}</strong> |
+                <strong>{{ $univ }}</strong>
+            </div>
+
+            @foreach ($data2 as $nature => $data3)
+                <table class="table w-100 text-center" border="">
+                    <tr class="bg-gray-200">
+                        <td colspan="5" class="text-center bg-gray-200 table-border">{{ $nature }}</td>
+                    </tr>
+                    <tr class="bg-gray-200">
+                        <th rowspan="2">Etablissements</td>
+                        <th rowspan="2">Nombre de Demandes</td>
+                        <th colspan="3">AVIS</td>
+                    </tr>
+                    <tr class="bg-gray-200">
+                        <th>Favorable</td>
+                        <th>Défavorable</td>
+                        <th>Réservé</td>
+                    </tr>
+                    <tbody>
+                        @foreach ($data3 as $ets)
+                            <tr>
+                                <td>{{ $ets->LibelleEtablissement }}</td>
+                                <td>{{ $ets->nbr }}</td>
+                                <td>{{ $ets->nbr_fav }}</td>
+                                <td>{{ $ets->nbr_def }}</td>
+                                <td>{{ $ets->nbr_res }}</td>
+                            </tr>
+                        @endforeach
+
+                    </tbody>
+                </table>
+            @endforeach
+        @endforeach
     @endforeach
-    <h4></h4>
 
 
     <script type="text/php">

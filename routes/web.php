@@ -89,6 +89,7 @@ Route::middleware(["auth", 'role:super-admin'])->group(function () {
 
     Route::get('/cloturer-pv/{pv_id}', [App\Http\Controllers\PvController::class, 'cloturerPV']);
     Route::get('/liste-definitive/{pv_id}', [App\Http\Controllers\PvController::class, 'listeDefinitive']);
+    Route::get('/exporter-statistique-pv/{pv_id}', [App\Http\Controllers\PvController::class, 'exporterStatistique']);
 
     Route::get('/les-demandes', [App\Http\Controllers\AdminDemandeUPB::class, 'index']);
     Route::get('/consulter', [App\Http\Controllers\AdminDemandeUPB::class, 'consulter']);

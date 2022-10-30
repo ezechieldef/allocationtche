@@ -108,9 +108,6 @@
                     @endforeach
                 </select>
 
-
-
-
             </div>
         </div>
 
@@ -137,41 +134,43 @@
         </button>
     </p>
     <div class="collapse" id="collapseExample2">
-        <table class="table table-responsive" id="datatable">
-            <thead>
-                <th>Université Sélection</th>
-                <th>Etablissement Sélection</th>
-                <th>Etablissement</th>
-            </thead>
-            <tbody>
-                @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct R.etablissementSelection, R.universiteSelection , R.CodeUniversite from resultats R
+        <div class="table-responsive">
+            <table class="table" id="datatable">
+                <thead>
+                    <th>Université Sélection</th>
+                    <th>Etablissement Sélection</th>
+                    <th>Etablissement</th>
+                </thead>
+                <tbody>
+                    @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct R.etablissementSelection, R.universiteSelection , R.CodeUniversite from resultats R
                 WHERE R.etablissementSelection NOT IN (SELECT C.etablissementSelection from corresp_ets_selection C ) ') as $sel)
-                    <tr>
-                        <td>{{ $sel->universiteSelection }}</td>
-                        <td>{{ $sel->etablissementSelection }}</td>
-                        <td>
+                        <tr>
+                            <td>{{ $sel->universiteSelection }}</td>
+                            <td>{{ $sel->etablissementSelection }}</td>
+                            <td>
 
-                            <form method="POST" action="{{ route('correspondance-ets-selection.store') }}"
-                                role="form" enctype="multipart/form-data" class="d-flex">
-                                @csrf
-                                <input type="text" name="etablissementSelection"
-                                    value="{{ $sel->etablissementSelection }}" class="hide">
-                                {{ Form::select(
-                                    'CodeEtablissement1',
-                                    App\Models\Etablissement::where('CodeUniversite', $sel->CodeUniversite)->pluck(
-                                        'LibelleEtablissement',
-                                        'CodeEtablissement',
-                                    ),
-                                    null,
-                                    ['class' => 'form-select', 'placeholder' => '-- Sélectionner --', 'required' => 'required'],
-                                ) }}
-                                <button type="submit" class="btn btn-success btn-sm mx-3">Valider</button>
-                            </form>
+                                <form method="POST" action="{{ route('correspondance-ets-selection.store') }}"
+                                    role="form" enctype="multipart/form-data" class="d-flex">
+                                    @csrf
+                                    <input type="text" name="etablissementSelection"
+                                        value="{{ $sel->etablissementSelection }}" class="hide">
+                                    {{ Form::select(
+                                        'CodeEtablissement1',
+                                        App\Models\Etablissement::where('CodeUniversite', $sel->CodeUniversite)->pluck(
+                                            'LibelleEtablissement',
+                                            'CodeEtablissement',
+                                        ),
+                                        null,
+                                        ['class' => 'form-select', 'placeholder' => '-- Sélectionner --', 'required' => 'required'],
+                                    ) }}
+                                    <button type="submit" class="btn btn-success btn-sm mx-3">Valider</button>
+                                </form>
 
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>

@@ -179,26 +179,21 @@
     <?php $__currentLoopData = $groups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $grp): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
         <h4 class="bg-gray-100 p-2"><?php echo e(str_replace('/', ' / ', $key)); ?></h4>
         <table class="w-100 table" border="all">
-            <thead class="bg-gray-300">
-                <th>Matricule</th>
-                <th>Nom et Prénoms</th>
-                <th>DateNaiss</th>
-                <th>Type</th>
-                <th>Référence</th>
-                <th>Situation Antérieur</th>
-                <th>
-                    <table class="w-100 text-center" border style="border-style: hidden">
-                        <tr>
-                            <td colspan="3">Avis de la commission</td>
-                        </tr>
-                        <tr>
-                            <td>F</td>
-                            <td>D</td>
-                            <td>R</td>
-                        </tr>
-                    </table>
+            <tr class="bg-gray-300">
+                <th rowspan="2">Matricule</th>
+                <th rowspan="2">Nom et Prénoms</th>
+                <th rowspan="2">DateNaiss</th>
+                <th rowspan="2">Type</th>
+                <th rowspan="2">Référence</th>
+                <th rowspan="2">Situation Antérieur</th>
+                <th colspan="3"> Avis de la commission
                 </th>
-            </thead>
+            </tr>
+            <tr class="bg-gray-300">
+                <th>F</th>
+                <th>D</th>
+                <th>R</th>
+            </tr>
             <tbody>
                 <?php $__currentLoopData = $grp; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $dem): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <td><?php echo e($dem->Matricule); ?></td>
@@ -207,12 +202,12 @@
                     <td><?php echo e($dem->CodeTypeDemande); ?></td>
                     <td>Page : <br>N°: <br><br></td>
                     <td><?php echo e($dem->Situationanterieure); ?></td>
-                    <td class="text-white" style="">
-
-                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 <tr>
-                    <td colspan='7' class='text-center'>TOTAL : <?php echo e(count($grp)); ?></td>
+                    <td colspan='9' class='text-center'>TOTAL : <?php echo e(count($grp)); ?></td>
                 </tr>
             </tbody>
 

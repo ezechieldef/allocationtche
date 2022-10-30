@@ -112,9 +112,6 @@
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
 
-
-
-
             </div>
         </div>
 
@@ -131,43 +128,45 @@
         </button>
     </p>
     <div class="collapse" id="collapseExample2">
-        <table class="table table-responsive" id="datatable">
-            <thead>
-                <th>Université Sélection</th>
-                <th>Etablissement Sélection</th>
-                <th>Etablissement</th>
-            </thead>
-            <tbody>
-                <?php $__currentLoopData = Illuminate\Support\Facades\DB::select('SELECT distinct R.etablissementSelection, R.universiteSelection , R.CodeUniversite from resultats R
+        <div class="table-responsive">
+            <table class="table" id="datatable">
+                <thead>
+                    <th>Université Sélection</th>
+                    <th>Etablissement Sélection</th>
+                    <th>Etablissement</th>
+                </thead>
+                <tbody>
+                    <?php $__currentLoopData = Illuminate\Support\Facades\DB::select('SELECT distinct R.etablissementSelection, R.universiteSelection , R.CodeUniversite from resultats R
                 WHERE R.etablissementSelection NOT IN (SELECT C.etablissementSelection from corresp_ets_selection C ) '); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <tr>
-                        <td><?php echo e($sel->universiteSelection); ?></td>
-                        <td><?php echo e($sel->etablissementSelection); ?></td>
-                        <td>
+                        <tr>
+                            <td><?php echo e($sel->universiteSelection); ?></td>
+                            <td><?php echo e($sel->etablissementSelection); ?></td>
+                            <td>
 
-                            <form method="POST" action="<?php echo e(route('correspondance-ets-selection.store')); ?>"
-                                role="form" enctype="multipart/form-data" class="d-flex">
-                                <?php echo csrf_field(); ?>
-                                <input type="text" name="etablissementSelection"
-                                    value="<?php echo e($sel->etablissementSelection); ?>" class="hide">
-                                <?php echo e(Form::select(
-                                    'CodeEtablissement1',
-                                    App\Models\Etablissement::where('CodeUniversite', $sel->CodeUniversite)->pluck(
-                                        'LibelleEtablissement',
-                                        'CodeEtablissement',
-                                    ),
-                                    null,
-                                    ['class' => 'form-select', 'placeholder' => '-- Sélectionner --', 'required' => 'required'],
-                                )); ?>
+                                <form method="POST" action="<?php echo e(route('correspondance-ets-selection.store')); ?>"
+                                    role="form" enctype="multipart/form-data" class="d-flex">
+                                    <?php echo csrf_field(); ?>
+                                    <input type="text" name="etablissementSelection"
+                                        value="<?php echo e($sel->etablissementSelection); ?>" class="hide">
+                                    <?php echo e(Form::select(
+                                        'CodeEtablissement1',
+                                        App\Models\Etablissement::where('CodeUniversite', $sel->CodeUniversite)->pluck(
+                                            'LibelleEtablissement',
+                                            'CodeEtablissement',
+                                        ),
+                                        null,
+                                        ['class' => 'form-select', 'placeholder' => '-- Sélectionner --', 'required' => 'required'],
+                                    )); ?>
 
-                                <button type="submit" class="btn btn-success btn-sm mx-3">Valider</button>
-                            </form>
+                                    <button type="submit" class="btn btn-success btn-sm mx-3">Valider</button>
+                                </form>
 
-                        </td>
-                    </tr>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </tbody>
-        </table>
+                            </td>
+                        </tr>
+                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 <?php /**PATH /home/ezechiel/AllocationTche/resources/views/corresp-ets-selection/form.blade.php ENDPATH**/ ?>

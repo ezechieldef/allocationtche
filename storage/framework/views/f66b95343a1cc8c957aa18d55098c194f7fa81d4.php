@@ -13,7 +13,7 @@
             <div class="col-md-4 col-12 my-2">
                 <?php echo e(Form::label('Année Civile')); ?>
 
-                <?php echo e(Form::select('AnneeCivile',\App\Models\AnneeAcademique::orderby('CodeAnneeAcademique', 'DESC')->pluck('CodeAnneeAcademique','CodeAnneeAcademique'), $pv->AnneeCivile, ['class' => 'form-select' . ($errors->has('AnneeCivile') ? ' is-invalid' : ''), 'placeholder' => '-- Sélectionner --'])); ?>
+                <?php echo e(Form::select('AnneeCivile',['2024'=>'2024', '2023'=>'2023', '2022'=>'2022','2021'=>'2021'], $pv->AnneeCivile, ['class' => 'form-select' . ($errors->has('AnneeCivile') ? ' is-invalid' : ''), 'placeholder' => '-- Sélectionner --'])); ?>
 
                 <?php echo $errors->first('AnneeCivile', '<div class="invalid-feedback">:message</div>'); ?>
 

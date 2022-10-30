@@ -8,20 +8,24 @@
 
     @php
         $eff_total = count($lot->demandes()->get());
-        $pourcent_total = (\App\Models\DemandeAllocationUPB::demandeAvecLot()->count() * 100) / ($eff_total == 0 ? 1 : $eff_total);
+
+        $pourcent_total = ($eff_total * 100) / \App\Models\AssocLotsDemande::count();
+        $pourcent_total = intval($pourcent_total);
         $eff_nontraite = $lot->demandesSansAvis()->count();
         $pourcent_nontraite = ($eff_nontraite * 100) / ($eff_total == 0 ? 1 : $eff_total);
+        $pourcent_nontraite = intval($pourcent_nontraite);
         $eff_traite = $lot->demandesAvecAvis()->count();
         $pourcent_traite = ($eff_traite * 100) / ($eff_total == 0 ? 1 : $eff_total);
-
+        $pourcent_traite = intval($pourcent_traite);
         $eff_fav = $lot->demandesAvecAvisParticulier('Favorable')->count();
         $pourcent_fav = ($eff_fav * 100) / ($eff_total == 0 ? 1 : $eff_total);
-
+        $pourcent_fav = intval($pourcent_fav);
         $eff_res = $lot->demandesAvecAvisParticulier('Réservé')->count();
         $pourcent_res = ($eff_res * 100) / ($eff_total == 0 ? 1 : $eff_total);
-
+        $pourcent_res=intval($pourcent_res);
         $eff_def = $lot->demandesAvecAvisParticulier('Défavorable')->count();
         $pourcent_def = ($eff_def * 100) / ($eff_total == 0 ? 1 : $eff_total);
+        $pourcent_def=intval($pourcent_def);
 
     @endphp
     <form method="POST" action="" role="form" id="formulaire" enctype="multipart/form-data">
@@ -84,12 +88,11 @@
                                 <div class="form-group ">
                                     {{ Form::label('Motif Rejet') }}
                                     {{ Form::select('motifs_rejet_id', \App\Models\MotifsRejet::pluck('libele', 'id'), $lot->motifs_rejet_id, ['id' => 'motif', 'class' => 'form-select' . ($errors->has('actif') ? ' is-invalid' : ''), 'placeholder' => '-- Sélectionner --']) }}
-
                                 </div>
                             </div>
                             <div class="col-3">
                                 <label for="">+</label>
-                                <a href="/motifs_rejet" class="btn btn-light w-100" target="_blank"><i
+                                <a href="/motifs_rejets" class="btn btn-light w-100" target="_blank"><i
                                         class="fa fa-fw fa-plus"></i> </a>
 
                             </div>
@@ -140,10 +143,10 @@
                             <tbody>
                                 @foreach (DB::select(
             "SELECT E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation,D.CodeAnneeAcademique, count(E.CodeEtudiant) as effectif from
-                        demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND
-                        D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
-                        AND D.CodeDemandeAllocation NOT IN (SELECT CodeDemandeAllocation from assoc_pv_demande WHERE avis ='Favorable' or avis='Défavorable' )
-                    GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation, D.CodeAnneeAcademique ",
+                            demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND
+                            D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
+                            AND D.CodeDemandeAllocation NOT IN (SELECT CodeDemandeAllocation from assoc_pv_demande WHERE avis ='Favorable' or avis='Défavorable' )
+                        GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation, D.CodeAnneeAcademique ",
             [],
         ) as $list)
                                     <tr>
@@ -272,13 +275,13 @@
 
                                     <div class="d-flex justify-content-between ">
                                         <div class="">
-                                            Favorable : <strong> {{ $eff_fav }} ( {{ $pourcent_fav }} % )</strong>
+                                            Fav. : <strong> {{ $eff_fav }} ( {{ $pourcent_fav }} % )</strong>
                                         </div>
                                         <div class="">
-                                            Réservé : <strong> {{ $eff_res }} ( {{ $pourcent_res }} % )</strong>
+                                            Rés. : <strong> {{ $eff_res }} ( {{ $pourcent_res }} % )</strong>
                                         </div>
                                         <div class="">
-                                            Défavorable : <strong> {{ $eff_def }} ( {{ $pourcent_def }} % )</strong>
+                                            Déf. : <strong> {{ $eff_def }} ( {{ $pourcent_def }} % )</strong>
                                         </div>
                                     </div>
 

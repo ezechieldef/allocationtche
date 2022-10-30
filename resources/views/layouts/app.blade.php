@@ -233,16 +233,20 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Lots</span></a></li>
                         @endrole
-                        <li class="sidebar-item @if (Request::is('nouvelle-demande-allocation/*')) selected @endif"> <a
-                                class="sidebar-link waves-effect waves-dark sidebar-link"
-                                href="/nouvelle-demande-allocation" aria-expanded="false"><i
-                                    class="mdi mdi-border-all"></i><span class="hide-menu">Nouvelle demande</span></a>
-                        </li>
-                        <li class="sidebar-item @if (Request::is('mes-demandes/*')) selected @endif"> <a
-                                class="sidebar-link waves-effect waves-dark sidebar-link" href="/mes-demandes"
-                                aria-expanded="false"><i class="mdi mdi-border-all"></i><span class="hide-menu">Mes
-                                    demandes</span></a>
-                        </li>
+                        @if (count(Auth::user()->getRoleNames()) == 0)
+                            <li class="sidebar-item @if (Request::is('nouvelle-demande-allocation/*')) selected @endif"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                                    href="/nouvelle-demande-allocation" aria-expanded="false"><i
+                                        class="mdi mdi-border-all"></i><span class="hide-menu">Demande en
+                                        ligne</span></a>
+                            </li>
+                            <li class="sidebar-item @if (Request::is('mes-demandes/*')) selected @endif"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/mes-demandes"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Suivre sa demande <br>en ligne </span></a>
+                            </li>
+                        @endif
+
 
 
 
@@ -281,14 +285,15 @@
                                             class="mdi mdi-home-outline fs-4"></i></a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Direction des Bourses et
                                     Aides
-                                    Universitaire @yield('sous-titre')</li>
+                                    Universitaires @yield('sous-titre')</li>
                             </ol>
                         </nav>
                         <h1 class="mb-0 fw-bold">@yield('titre')</h1>
                     </div>
                     <div class="col-md-4 col-12">
                         <div class="text-end">
-                            <label class=" btn btn-dark text-white">{{ Auth::user()->email.' | '.Auth::user()->name }} </label>
+                            <label class=" btn btn-dark text-white">{{ Auth::user()->email . ' | ' . Auth::user()->name }}
+                            </label>
                         </div>
                     </div>
                 </div>

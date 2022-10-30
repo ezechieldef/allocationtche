@@ -56,25 +56,26 @@
                             </div>
                         </div>
 
-                        <div class="bg-gray-200 text-dark text-bold text-center py-2 my-3">
-                            Statistique
+                        <div class="bg-gray-200 text-dark text-bold p-2 my-3 d-flex justify-content-between align-items-center ">
+                            <span>Statistique</span>
+                            <a href="/exporter-statistique-pv/<?php echo e($pv->CodePV); ?>" class="btn btn-success btn-sm text-white text-bold">Exporter</a>
                         </div>
                         <?php
                             $i = 0;
                         ?>
-                        <ul>
+
 
                             <?php $__currentLoopData = $groups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $an => $data1): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <li>
-                                    <div class="h5">Année Académique : <strong><?php echo e($an); ?></strong></div>
-<ul>
+
+                                    <div class="h5"></div>
+
                                     <?php $__currentLoopData = $data1; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $univ=>$data2): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <li><div class="h6 text-center ">Université : <strong><?php echo e($univ); ?></strong></div></li>
+                                        <div class="h5 text-center ">Année Académique : <strong><?php echo e(\App\Models\AnneeAcademique::find($an)->LibelleAnneeAcademique); ?></strong> | <strong><?php echo e($univ); ?></strong></div>
 
                                         <?php $__currentLoopData = $data2; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $nature=>$data3): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <table class="table">
                                             <tr class="bg-gray-200">
-                                                <td colspan="5" class="text-center bg-gray-200" ><?php echo e($nature); ?></td>
+                                                <td colspan="5" class="text-center bg-gray-200 table-border" ><?php echo e($nature); ?></td>
                                             </tr>
                                             <tr class="bg-gray-200">
                                                 <td>Etablissements</td>
@@ -93,18 +94,15 @@
                                                         <td><?php echo e($ets->nbr_res); ?></td>
                                                     </tr>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                                <tr>
 
-                                                </tr>
                                             </tbody>
                                         </table>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                </ul>
-                                </li>
+
                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                        </ul>
+
 
                     </div>
                 </div>

@@ -98,10 +98,9 @@ class DemandeAllocController extends Controller
             }
         }
         if ($queDesFalse) {
-            $this->putError('Vous n\'avez aucune allocation universitaire non faite. ');
-        }
-        if (!$newDemandeDispo) {
-            $this->putError('Vous n\'avez aucune nouvelle demande allocation universitaire à faire.');
+            $this->putError('Vous n\'avez aucune demande d\'allocation universitaire antérieure à faire . ');
+        }elseif (!$newDemandeDispo) {
+            $this->putError('Vous n\'avez aucune nouvelle demande allocation universitaire à faire cette année.');
         }
         //dd($cursus);
         // Si non, il peut continuer
@@ -623,9 +622,9 @@ class DemandeAllocController extends Controller
                 $this->putError("La filière / etablissement de la dérogation , n'est pas conforme à celle de l'inscription ... Filiere dérogation : " . $derogation->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement derogation : " . $derogation->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
             }
         } else {
-            if ($codeAnnee == 2022) {
-                dd('dero non trouvé');
-            }
+            // if ($codeAnnee == 2022) {
+            //     dd('dero non trouvé');
+            // }
         }
         $this->putError('Clarification de cursus');
 
@@ -687,8 +686,9 @@ class DemandeAllocController extends Controller
         request()->validate([
             "RIB" => "required|regex:/^" . $banque->regex . '/',
         ]);
-
+$i=0;
         foreach ($demAttente as $demande) {
+            $i++;
             $ins = array_merge($demande->toArray(), $all);
             $ins['CodeBanque'] = $ins['Banque'];
             $ins['UtilisateurDemande'] = Auth::user()->id;
@@ -701,12 +701,18 @@ class DemandeAllocController extends Controller
             if (!is_null($etu)) {
                 if ($etu->user_id != Auth::user()->id) {
                     $demande->delete();
+                    if ( $i !=count($demAttente) ) {
+                        continue;
+                    }
                     return redirect('/mes-demandes')->with('error', "Vous n'êtes pas autorisé à faire une demande pour un autre étudiant");
                 }
                 $etu->update($ins);
             } else {
                 if (Etudiant::where('user_id', Auth::user()->id)->exists()) {
                     $demande->delete();
+                    if ( $i !=count($demAttente) ) {
+                        continue;
+                    }
                     return redirect('/mes-demandes')->with('error', "Vous n'êtes pas autorisé à faire une demande pour un autre étudiant");
                 }
 

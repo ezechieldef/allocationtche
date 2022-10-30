@@ -186,16 +186,20 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Lots</span></a></li>
                         <?php endif; ?>
-                        <li class="sidebar-item <?php if(Request::is('nouvelle-demande-allocation/*')): ?> selected <?php endif; ?>"> <a
-                                class="sidebar-link waves-effect waves-dark sidebar-link"
-                                href="/nouvelle-demande-allocation" aria-expanded="false"><i
-                                    class="mdi mdi-border-all"></i><span class="hide-menu">Nouvelle demande</span></a>
-                        </li>
-                        <li class="sidebar-item <?php if(Request::is('mes-demandes/*')): ?> selected <?php endif; ?>"> <a
-                                class="sidebar-link waves-effect waves-dark sidebar-link" href="/mes-demandes"
-                                aria-expanded="false"><i class="mdi mdi-border-all"></i><span class="hide-menu">Mes
-                                    demandes</span></a>
-                        </li>
+                        <?php if(count(Auth::user()->getRoleNames()) == 0): ?>
+                            <li class="sidebar-item <?php if(Request::is('nouvelle-demande-allocation/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                                    href="/nouvelle-demande-allocation" aria-expanded="false"><i
+                                        class="mdi mdi-border-all"></i><span class="hide-menu">Demande en
+                                        ligne</span></a>
+                            </li>
+                            <li class="sidebar-item <?php if(Request::is('mes-demandes/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/mes-demandes"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Suivre sa demande <br>en ligne </span></a>
+                            </li>
+                        <?php endif; ?>
+
 
 
 
@@ -234,14 +238,16 @@
                                             class="mdi mdi-home-outline fs-4"></i></a></li>
                                 <li class="breadcrumb-item active" aria-current="page">Direction des Bourses et
                                     Aides
-                                    Universitaire <?php echo $__env->yieldContent('sous-titre'); ?></li>
+                                    Universitaires <?php echo $__env->yieldContent('sous-titre'); ?></li>
                             </ol>
                         </nav>
                         <h1 class="mb-0 fw-bold"><?php echo $__env->yieldContent('titre'); ?></h1>
                     </div>
                     <div class="col-md-4 col-12">
                         <div class="text-end">
-                            <label class=" btn btn-dark text-white"><?php echo e(Auth::user()->email.' | '.Auth::user()->name); ?> </label>
+                            <label class=" btn btn-dark text-white"><?php echo e(Auth::user()->email . ' | ' . Auth::user()->name); ?>
+
+                            </label>
                         </div>
                     </div>
                 </div>
