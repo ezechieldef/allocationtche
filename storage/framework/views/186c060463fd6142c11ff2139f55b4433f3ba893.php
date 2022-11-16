@@ -63,58 +63,62 @@
 
 <div class="box box-info padding-1">
     <div class="box-body">
-        <div class="row">
-            <div class="col-12">
-                <?php echo $errors->first('CodeEtablissement1', '<div class="alert alert-danger">:message</div>'); ?>
+        <form method="POST" action="<?php echo e(route('correspondance-ets-selection.store')); ?>" role="form"
+            enctype="multipart/form-data">
+            <?php echo csrf_field(); ?>
+            <div class="row">
+                <div class="col-12">
+                    <?php echo $errors->first('CodeEtablissement1', '<div class="alert alert-danger">:message</div>'); ?>
 
-                <?php echo $errors->first('etablissementSelection', '<div class="alert alert-danger">:message</div>'); ?>
+                    <?php echo $errors->first('etablissementSelection', '<div class="alert alert-danger">:message</div>'); ?>
 
 
+                </div>
+                <div class="col-12 form-group mb-3">
+                    <?php echo e(Form::label('Universités')); ?>
+
+                    <?php echo e(Form::select('universite', \App\Models\Universite::pluck('LibelleLongUniversite', 'CodeUniversite'), null, [
+                        'id' => 'sel-univ',
+                        'class' => 'form-select ' . ($errors->has('universite') ? ' is-invalid' : ''),
+                        'placeholder' => '-- Séletionner --',
+                        'onchange' => 'arrange();',
+                    ])); ?>
+
+                </div>
+
+                <div class="col-md-6 col-12">
+
+                    <?php echo e(Form::label('Etablissement ')); ?>
+
+                    <select id="CodeEtablissement1" name="CodeEtablissement1" class="form-select"
+                        onchange="filsel(this.value);" value="<?php echo e($correspEtsSelection->CodeEtablissement1); ?>">
+                        <option value=""> -- Sélectionner -- </option>
+                        <?php $__currentLoopData = \App\Models\Etablissement::all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $an): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($an->CodeEtablissement); ?>" parent='<?php echo e($an->CodeUniversite); ?>' hidden>
+                                <?php echo e($an->LibelleEtablissement); ?> </option>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
+
+                </div>
+
+                <div class="col-md-6 col-12">
+
+                    <?php echo e(Form::label('Correspond à')); ?>
+
+                    <select id="etablissementSelection" name="etablissementSelection" class="form-select"
+                        value="<?php echo e($correspEtsSelection->etablissementSelection); ?>">
+                        <option value=""> -- Sélectionner -- </option>
+                        <?php $__currentLoopData = Illuminate\Support\Facades\DB::select('SELECT distinct etablissementSelection, CodeUniversite from resultats'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $an): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($an->etablissementSelection); ?>" parent='<?php echo e($an->CodeUniversite); ?>'
+                                hidden>
+                                <?php echo e($an->etablissementSelection); ?> </option>
+                            
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </select>
+
+                </div>
             </div>
-            <div class="col-12 form-group mb-3">
-                <?php echo e(Form::label('Universités')); ?>
-
-                <?php echo e(Form::select('universite', \App\Models\Universite::pluck('LibelleLongUniversite', 'CodeUniversite'), null, [
-                    'id' => 'sel-univ',
-                    'class' => 'form-select ' . ($errors->has('universite') ? ' is-invalid' : ''),
-                    'placeholder' => '-- Séletionner --',
-                    'onchange' => 'arrange();',
-                ])); ?>
-
-            </div>
-
-            <div class="col-md-6 col-12">
-
-                <?php echo e(Form::label('Etablissement ')); ?>
-
-                <select id="CodeEtablissement1" name="CodeEtablissement1" class="form-select" onchange="filsel(this.value);"
-                    value="<?php echo e($correspEtsSelection->CodeEtablissement1); ?>">
-                    <option value=""> -- Sélectionner -- </option>
-                    <?php $__currentLoopData = \App\Models\Etablissement::all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $an): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($an->CodeEtablissement); ?>" parent='<?php echo e($an->CodeUniversite); ?>' hidden>
-                            <?php echo e($an->LibelleEtablissement); ?> </option>
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </select>
-
-            </div>
-
-            <div class="col-md-6 col-12">
-
-                <?php echo e(Form::label('Correspond à')); ?>
-
-                <select id="etablissementSelection" name="etablissementSelection" class="form-select"
-                    value="<?php echo e($correspEtsSelection->etablissementSelection); ?>">
-                    <option value=""> -- Sélectionner -- </option>
-                    <?php $__currentLoopData = Illuminate\Support\Facades\DB::select('SELECT distinct etablissementSelection, CodeUniversite from resultats'); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $an): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                        <option value="<?php echo e($an->etablissementSelection); ?>" parent='<?php echo e($an->CodeUniversite); ?>' hidden>
-                            <?php echo e($an->etablissementSelection); ?> </option>
-                        
-                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                </select>
-
-            </div>
-        </div>
-
+        </form>
         
 
     </div>
@@ -127,9 +131,9 @@
             Liste des Etablissements de sélection, n'ayant pas de correspondance.
         </button>
     </p>
-    <div class="collapse" id="collapseExample2">
+    <div class="collapse w-100" id="collapseExample2">
         <div class="table-responsive">
-            <table class="table" id="datatable">
+            <table class="table w-100" id="datatable">
                 <thead>
                     <th>Université Sélection</th>
                     <th>Etablissement Sélection</th>

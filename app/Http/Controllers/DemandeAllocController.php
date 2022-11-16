@@ -30,6 +30,9 @@ class DemandeAllocController extends Controller
     //
     public function index()
     {
+        if (DemandeTemp::where('user_id', Auth::user()->id)->exists()) {
+            return redirect('/step2');
+        }
 
         return view('upb.form-demande');
     }
@@ -97,10 +100,8 @@ class DemandeAllocController extends Controller
                 }
             }
         }
-        if ($queDesFalse) {
-            $this->putError('Vous n\'avez aucune demande d\'allocation universitaire antérieure à faire . ');
-        }elseif (!$newDemandeDispo) {
-            $this->putError('Vous n\'avez aucune nouvelle demande allocation universitaire à faire cette année.');
+        if ($queDesFalse || !$newDemandeDispo) {
+            $this->putError('Vous ne pouvez pas faire de demande d\'allocation universitaire avec les informations saisies.');
         }
         //dd($cursus);
         // Si non, il peut continuer
@@ -213,7 +214,6 @@ class DemandeAllocController extends Controller
                     'LibeleFiliere' => 'filiere',
                     "CodeAnneeEtude" => 'niveau',
                     'StatutAllocataire' => $champ_type_alloc,
-
                 ];
 
                 break;
@@ -243,7 +243,7 @@ class DemandeAllocController extends Controller
             case 'UNSTIM':
                 $champ_validation = 'isValidated';
                 $champ_type_alloc = 'scholarship';
-                $alloc_autorise = ['BRS','AU'];
+                $alloc_autorise = ['BRS', 'AU'];
                 $var_name_api = [
                     'Matricule' => 'matricule',
                     'NomEtudiant' => 'lastName',
@@ -287,7 +287,7 @@ class DemandeAllocController extends Controller
             case 'UNA':
 
                 if (in_array('message', array_keys($response))) {
-                    $this->putError($response['message'] . '... Année Scolaire : ' . (AnneeAcademique::find($codeAnnee)->LibelleAnneeAcademique));
+                    $this->putError('Inscription non validée ' . '... Année Scolaire : ' . (AnneeAcademique::find($codeAnnee)->LibelleAnneeAcademique));
                     return;
                 }
                 //dd($response);
@@ -310,11 +310,11 @@ class DemandeAllocController extends Controller
                 break;
             case 'UNSTIM':
                 if (($response['status'] ?? null) == 500) {
-                    Session::put('error', 'Erreur au niveau du serveur distant');
-                    return null ;
+                    //Session::put('error', 'Erreur au niveau du serveur distant');
+                    return null;
                 }
                 if (in_array('error', array_keys($response))) {
-                    $this->putError($response['message'] . '... Année Scolaire : ' . (AnneeAcademique::find($codeAnnee)->LibelleAnneeAcademique));
+                    $this->putError( 'Inscription non validée ... Année Scolaire : ' . (AnneeAcademique::find($codeAnnee)->LibelleAnneeAcademique));
                     return null;
                 }
                 $etu = $response['student'];
@@ -348,7 +348,7 @@ class DemandeAllocController extends Controller
                     if (is_null($correct)) {
                         $correct = $resp;
                     } else {
-                        $this->putError('Anomalie : Plusieurs bourses ont été identifiées, vous devez annuler 1... ' . $codeAnnee);
+                        $this->putError('Erreur : Plusieurs bourses ont été identifiées, vous devez annuler une bourse au niveau de la scolarité centrale ... Année Académique : ' . (AnneeAcademique::find($codeAnnee)->LibelleAnneeAcademique) );
                         return;
                     }
                 }
@@ -442,12 +442,10 @@ class DemandeAllocController extends Controller
                 }
                 $map['CodeEtablissement'] = $map['CodeEtablissement'] . '-' . $univ;
             }
-
-
         }
 
         if (!is_null($map['CodeFiliere'])) {
-            $fil=Filiere::find($map['CodeFiliere']);
+            $fil = Filiere::find($map['CodeFiliere']);
             if (is_null($fil)) {
                 $r = Filiere::where("CodeFiliere", $map['CodeFiliere'] . '-' . $ets->CodeEtablissement)->where("CodeEtablissement", $ets->CodeEtablissement)->exists();
 
@@ -527,13 +525,11 @@ class DemandeAllocController extends Controller
                     Etablissement::correspondreSelection($map['CodeEtablissement'], $selection->etablissementSelection) &&
                     Filiere::correspondreSelection($map['CodeFiliere'], $selection->libfiliere)
                 ) {
-
                     $type_demande = 'Attribution';
                     $complement = array();
                     $complement['CodeSerie'] = $selection->serie;
                     $complement['ReferenceSelection'] = $selection->positionnorm;
                     $complement['TypeSelection'] = $selection->mode;
-
                     return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT', 'COMPLEMENT' => $complement];
                 } else {
                     $this->putError('Cas d\'une probable Attribution');
@@ -547,6 +543,7 @@ class DemandeAllocController extends Controller
         // Si demande de l'année passé trouvé et est passé en classe supérieur : cas d'un Renouvellement
         if (!is_null($allocAnnePasse) && ($allocAnnePasse->CodeAnneeEtude + 1) == $map['CodeAnneeEtude']) {
             //Si correspondance entre la filiere de l'année passé et celle ci
+
 
             if (
                 Etablissement::correspondre($map['CodeEtablissement'], $allocAnnePasse->CodeEtablissement)
@@ -582,7 +579,7 @@ class DemandeAllocController extends Controller
                 if ($codeAnnee == $max) {
                     $this->putError("Cas d'un Redoublement successif");
                     $this->putError("Votre cursus a commencé en " . ($annedebut) . '-' . ($annedebut + 1));
-                    $this->putError("Dans la norme, vous êtes censé finir votre cursus au plus tard dans l'année académique : " . ($max - 1) . '-' . ($max));
+                    $this->putError("Vous devriez finir votre formation au plus tard dans l'année académique : " . ($max - 1) . '-' . ($max));
                     return false;
                 }
             }
@@ -602,7 +599,7 @@ class DemandeAllocController extends Controller
             } else {
                 $this->putError("Cas d'un rétablissement ");
                 $this->putError("La filière / etablissement de l'année précédente, n'est pas conforme à celle de cette année ... Filiere Année précédente : " . $allocAnnePasse->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement année précédente : " . $allocAnnePasse->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
-                $this->putError("Si vous pensez qu'il s'agit de la même filière / Etablissement anoté différement, veuillez signaler cela à la DBAU ");
+                $this->putError("Si vous pensez qu'il s'agit de la même filière / Etablissement , veuillez signaler cela à la DBAU ");
             }
         }
         //S'il dispose d'une dérogation
@@ -686,7 +683,7 @@ class DemandeAllocController extends Controller
         request()->validate([
             "RIB" => "required|regex:/^" . $banque->regex . '/',
         ]);
-$i=0;
+        $i = 0;
         foreach ($demAttente as $demande) {
             $i++;
             $ins = array_merge($demande->toArray(), $all);
@@ -701,7 +698,7 @@ $i=0;
             if (!is_null($etu)) {
                 if ($etu->user_id != Auth::user()->id) {
                     $demande->delete();
-                    if ( $i !=count($demAttente) ) {
+                    if ($i != count($demAttente)) {
                         continue;
                     }
                     return redirect('/mes-demandes')->with('error', "Vous n'êtes pas autorisé à faire une demande pour un autre étudiant");
@@ -710,7 +707,7 @@ $i=0;
             } else {
                 if (Etudiant::where('user_id', Auth::user()->id)->exists()) {
                     $demande->delete();
-                    if ( $i !=count($demAttente) ) {
+                    if ($i != count($demAttente)) {
                         continue;
                     }
                     return redirect('/mes-demandes')->with('error', "Vous n'êtes pas autorisé à faire une demande pour un autre étudiant");

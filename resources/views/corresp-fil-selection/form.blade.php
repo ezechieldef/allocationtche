@@ -139,7 +139,7 @@
             <div class="form-group">
                 {{ Form::label('Correspond à : ') }}
 
-                <select id="sel-fil2" class="form-select" onchange="change(this)" name="filiereSelection">
+                <select id="sel-fil2" class="form-select selectpicker" onchange="change(this)" name="filiereSelection">
                     <option value=""> --Sélectionner -- </option>
 
                     @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct R.libfiliere from resultats R ') as $an)
@@ -161,8 +161,9 @@
             Liste des Filières de sélection, n'ayant pas de correspondance.
         </button>
     </p>
-    <div class="collapse" id="collapseExample2">
-        <table class="table table-responsive" id="datatable">
+    <div class="collapse w-100" id="collapseExample2">
+        <div class="table-responsive w-100">
+        <table class="table w-100" id="datatable">
             <thead>
                 <th>Université Sélection</th>
                 <th>Etablissement Sélection</th>
@@ -217,6 +218,6 @@
                     </tr>
                 @endforeach
             </tbody>
-        </table>
+        </table></div>
     </div>
 </div>

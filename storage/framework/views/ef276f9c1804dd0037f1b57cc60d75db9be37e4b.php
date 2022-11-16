@@ -175,6 +175,12 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Motifs
                                         Rejets</span></a></li>
+                            <li class="sidebar-item <?php if(Request::is('ouverture')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/ouverture"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Disponibilité</span></a></li>
+                        <?php endif; ?>
+                        <?php if(auth()->check() && auth()->user()->hasRole('President-CNABAU|super-admin')): ?>
                             <li class="sidebar-item <?php if(Request::is('pv/*')): ?> selected <?php endif; ?>"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/pv"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
@@ -229,6 +235,7 @@
             <!-- ============================================================== -->
             <!-- Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
+
             <div class="page-breadcrumb ">
                 <div class="row align-items-center ">
                     <div class="col-md-8 col-12">
@@ -245,9 +252,14 @@
                     </div>
                     <div class="col-md-4 col-12">
                         <div class="text-end">
-                            <label class=" btn btn-dark text-white"><?php echo e(Auth::user()->email . ' | ' . Auth::user()->name); ?>
+                            <a href="/profile/<?php echo e(Auth::user()->id); ?>">
+                                <label class=" btn btn-dark text-white"><?php echo e(Auth::user()->email); ?> <?php if(trim(Auth::user()->name) != ''): ?>
+                                        |
+                                    <?php endif; ?> <?php echo e(Auth::user()->name); ?>
 
-                            </label>
+                                </label>
+                            </a>
+
                         </div>
                     </div>
                 </div>
@@ -327,6 +339,8 @@
 
         // $('.sidebar-item.selected').addClass('bg-success');
     </script>
+    <!-- Latest compiled and minified CSS -->
+    
     <style>
         .sidebar-nav ul .sidebar-item.selected>.sidebar-link {
             /* background: var(--bs-green) #289f61; */

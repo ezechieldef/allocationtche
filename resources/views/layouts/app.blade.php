@@ -222,6 +222,12 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Motifs
                                         Rejets</span></a></li>
+                            <li class="sidebar-item @if (Request::is('ouverture')) selected @endif"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/ouverture"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Disponibilité</span></a></li>
+                        @endrole
+                        @role('President-CNABAU|super-admin')
                             <li class="sidebar-item @if (Request::is('pv/*')) selected @endif"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/pv"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
@@ -276,6 +282,7 @@
             <!-- ============================================================== -->
             <!-- Bread crumb and right sidebar toggle -->
             <!-- ============================================================== -->
+
             <div class="page-breadcrumb ">
                 <div class="row align-items-center ">
                     <div class="col-md-8 col-12">
@@ -292,8 +299,13 @@
                     </div>
                     <div class="col-md-4 col-12">
                         <div class="text-end">
-                            <label class=" btn btn-dark text-white">{{ Auth::user()->email . ' | ' . Auth::user()->name }}
-                            </label>
+                            <a href="/profile/{{ Auth::user()->id }}">
+                                <label class=" btn btn-dark text-white">{{ Auth::user()->email }} @if (trim(Auth::user()->name) != '')
+                                        |
+                                    @endif {{ Auth::user()->name }}
+                                </label>
+                            </a>
+
                         </div>
                     </div>
                 </div>
@@ -373,6 +385,15 @@
 
         // $('.sidebar-item.selected').addClass('bg-success');
     </script>
+    <!-- Latest compiled and minified CSS -->
+    {{--
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/css/bootstrap-select.min.css">
+
+<!-- Latest compiled and minified JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/bootstrap-select.min.js"></script>
+
+<!-- (Optional) Latest compiled and minified JavaScript translation files -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap-select@1.13.14/dist/js/i18n/defaults-*.min.js"></script> --}}
     <style>
         .sidebar-nav ul .sidebar-item.selected>.sidebar-link {
             /* background: var(--bs-green) #289f61; */

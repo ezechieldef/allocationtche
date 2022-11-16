@@ -7,6 +7,7 @@ use App\Models\AssocPjUser;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use RealRashid\SweetAlert\Facades\Alert;
@@ -178,7 +179,7 @@ class UserController extends Controller
         $user = User::findOrFail($user_id);
         $a = $request->all();
         foreach (Role::all()->pluck('name') as $key => $name) {
-            if ($a['btn-'.$name] ?? null === true) {
+            if ($a['btn-' . $name] ?? null === true) {
                 $user->assignRole($name);
             } else {
                 $user->removeRole($name);
@@ -201,5 +202,66 @@ class UserController extends Controller
         }
         $user->save();
         return back()->with("message", 'Roles de l\'utilisateur modifié avec succès');
+    }
+
+    public function showprofile(int $user_id)
+    {
+        if (Auth::user()->id != $user_id) {
+            return abort(403, 'Vous n\'avez pas la permission de consulter ce profile');
+        }
+        return view('upb.profile');
+    }
+
+    public function deleteprofile(int $user_id)
+    {
+        if (Auth::user()->id != $user_id) {
+            return abort(403, 'Vous n\'avez pas la permission de consulter ce profile');
+        }
+        try {
+            $r = User::findOrFail($user_id)->delete();
+            Auth::logout();
+        } catch (\Throwable $th) {
+            Alert::toast("Ce compte d'utilisateur ne peut pas être supprimé !!", 'error', '#fff')->position('bottom-end')->autoClose(10000)->timerProgressBar();
+        }
+
+        return back();
+    }
+
+    public function editprofile(int $user_id)
+    {
+        if (Auth::user()->id != $user_id) {
+            return abort(403, 'Vous n\'avez pas la permission de consulter ce profile');
+        }
+        request()->validate([
+            'email' => 'unique:users,email,' . $user_id,
+            "name" => 'required'
+        ]);
+        $u = User::findOrFail($user_id)->update(request()->all());
+        Alert::toast("Informartion du profil mis à jour avec succès !", 'success', '#fff')->position('bottom-end')->autoClose(10000)->timerProgressBar();
+        return back();
+    }
+
+    public function changepass(int $user_id)
+    {
+        if (Auth::user()->id != $user_id) {
+            return abort(403, 'Vous n\'avez pas la permission de consulter ce profile');
+        }
+
+
+
+        request()->validate([
+            'old-password' => 'required',
+            'password' => 'required|confirmed|regex:/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{6,}$/',
+        ]);
+        $all = request()->all();
+        if (!Hash::check($all['old-password'], Auth::user()->password)) {
+            Alert::toast("Le mot de passe actuel est invalide", 'error', '#fff')->position('bottom-end')->autoClose(10000)->timerProgressBar();
+
+            return back();
+        }
+        Auth::user()->update(['password'=>Hash::make($all['password']), 'remember_token'=>null]);
+        Alert::toast("Votre mot de passe a été modifié avec succès", 'success', '#fff')->position('bottom-end')->autoClose(10000)->timerProgressBar();
+
+        return back();
     }
 }

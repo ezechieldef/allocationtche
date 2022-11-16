@@ -45,13 +45,18 @@ Route::middleware(["auth"])->group(function () {
 
     Route::any('/mes-demandes', [App\Http\Controllers\MesDemandes::class, 'index']);
     Route::get('/imprimer-fiche/{code}', [MesDemandes::class, 'imprimerFiche']);
-
     Route::any('/joindre-fichier/{codeEtudiant}', [MesDemandes::class, 'joindrefichier'])->name('joindre-fichier');
     Route::get('/modifier-demande/{codedemande}', [MesDemandes::class, 'modifierDemande'])->name('modifier-demande');
     Route::post('/modifier-demande/{codedemande}', [MesDemandes::class, 'postModifierDemande'])->name('modifier-demande');
     Route::get('/voir-demande/{codedemande}', [MesDemandes::class, 'voirDemande'])->name('voir-demande');
     Route::get('/apres-paiement/{codedemande}/{idtransaction}', [MesDemandes::class, 'payer'])->name('payer');
     Route::get('/apres-paiement/{codedemande}/?transaction_id={idtransaction}', [MesDemandes::class, 'payer'])->name('payer');
+    Route::get('/profile/{user_id}', [App\Http\Controllers\UserController::class, 'showprofile']);
+    Route::post('/profile/{user_id}', [App\Http\Controllers\UserController::class, 'editprofile']);
+    Route::post('/profile/{user_id}/delete', [App\Http\Controllers\UserController::class, 'deleteprofile']);
+    Route::post('/profile/{user_id}/changepass', [App\Http\Controllers\UserController::class, 'changepass']);
+
+
 });
 
 Route::redirect('/', 'nouvelle-demande-allocation', 302);
@@ -75,19 +80,23 @@ Route::middleware(["auth", 'role:banquier|super-admin'])->group(function () {
 Route::middleware(["auth", 'role:super-admin|commissaire-CNABAU'])->group(function () {
     Route::resource('/lots', App\Http\Controllers\LotController::class);
     Route::post('/avis-UPB/{demande_id}', [App\Http\Controllers\AvisUPB::class, 'aviser']);
+    Route::any('/exporter-lot/{codelot}', [App\Http\Controllers\LotController::class, 'exporter']);
+    Route::any('/exporter-lot-stats/{codelot}', [App\Http\Controllers\LotController::class, 'exporterStats']);
+
 });
+Route::middleware(["auth", 'role:super-admin|President-CNABAU'])->group(function () {
+    Route::resource('/pv', App\Http\Controllers\PvController::class);
+    Route::resource('/motifs_rejets', App\Http\Controllers\MotifsRejetController::class);
+    Route::post('/ajouter-au-lot/{lot_id}', [App\Http\Controllers\LotController::class, 'ajouterAuLot']);
+    Route::post('/retirer-du-lot/{codelot}/{codedemande}', [App\Http\Controllers\LotController::class, 'retirerDuLot']);
+    Route::get('/cloturer-pv/{pv_id}', [App\Http\Controllers\PvController::class, 'cloturerPV']);
+});
+
 Route::middleware(["auth", 'role:super-admin'])->group(function () {
 
     Route::resource('/derogations', App\Http\Controllers\DerogationController::class);
     Route::resource('/taux', App\Http\Controllers\TauxController::class);
 
-    Route::resource('/pv', App\Http\Controllers\PvController::class);
-    Route::resource('/motifs_rejets', App\Http\Controllers\MotifsRejetController::class);
-    Route::post('/ajouter-au-lot/{lot_id}', [App\Http\Controllers\LotController::class, 'ajouterAuLot']);
-    Route::post('/retirer-du-lot/{codelot}/{codedemande}', [App\Http\Controllers\LotController::class, 'retirerDuLot']);
-    Route::any('/exporter-lot/{codelot}', [App\Http\Controllers\LotController::class, 'exporter']);
-
-    Route::get('/cloturer-pv/{pv_id}', [App\Http\Controllers\PvController::class, 'cloturerPV']);
     Route::get('/liste-definitive/{pv_id}', [App\Http\Controllers\PvController::class, 'listeDefinitive']);
     Route::get('/exporter-statistique-pv/{pv_id}', [App\Http\Controllers\PvController::class, 'exporterStatistique']);
 
@@ -96,6 +105,8 @@ Route::middleware(["auth", 'role:super-admin'])->group(function () {
     Route::post('/consulter', [App\Http\Controllers\AdminDemandeUPB::class, 'consulterPost']);
 
     Route::resource('/universites', UniversiteController::class);
+
+    Route::any('/ouverture', [App\Http\Controllers\ParamsController::class, 'ouverture']);
     Route::post('/permission/{user_id}', [App\Http\Controllers\UserController::class, 'permission']);
     Route::resource('/utilisateur', App\Http\Controllers\UserController::class, [
         // 'except' => ['index', 'destroy', 'create']
@@ -106,37 +117,13 @@ Route::get('/sudo', function () {
     Auth::user()->assignRole("super-admin");
 })->middleware('auth');
 Route::get('/test', function () {
-    //$v = DemandeAllocationUPB::join('etudiant', 'etudiant.CodeEtudiant','demande_allocation.CodeEtudiant');
-    // return $v->get();
-    $map = [
-        "Matricule" => "11012808221UNA",
-        "NomEtudiant" => "ODJO",
-        "PrenomEtudiant" => "Adéniran Anael Astrid",
-        "DateNaissanceEtudiant" => "28/03/2004",
-        "LieuNaissanceEtudiant" => "Godomey",
-        "SexeEtudiant" => "M",
-        "Nationalite" => "Béninoise",
-        "CodeEtablissement" => "EAq-UNA",
-        "CodeFiliere" => "EAq-EAq-UNA",
-        "CodeAnneeEtude" => 2,
-        "StatutAllocataire" => "BOURSE",
-        "LibeleFiliere" => "DEUXIEME ANNEE DE EAq",
-        "LibelleCourtUniversite" => "UNA",
-    ];
-    echo date("d/m/Y", strtotime($map['DateNaissanceEtudiant']));
-
-    $codeAnnee = 2021;
-    $allocAnnePasse =  ArchiveAllocataire::rechercher($codeAnnee - 1, $map) ?? DemandeTemp::rechercher($codeAnnee - 1, $map) ?? DemandeAllocationUPB::rechercher($codeAnnee - 1, $map);
-    $allocAnneSurpasse = ArchiveAllocataire::rechercher($codeAnnee - 2, $map) ?? DemandeTemp::rechercher($codeAnnee - 2, $map) ?? DemandeAllocationUPB::rechercher($codeAnnee - 2, $map);
-    if ($codeAnnee == 2021) {
-        dd($allocAnnePasse);
-    }
-
-    $v = DemandeAllocationUPB::join("etudiant", 'etudiant.CodeEtudiant', 'demande_allocation.CodeEtudiant')->where('CodeBanque', Auth::user()->banque_assigner)
-        ->where('RIB_valide', '!=', 'oui')
-        ->get(['CodeDemandeAllocation', 'NPI', 'NomEtudiant', 'PrenomEtudiant', 'RIB']);
-    dd($v);
+    return view('upb.form_ouverture');
 });
 Route::get('/temp', function () {
     return view('layouts.template');
 });
+
+/* ADMINISTRATION */
+Route::get('/administration/dashboard', [App\Http\Controllers\Administration\DashboardController::class, 'index'])->name('dashboard.index');
+Route::post('/administration/dashboard/consulter', [App\Http\Controllers\Administration\DashboardController::class, 'consulter'])->name('dashboard.stat.consulter');
+

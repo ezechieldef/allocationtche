@@ -6,8 +6,8 @@
 
     <?php
         $eff_total = count($lot->demandes()->get());
-
-        $pourcent_total = ($eff_total * 100) / \App\Models\AssocLotsDemande::count();
+        $v = \App\Models\AssocLotsDemande::count();
+        $pourcent_total = ($eff_total * 100) / ($v == 0 ? 1 : $v);
         $pourcent_total = intval($pourcent_total);
         $eff_nontraite = $lot->demandesSansAvis()->count();
         $pourcent_nontraite = ($eff_nontraite * 100) / ($eff_total == 0 ? 1 : $eff_total);
@@ -20,10 +20,10 @@
         $pourcent_fav = intval($pourcent_fav);
         $eff_res = $lot->demandesAvecAvisParticulier('Réservé')->count();
         $pourcent_res = ($eff_res * 100) / ($eff_total == 0 ? 1 : $eff_total);
-        $pourcent_res=intval($pourcent_res);
+        $pourcent_res = intval($pourcent_res);
         $eff_def = $lot->demandesAvecAvisParticulier('Défavorable')->count();
         $pourcent_def = ($eff_def * 100) / ($eff_total == 0 ? 1 : $eff_total);
-        $pourcent_def=intval($pourcent_def);
+        $pourcent_def = intval($pourcent_def);
 
     ?>
     <form method="POST" action="" role="form" id="formulaire" enctype="multipart/form-data">
@@ -137,10 +137,10 @@
                             <tbody>
                                 <?php $__currentLoopData = DB::select(
             "SELECT E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation,D.CodeAnneeAcademique, count(E.CodeEtudiant) as effectif from
-                            demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND
-                            D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
-                            AND D.CodeDemandeAllocation NOT IN (SELECT CodeDemandeAllocation from assoc_pv_demande WHERE avis ='Favorable' or avis='Défavorable' )
-                        GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation, D.CodeAnneeAcademique ",
+                                demande_allocation D , etudiant E WHERE D.CodeEtudiant= E.CodeEtudiant AND D.idtransaction!='' AND
+                                D.CodeDemandeAllocation not in (SELECT CodeDemandeAllocation from assoc_lots_demande )
+                                AND D.CodeDemandeAllocation NOT IN (SELECT CodeDemandeAllocation from assoc_pv_demande WHERE avis ='Favorable' or avis='Défavorable' )
+                            GROUP BY E.CodeFiliere, D.CodeAnneeEtude, D.CodeNatureAllocation, D.CodeAnneeAcademique ",
             [],
         ); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $list): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                     <tr>
@@ -189,12 +189,15 @@
                             <span class="card-title">Détail Lot</span>
                         </div>
                         <div class="float-right">
-                            <?php if(auth()->check() && auth()->user()->hasRole('super-admin')): ?>
+                            <?php if(auth()->check() && auth()->user()->hasRole('super-admin|President-CNABAU')): ?>
                                 <button class="btn btn-light shadow mx-2" data-bs-toggle="modal"
                                     data-bs-target="#modalPayer">Ajouter au lot</button>
-                                <a href="/exporter-lot/<?php echo e($lot->CodeLot); ?>">
-                                    <button class="btn btn-secondary text-white text-bold mx-2">Exporter</button></a>
                             <?php endif; ?>
+                            <a href="/exporter-lot/<?php echo e($lot->CodeLot); ?>">
+                                <button class="btn btn-secondary text-white text-bold mx-2">Exporter</button></a>
+                                <a href="/exporter-lot-stats/<?php echo e($lot->CodeLot); ?>">
+                                    <button class="btn btn-secondary text-white text-bold mx-2">Exporter Statistique</button></a>
+
                             <a class="btn btn-warning text-dark" href="<?php echo e(route('lots.index')); ?>"> Retour</a>
                         </div>
                     </div>
@@ -351,7 +354,7 @@
                                                             data-bs-toggle="modal" data-bs-target="#myModal"
                                                             onclick="loadmodal('<?php echo e($demjoin->CodeDemandeAllocation); ?>')">Traiter</button>
                                                     <?php endif; ?>
-                                                    <?php if(auth()->check() && auth()->user()->hasRole('super-admin')): ?>
+                                                    <?php if(auth()->check() && auth()->user()->hasRole('super-admin|President-CNABAU')): ?>
                                                         <form
                                                             action="/retirer-du-lot/<?php echo e($lot->CodeLot); ?>/<?php echo e($demjoin->CodeDemandeAllocation); ?>"
                                                             method="post">

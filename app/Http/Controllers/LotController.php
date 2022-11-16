@@ -240,4 +240,31 @@ class LotController extends Controller
 
         return $pdf->download('lot' . $lot->CodeLot . ' N° ' . $lot->Numero . '.pdf');
     }
+
+    public function exporterStats(int $codelot)
+    {
+        $lot = Lot::findOrFail($codelot);
+        $pv = $lot->pv()->first();
+
+
+        PDF::setOptions([
+            "isHtml5ParserEnabled" => true,
+            "isRemoteEnabled" => true,
+            "defaultPaperSize" => "a4",
+            "dpi" => 350,
+        ]);
+        $data = ['lot' => $lot, 'pv' => $pv];
+        // return view('upb.pdf_stats_lot', $data);
+
+        $pdf = app('dompdf.wrapper');
+        $pdf->getDomPDF()->set_option("enable_php", true);
+        $pdf->getDomPDF()->set_option("enable_remote", false);
+        //$pdf->setPaper('a4', 'landscape');
+        $pdf->loadView('upb.pdf_stats_lot', $data);
+
+        // $pdf = PDF::loadView('upb.pdf_export_lot', ['lot' => $lot, 'groups' => $groups, 'pv'=>$pv])->setPaper('a4', 'landscape');;
+        // $pdf->getDomPDF()->set_option("enable_php", true);
+
+        return $pdf->download('Statistique lot' . $lot->CodeLot . ' N° ' . $lot->Numero . '.pdf');
+    }
 }

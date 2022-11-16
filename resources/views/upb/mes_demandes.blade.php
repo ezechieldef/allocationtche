@@ -21,8 +21,7 @@
                 <div class="modal-body">
 
 
-                    <button class="btn btn-outline-success  text-bold w-100 mb-4 py-3" onclick="payer(this)"
-                        id="btn-payer">
+                    <button class="btn btn-outline-success  text-bold w-100 mb-4 py-3" onclick="payer(this)" id="btn-payer">
                         Payer les frais d'étude de ma demande
                     </button>
 
@@ -64,7 +63,8 @@
                     <div class="alert alert-danger" role="alert">
                         <h4 class="alert-heading">Vous avez des paiements en attente </h4>
 
-                        <p class="mb-0">Procédez maintenant au paiement en cliquant sur le bouton <strong>Payer</strong>, sans cela, votre
+                        <p class="mb-0">Procédez maintenant au paiement en cliquant sur le bouton <strong>Payer</strong>,
+                            sans cela, votre
                             demande ne sera pas prise en compte.</p>
                     </div>
 
@@ -94,27 +94,33 @@
                                 <td>{{ $dem->CodeAnneeAcademique ?? $dem->Annee }}</td>
                                 <td>{{ $dem->CodeTypeDemande ?? '( Ancienne demande )' }}</td>
                                 @php
-                                    $assoc = \App\Models\AssocPvDemande::where('CodeDemandeAllocation', $dem->CodeDemandeAllocation)->get()->last();
+                                    $assoc = \App\Models\AssocPvDemande::where('CodeDemandeAllocation', $dem->CodeDemandeAllocation)
+                                        ->get()
+                                        ->last();
                                 @endphp
-                                <td class="text-dark text-bold" >{{ is_null($dem->CodeTypeDemande)? 'TRAITÉ' : ( is_null($assoc)? 'EN COURS DE TRAITEMENT' : $assoc->Avis) }}</td>
+                                <td class="text-dark text-bold">
+                                    {{ is_null($dem->CodeTypeDemande) ? 'TRAITÉ' : (is_null($assoc) ? 'EN COURS DE TRAITEMENT' : $assoc->Avis) }}
+                                </td>
                                 <td class="">
                                     <a href="/voir-demande/{{ $dem->CodeDemandeAllocation }}"
                                         class="btn btn-sm btn-info text-white text-bold my-1"> <i
                                             class="fa fa-eye mx-2"></i> Voir
                                     </a>
-                                    @if (is_null($assoc) && !\App\Models\AssocLotsDemande::where('CodeDemandeAllocation', $dem->CodeDemandeAllocation)->exists() && !is_null($dem->CodeTypeDemande)  )
+                                    @if (is_null($assoc) &&
+                                        !\App\Models\AssocLotsDemande::where('CodeDemandeAllocation', $dem->CodeDemandeAllocation)->exists() &&
+                                        !is_null($dem->CodeTypeDemande))
                                         <a href="/modifier-demande/{{ $dem->CodeDemandeAllocation }}"
                                             class="btn btn-sm btn-secondary text-white text-bold my-1"> <i
                                                 class="fa fa-edit mx-2"></i>
                                             Modifier </a>
                                     @endif
-                                    <a href="/imprimer-fiche/{{ $dem->CodeDemandeAllocation }}"
-                                        class="btn btn-sm btn-success text-white text-bold my-1"> <i
-                                            class="fa fa-print me-2"></i>
-                                        Imprimer </a>
-                                    @php
-                                        //dd(['var'=>$dem,'nn'=>\App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique)]);
-                                    @endphp
+                                    @if ($dem->CodeTypeDemande != '' && $dem->idtransaction != '')
+                                        <a href="/imprimer-fiche/{{ $dem->CodeDemandeAllocation }}"
+                                            class="btn btn-sm btn-success text-white text-bold my-1"> <i
+                                                class="fa fa-print me-2"></i>
+                                            Imprimer </a>
+                                    @endif
+
                                     @if ($dem->CodeTypeDemande != '' &&
                                         $dem->idtransaction == '' &&
                                         \App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique ?? $dem->Annee)->taux != 0)
@@ -140,81 +146,82 @@
     </div>
 
     @if (!is_null($etudiant))
-    <div class="card border-success">
+        <div class="card border-success">
 
 
-        <div class="card-header bg-success text-white text-bold">
-            Pièce à joindre
-        </div>
-        <div class="card-body">
-            @if ($etudiant->url_RIB != '' || $etudiant->url_CIP !='')
-                <div class="alert alert-info" role="alert">
-                    <h4 class="alert-heading">Information </h4>
+            <div class="card-header bg-success text-white text-bold">
+                Pièce à joindre
+            </div>
+            <div class="card-body">
+                @if ($etudiant->url_RIB == '' || $etudiant->url_CIP == '')
+                    <div class="alert alert-info" role="alert">
+                        <h4 class="alert-heading">Information </h4>
 
-                    <p class="mb-0">Veuillez joindre les pièces listé ci-dessous en PDF pour faciliter leur vérification  </p>
-                </div>
-            @endif
-            <form method="POST" action="{{ route('joindre-fichier', $etudiant->CodeEtudiant) }}" role="form"
-                enctype="multipart/form-data">
-                {{ method_field('PATCH') }}
-                @csrf
-                <div class="row">
-                    @php
-                        $tab = [['name' => 'url_RIB', 'label' => 'Relevé d\'Identité Bancaire (RIB)'], ['name' => 'url_CIP', 'label' => 'Certificat d\'Identification Personnel (CIP) ou autres pièce sur laquelle apparaît votre NPI']];
-                    @endphp
+                        <p class="mb-0">Veuillez joindre les pièces listé ci-dessous en PDF pour faciliter leur
+                            vérification </p>
+                    </div>
+                @endif
+                <form method="POST" action="{{ route('joindre-fichier', $etudiant->CodeEtudiant) }}" role="form"
+                    enctype="multipart/form-data">
+                    {{ method_field('PATCH') }}
+                    @csrf
+                    <div class="row">
+                        @php
+                            $tab = [['name' => 'url_RIB', 'label' => 'Relevé d\'Identité Bancaire (RIB)'], ['name' => 'url_CIP', 'label' => 'Certificat d\'Identification Personnel (CIP) ou autres pièce sur laquelle apparaît votre NPI']];
+                        @endphp
 
-                    @foreach ($tab as $el)
-                        <div class="col-12 mt-3 mb-3">
+                        @foreach ($tab as $el)
+                            <div class="col-12 mt-3 mb-3">
 
-                            @if ($etudiant[$el['name']] != '')
-                                <div class="form-group">
-                                    <div class="d-flex align-items-middle">
-                                        <i class="fa fa-fw fa-check"
-                                            style="color: green; font-size:20px; margin-right: 10px"></i>
+                                @if ($etudiant[$el['name']] != '')
+                                    <div class="form-group">
+                                        <div class="d-flex align-items-middle">
+                                            <i class="fa fa-fw fa-check"
+                                                style="color: green; font-size:20px; margin-right: 10px"></i>
 
+                                            {{ Form::label($el['label']) }}
+
+                                        </div>
+                                        <div class="d-flex">
+
+                                            <a href="{{ Storage::url($etudiant[$el['name']]) }}" target="_blank">
+                                                <button class="btn btn-info text-white" style="pointer-events: none"><i
+                                                        class="fa fa-fw fa-eye"></i>
+                                                    <strong>Voir</strong></button></a>
+                                            <form method="POST"
+                                                action="{{ route('joindre-fichier', $etudiant->CodeEtudiant) }}">
+                                                {{ method_field('PATCH') }}
+                                                @csrf
+                                                <input type="text" name="delete" value="oui" class="hide">
+                                                <input type="text" name="delete_val" value="{{ $el['name'] }}"
+                                                    class="hide">
+                                                <button class="btn btn-danger mx-3 text-white" type="submit"><i
+                                                        class="fa fa-fw fa-trash"></i><strong>Supprimer</strong>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        {!! $errors->first($el['name'], '<div class="alert alert-danger mt-2">:message</div>') !!}
+                                    </div>
+                                @else
+                                    <div class="form-group">
                                         {{ Form::label($el['label']) }}
-
+                                        {{ Form::file($el['name'], ['accept' => 'application/pdf', 'class' => 'form-control form-file is-invalid' . ($errors->has('url_diplome_ou_bac') ? ' is-invalid' : ''), 'placeholder' => '']) }}
+                                        <div class="invalid-feedback">Choisissez le fichier (Taille Maximal : 2 Mo)
+                                        </div>
+                                        {!! $errors->first($el['name'], '<div class="alert alert-danger mt-2">:message</div>') !!}
                                     </div>
-                                    <div class="d-flex">
+                                @endif
 
-                                        <a href="{{ Storage::url($etudiant[$el['name']]) }}" target="_blank">
-                                            <button class="btn btn-info text-white" style="pointer-events: none"><i
-                                                    class="fa fa-fw fa-eye"></i>
-                                                <strong>Voir</strong></button></a>
-                                        <form method="POST"
-                                            action="{{ route('joindre-fichier', $etudiant->CodeEtudiant) }}">
-                                            {{ method_field('PATCH') }}
-                                            @csrf
-                                            <input type="text" name="delete" value="oui" class="hide">
-                                            <input type="text" name="delete_val" value="{{ $el['name'] }}"
-                                                class="hide">
-                                            <button class="btn btn-danger mx-3 text-white" type="submit"><i
-                                                    class="fa fa-fw fa-trash"></i><strong>Supprimer</strong>
-                                            </button>
-                                        </form>
-                                    </div>
-                                    {!! $errors->first($el['name'], '<div class="alert alert-danger mt-2">:message</div>') !!}
-                                </div>
-                            @else
-                                <div class="form-group">
-                                    {{ Form::label($el['label']) }}
-                                    {{ Form::file($el['name'], ['accept' => 'application/pdf', 'class' => 'form-control form-file is-invalid' . ($errors->has('url_diplome_ou_bac') ? ' is-invalid' : ''), 'placeholder' => '']) }}
-                                    <div class="invalid-feedback">Choisissez le fichier (Taille Maximal : 2 Mo)
-                                    </div>
-                                    {!! $errors->first($el['name'], '<div class="alert alert-danger mt-2">:message</div>') !!}
-                                </div>
-                            @endif
-
-                        </div>
-                    @endforeach
+                            </div>
+                        @endforeach
 
 
-                </div>
+                    </div>
 
-            </form>
+                </form>
+            </div>
         </div>
-    </div>
-@endif
+    @endif
 @endsection
 <script>
     function ancienPaiement(btn) {

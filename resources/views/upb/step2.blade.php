@@ -113,7 +113,7 @@
                     <div class="row">
                         @csrf
                         <div class="col-md-4 col-12 my-2">
-                            {{ Form::label('Banque') }}
+                            <div class="fw-bold text-dark"> {{ Form::label('Banque') }}</div>
                             {{ Form::select('Banque', App\Models\Banque::pluck('LibellecourtBanque', 'CodeBanque'), null, [
                                 'id' => 'banque',
                                 'onchange' => 'regexcheck(this.value);',
@@ -124,17 +124,18 @@
                         </div>
 
                         <div class="col-md-8 col-12 my-2">
-                            {{ Form::label('RIB') }}
+                            <div class="fw-bold text-dark">
+                            <label for="RIB">Relevé d'Identité Bancaire (RIB)</label></div>
                             {{ Form::text('RIB', null, ['id' => 'RIB', 'class' => 'form-control' . ($errors->has('RIB') ? ' is-invalid' : ''), 'placeholder' => 'RIB', 'required' => 'required']) }}
                             {!! $errors->first('RIB', '<div class="invalid-feedback">:message</div>') !!}
                         </div>
                         <div class="col-md-6 col-12 my-2">
-                            {{ Form::label('Telephone') }}
+                            <div class="fw-bold text-dark">{{ Form::label('Telephone') }}</div>
                             {{ Form::tel('Telephone', null, ['min' => '8', 'max' => '8', 'required' => 'required', 'class' => 'form-control' . ($errors->has('Telephone') ? ' is-invalid' : ''), 'placeholder' => 'Telephone']) }}
                             {!! $errors->first('Telephone', '<div class="invalid-feedback">:message</div>') !!}
                         </div>
                         <div class="col-md-6 col-12 my-2">
-                            {{ Form::label('NPI') }}
+                            <div class="fw-bold text-dark">{{ Form::label('NPI') }}</div>
                             {{ Form::number('NPI', null, ['minlength' => '9', 'maxlength' => '12', 'required' => 'required', 'class' => 'form-control' . ($errors->has('NPI') ? ' is-invalid' : ''), 'placeholder' => 'NPI']) }}
                             {!! $errors->first('NPI', '<div class="invalid-feedback">:message</div>') !!}
                         </div>

@@ -126,7 +126,7 @@
                     <td colspan="12">
 
                         <p class="m-0"><span class="title">Code Demande : </span><span
-                                class="text-italic"><?php echo e($dem->CodeDemandeAllocation); ?></span></p>
+                                class="text-italic"><?php echo e($dem->CodeDemandeAllocation.'-'. $dem->idtransaction.'-'. $dem->CodeAnneeAcademique); ?></span></p>
 
                     </td>
                 </tr>

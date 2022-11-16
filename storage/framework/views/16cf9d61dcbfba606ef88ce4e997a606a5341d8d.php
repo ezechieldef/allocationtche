@@ -62,7 +62,7 @@
                                                         href="<?php echo e(route('lots.show', $lot->CodeLot)); ?>"><i
                                                             class="fa fa-fw fa-eye"></i> Voir</a>
 
-                                                    <?php if(auth()->check() && auth()->user()->hasRole('super-admin')): ?>
+                                                    <?php if(auth()->check() && auth()->user()->hasRole('super-admin|President-CNABAU')): ?>
                                                         <a class="btn btn-sm btn-success text-white"
                                                             href="<?php echo e(route('lots.edit', $lot->CodeLot)); ?>"><i
                                                                 class="fa fa-fw fa-edit"></i> Modifier</a>

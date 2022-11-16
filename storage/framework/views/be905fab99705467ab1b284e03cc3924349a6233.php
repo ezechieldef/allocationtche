@@ -137,7 +137,7 @@
                 <?php echo e(Form::label('Correspond à : ')); ?>
 
 
-                <select id="sel-fil2" class="form-select" onchange="change(this)" name="filiereSelection">
+                <select id="sel-fil2" class="form-select selectpicker" onchange="change(this)" name="filiereSelection">
                     <option value=""> --Sélectionner -- </option>
 
                     <?php $__currentLoopData = Illuminate\Support\Facades\DB::select('SELECT distinct R.libfiliere from resultats R '); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $an): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -159,8 +159,9 @@
             Liste des Filières de sélection, n'ayant pas de correspondance.
         </button>
     </p>
-    <div class="collapse" id="collapseExample2">
-        <table class="table table-responsive" id="datatable">
+    <div class="collapse w-100" id="collapseExample2">
+        <div class="table-responsive w-100">
+        <table class="table w-100" id="datatable">
             <thead>
                 <th>Université Sélection</th>
                 <th>Etablissement Sélection</th>
@@ -216,7 +217,7 @@
                     </tr>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </tbody>
-        </table>
+        </table></div>
     </div>
 </div>
 <?php /**PATH /home/ezechiel/AllocationTche/resources/views/corresp-fil-selection/form.blade.php ENDPATH**/ ?>

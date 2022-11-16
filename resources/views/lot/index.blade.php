@@ -62,7 +62,7 @@
                                                         href="{{ route('lots.show', $lot->CodeLot) }}"><i
                                                             class="fa fa-fw fa-eye"></i> Voir</a>
 
-                                                    @role('super-admin')
+                                                    @role('super-admin|President-CNABAU')
                                                         <a class="btn btn-sm btn-success text-white"
                                                             href="{{ route('lots.edit', $lot->CodeLot) }}"><i
                                                                 class="fa fa-fw fa-edit"></i> Modifier</a>

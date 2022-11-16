@@ -51,9 +51,9 @@
                         </div>
                     <?php endif; ?>
 
-                    <div class="">
+                    <div class="card-body">
                         <div class="table-responsive">
-                            <table class="table table-striped table-hover" id="">
+                            <table class="table table-striped table-hover datatable w-100" >
                                 <thead class="thead">
                                     <tr>
                                         <th>Université</th>

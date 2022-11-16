@@ -115,8 +115,7 @@
                     <div class="row">
                         <?php echo csrf_field(); ?>
                         <div class="col-md-4 col-12 my-2">
-                            <?php echo e(Form::label('Banque')); ?>
-
+                            <div class="fw-bold text-dark"> <?php echo e(Form::label('Banque')); ?></div>
                             <?php echo e(Form::select('Banque', App\Models\Banque::pluck('LibellecourtBanque', 'CodeBanque'), null, [
                                 'id' => 'banque',
                                 'onchange' => 'regexcheck(this.value);',
@@ -128,24 +127,22 @@
                         </div>
 
                         <div class="col-md-8 col-12 my-2">
-                            <?php echo e(Form::label('RIB')); ?>
-
+                            <div class="fw-bold text-dark">
+                            <label for="RIB">Relevé d'Identité Bancaire (RIB)</label></div>
                             <?php echo e(Form::text('RIB', null, ['id' => 'RIB', 'class' => 'form-control' . ($errors->has('RIB') ? ' is-invalid' : ''), 'placeholder' => 'RIB', 'required' => 'required'])); ?>
 
                             <?php echo $errors->first('RIB', '<div class="invalid-feedback">:message</div>'); ?>
 
                         </div>
                         <div class="col-md-6 col-12 my-2">
-                            <?php echo e(Form::label('Telephone')); ?>
-
+                            <div class="fw-bold text-dark"><?php echo e(Form::label('Telephone')); ?></div>
                             <?php echo e(Form::tel('Telephone', null, ['min' => '8', 'max' => '8', 'required' => 'required', 'class' => 'form-control' . ($errors->has('Telephone') ? ' is-invalid' : ''), 'placeholder' => 'Telephone'])); ?>
 
                             <?php echo $errors->first('Telephone', '<div class="invalid-feedback">:message</div>'); ?>
 
                         </div>
                         <div class="col-md-6 col-12 my-2">
-                            <?php echo e(Form::label('NPI')); ?>
-
+                            <div class="fw-bold text-dark"><?php echo e(Form::label('NPI')); ?></div>
                             <?php echo e(Form::number('NPI', null, ['minlength' => '9', 'maxlength' => '12', 'required' => 'required', 'class' => 'form-control' . ($errors->has('NPI') ? ' is-invalid' : ''), 'placeholder' => 'NPI'])); ?>
 
                             <?php echo $errors->first('NPI', '<div class="invalid-feedback">:message</div>'); ?>

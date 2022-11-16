@@ -63,54 +63,58 @@
 
 <div class="box box-info padding-1">
     <div class="box-body">
-        <div class="row">
-            <div class="col-12">
-                {!! $errors->first('CodeEtablissement1', '<div class="alert alert-danger">:message</div>') !!}
-                {!! $errors->first('etablissementSelection', '<div class="alert alert-danger">:message</div>') !!}
+        <form method="POST" action="{{ route('correspondance-ets-selection.store') }}" role="form"
+            enctype="multipart/form-data">
+            @csrf
+            <div class="row">
+                <div class="col-12">
+                    {!! $errors->first('CodeEtablissement1', '<div class="alert alert-danger">:message</div>') !!}
+                    {!! $errors->first('etablissementSelection', '<div class="alert alert-danger">:message</div>') !!}
 
-            </div>
-            <div class="col-12 form-group mb-3">
-                {{ Form::label('Universités') }}
-                {{ Form::select('universite', \App\Models\Universite::pluck('LibelleLongUniversite', 'CodeUniversite'), null, [
-                    'id' => 'sel-univ',
-                    'class' => 'form-select ' . ($errors->has('universite') ? ' is-invalid' : ''),
-                    'placeholder' => '-- Séletionner --',
-                    'onchange' => 'arrange();',
-                ]) }}
-            </div>
+                </div>
+                <div class="col-12 form-group mb-3">
+                    {{ Form::label('Universités') }}
+                    {{ Form::select('universite', \App\Models\Universite::pluck('LibelleLongUniversite', 'CodeUniversite'), null, [
+                        'id' => 'sel-univ',
+                        'class' => 'form-select ' . ($errors->has('universite') ? ' is-invalid' : ''),
+                        'placeholder' => '-- Séletionner --',
+                        'onchange' => 'arrange();',
+                    ]) }}
+                </div>
 
-            <div class="col-md-6 col-12">
+                <div class="col-md-6 col-12">
 
-                {{ Form::label('Etablissement ') }}
-                <select id="CodeEtablissement1" name="CodeEtablissement1" class="form-select" onchange="filsel(this.value);"
-                    value="{{ $correspEtsSelection->CodeEtablissement1 }}">
-                    <option value=""> -- Sélectionner -- </option>
-                    @foreach (\App\Models\Etablissement::all() as $an)
-                        <option value="{{ $an->CodeEtablissement }}" parent='{{ $an->CodeUniversite }}' hidden>
-                            {{ $an->LibelleEtablissement }} </option>
-                    @endforeach
-                </select>
+                    {{ Form::label('Etablissement ') }}
+                    <select id="CodeEtablissement1" name="CodeEtablissement1" class="form-select"
+                        onchange="filsel(this.value);" value="{{ $correspEtsSelection->CodeEtablissement1 }}">
+                        <option value=""> -- Sélectionner -- </option>
+                        @foreach (\App\Models\Etablissement::all() as $an)
+                            <option value="{{ $an->CodeEtablissement }}" parent='{{ $an->CodeUniversite }}' hidden>
+                                {{ $an->LibelleEtablissement }} </option>
+                        @endforeach
+                    </select>
 
-            </div>
+                </div>
 
-            <div class="col-md-6 col-12">
+                <div class="col-md-6 col-12">
 
-                {{ Form::label('Correspond à') }}
-                <select id="etablissementSelection" name="etablissementSelection" class="form-select"
-                    value="{{ $correspEtsSelection->etablissementSelection }}">
-                    <option value=""> -- Sélectionner -- </option>
-                    @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct etablissementSelection, CodeUniversite from resultats') as $an)
-                        <option value="{{ $an->etablissementSelection }}" parent='{{ $an->CodeUniversite }}' hidden>
-                            {{ $an->etablissementSelection }} </option>
-                        {{-- <option value="{{ $an['etablissementSelection'] }}" parent='{{ $an['CodeUniversite'] }}'
+                    {{ Form::label('Correspond à') }}
+                    <select id="etablissementSelection" name="etablissementSelection" class="form-select"
+                        value="{{ $correspEtsSelection->etablissementSelection }}">
+                        <option value=""> -- Sélectionner -- </option>
+                        @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct etablissementSelection, CodeUniversite from resultats') as $an)
+                            <option value="{{ $an->etablissementSelection }}" parent='{{ $an->CodeUniversite }}'
+                                hidden>
+                                {{ $an->etablissementSelection }} </option>
+                            {{-- <option value="{{ $an['etablissementSelection'] }}" parent='{{ $an['CodeUniversite'] }}'
                             hidden>
                             {{ $an['etablissementSelection'] }} </option> --}}
-                    @endforeach
-                </select>
+                        @endforeach
+                    </select>
 
+                </div>
             </div>
-        </div>
-
+        </form>
         {{--
         <div class="form-group">
             {{ Form::label('CodeEtablissement1') }}
@@ -133,9 +137,9 @@
             Liste des Etablissements de sélection, n'ayant pas de correspondance.
         </button>
     </p>
-    <div class="collapse" id="collapseExample2">
+    <div class="collapse w-100" id="collapseExample2">
         <div class="table-responsive">
-            <table class="table" id="datatable">
+            <table class="table w-100" id="datatable">
                 <thead>
                     <th>Université Sélection</th>
                     <th>Etablissement Sélection</th>
