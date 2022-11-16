@@ -6,12 +6,23 @@
     @php
         $reg = \App\Models\ReglageDeBase::first();
         $today = strtotime(date('Y-m-d'));
+        $ouv = strtotime($reg->DateOuverture);
+        $ferm = strtotime($reg->DateFermeture);
     @endphp
+    {{-- {{ $ouv }} <br> {{ $today }} <br> {{ $ferm }} --}}
+    @if ($ouv > $today || $ferm < $today)
+        {{-- @if (1 == 1) --}}
+        <div class="text-center">
+            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+            <lottie-player src="https://assets7.lottiefiles.com/private_files/lf30_3anincg1.json" background="transparent"
+                speed="1" style="height:500px;" loop autoplay>
 
-    {{-- @if (strtotime($reg->DateOuverture) >= $today && strtotime($reg->DateFermeture) <= $today) --}}
-    @if (1==1)
+            </lottie-player>
+            <div class="h4">Formulaire de demande d'allocation non accessible pour le moment</div>
 
-
+            <p> Disponible du <strong>{{ $reg->DateOuverture }}</strong> au <strong>{{ $reg->DateFermeture }}</strong></p>
+        </div>
+    @else
         <form action="nouvelle-demande-allocation" method="post">
             <div class=" ">
                 {{-- {{ Session::get('errorsDem') }} --}}
@@ -39,12 +50,12 @@
                         <div class="row">
                             @csrf
                             <div class="col-md-6 col-12 my-2">
-                              <strong>  <label for="">Université</label></strong>
+                                <strong> <label for="">Université</label></strong>
                                 {{ Form::select('Universite', App\Models\Universite::pluck('LibelleLongUniversite', 'CodeUniversite'), null, ['required' => 'required', 'class' => 'form-select', 'placeholder' => '-- Sélectionner --']) }}
                             </div>
 
                             <div class="col-md-6 col-12 my-2">
-                               <strong> {{ Form::label('Matricule') }}</strong>
+                                <strong> {{ Form::label('Matricule') }}</strong>
                                 {{ Form::text('Matricule', null, ['class' => 'form-control' . ($errors->has('Matricule') ? ' is-invalid' : ''), 'placeholder' => 'Matricule', 'required' => 'required']) }}
                                 {!! $errors->first('Matricule', '<div class="invalid-feedback">:message</div>') !!}
                             </div>
@@ -56,7 +67,7 @@
                             </div>
                             <div class="col-md-4 col-12 my-2">
                                 <strong><label for="">Diplome de base</label></strong>
-                                {{ Form::select('DipDeBase', ['BAC'=>'Baccalauréat', 'Autre'=>'Autres'], null, ['required' => 'required', 'class' => 'form-select', 'placeholder' => '-- Sélectionner --']) }}
+                                {{ Form::select('DipDeBase', ['BAC' => 'Baccalauréat', 'Autre' => 'Autres'], null, ['required' => 'required', 'class' => 'form-select', 'placeholder' => '-- Sélectionner --']) }}
                             </div>
                             {{-- <div class="col-12">
                     <label for="">Année d'Obtention</label>
@@ -72,7 +83,7 @@
                             <div class="col-md-4 col-12 my-2">
 
                                 <strong>
-                                <label for="NumeroDeTable">Numero de table</label></strong>
+                                    <label for="NumeroDeTable">Numero de table</label></strong>
                                 {{ Form::text('NumeroDeTable', null, ['required' => 'required', 'class' => 'form-control' . ($errors->has('NumeroDeTable') ? ' is-invalid' : ''), 'placeholder' => 'Numero De Table']) }}
                                 {!! $errors->first('NumeroDeTable', '<div class="invalid-feedback">:message</div>') !!}
                             </div>
@@ -88,17 +99,6 @@
 
             </div>
         </form>
-    @else
-        <div class="text-center">
-            <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
-            <lottie-player src="https://assets7.lottiefiles.com/private_files/lf30_3anincg1.json" background="transparent"
-                speed="1" style="height:500px;" loop autoplay>
-
-            </lottie-player>
-            <div class="h4">Formulaire de demande d'allocation non accessible pour le moment</div>
-
-            <p> Disponible du <strong>{{ $reg->DateOuverture }}</strong> au <strong>{{ $reg->DateFermeture }}</strong></p>
-        </div>
 
     @endif
 @endsection
