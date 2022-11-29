@@ -54,7 +54,7 @@
     <center>
         <h2 style="text-decoration: underline">Direction des Bourses et Aides Universitaire</h2>
 
-        <h3 class="mb-3"> Fiche d'inscription : Bourse Chinoise </h4>
+        <h3 class="mb-3"> Fiche d'inscription : Bourse de Coopération Chinoise </h4>
     </center>
 
 
@@ -80,47 +80,55 @@
             </td>
         </tr>
         <tr>
-            <td>
+            <td colspan="2">
                 <strong>Date Naissance:</strong>
                 <div class='btn-style'><?php echo e($demandesBourseChinoise->date_naissance); ?></div>
-            </td>
-            <td>
-                <strong>Lieu Naissance:</strong>
-                <div class='btn-style'><?php echo e($demandesBourseChinoise->lieu_naissance); ?></div>
             </td>
 
             <td>
                 <strong>Sexe:</strong>
                 <div class='btn-style'><?php echo e($demandesBourseChinoise->sexe); ?></div>
             </td>
-            <td>
-                <strong>Diplome de base:</strong>
-                <div class='btn-style'><?php echo e($demandesBourseChinoise->diplome_de_base .' | '.$demandesBourseChinoise->serie_ou_filiere); ?></div>
+
+            <td colspan="3">
+                <strong>Lieu Naissance:</strong>
+                <div class='btn-style'><?php echo e($demandesBourseChinoise->lieu_naissance); ?></div>
             </td>
-            <td>
-                <strong>Baccalauréat :</strong>
-                <div class='btn-style'><?php echo e($demandesBourseChinoise->annee_obtention_bac.' | '.$demandesBourseChinoise->moyenne_bac.' | '.$demandesBourseChinoise->mention); ?></div>
-            </td>
+
+
 
         </tr>
         <tr>
-            <td colspan="2">
-                <strong>Filière choisi:</strong>
-                <div class='btn-style'><?php echo e($demandesBourseChinoise->filiere_choisi); ?></div>
+            <td colspan="3">
+                <strong>Diplome de base:</strong>
+                <div class='btn-style'><?php echo e($demandesBourseChinoise->diplome_de_base .' | '.$demandesBourseChinoise->serie_ou_filiere); ?></div>
+            </td>
+            <td colspan="3">
+                <strong>Diplome de base (Année | Moy | Mention ) :</strong>
+                <div class='btn-style'><?php echo e($demandesBourseChinoise->annee_obtention_bac.' | '.$demandesBourseChinoise->moyenne_bac.' | '.$demandesBourseChinoise->mention); ?></div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6">
+                <strong>Niveau & Filière sollicité:</strong>
+                <div class='btn-style'><?php echo e($demandesBourseChinoise->niveau_sollicite .' | '.$demandesBourseChinoise->filiere_choisi); ?></div>
             </td>
 
+
+        </tr>
+        <tr>
             <td> <strong>Status Bourse:</strong>
                 <div class='btn-style'><?php echo e($demandesBourseChinoise->status_bourse); ?></div>
             </td>
-            <td><strong>Contact Whatsapp:</strong>
+            <td colspan="3"><strong>Contact Whatsapp:</strong>
                 <div class='btn-style'><?php echo e($demandesBourseChinoise->contact_whatsapp); ?></div>
             </td>
-            <td><strong>Contact Parent:</strong>
+            <td colspan="2"><strong>Contact Parent:</strong>
                 <div class='btn-style'><?php echo e($demandesBourseChinoise->contact_parent); ?></div>
             </td>
         </tr>
         <tr>
-            <td colspan="5">
+            <td colspan="6">
 
                 <?php $__empty_1 = true; $__currentLoopData = App\Models\PieceJointeChine::all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pj): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                     
@@ -173,8 +181,7 @@
         <label for=""> <strong> Imprimé le :</strong> <br>
             <?php echo e(\Carbon\Carbon::parse(date('d-m-Y'))->translatedFormat('d F Y ')); ?> par
             <?php echo e(Auth::user()->name); ?></label> <br>
-        <label for=""> <strong> Référence : </strong>
-            D22-ISSI<?php echo e($demandesBourseChinoise->id); ?></label>
+
     </div>
 
 

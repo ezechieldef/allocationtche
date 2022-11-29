@@ -51,6 +51,6 @@ class User extends Authenticatable
 
     public function demandesBourseChinoise()
     {
-        return $this->hasMany(demandesBourseChinoise::class, 'user_id', 'id')->get();
+        return $this->hasMany(DemandesBourseChinoise::class, 'user_id', 'id')->get();
     }
 }

@@ -5,7 +5,7 @@
 @endsection
 
 @section('content')
-<div class="text-center">
+{{-- <div class="text-center">
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <lottie-player src="https://assets7.lottiefiles.com/private_files/lf30_3anincg1.json" background="transparent"
         speed="1" style="height:500px;" loop autoplay>
@@ -14,8 +14,8 @@
     <div class="h4">Formulaire de demande d'allocation non accessible pour le moment</div>
 
     <p> Maintenance en cours </p>
-</div>
-    {{-- <section class="content container-fluid">
+</div> --}}
+     <section class="content container-fluid">
         <div class="">
             <div class="col-md-12">
 
@@ -42,5 +42,5 @@
                 </div>
             </div>
         </div>
-    </section> --}}
+    </section> 
 @endsection

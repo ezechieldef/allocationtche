@@ -34,31 +34,39 @@ class DemandesBourseChinoise extends Model
 {
     protected $table = 'demandes_bourse_chinoise';
     static $rules = [
-		'user_id' => 'required',
-		'nom' => 'required',
-		'prenoms' => 'required',
-		'date_naissance' => 'required|before_or_equal:today',
-		'lieu_naissance' => 'required',
-		'sexe' => 'required',
-        'diplome_de_base'=>'required',
-		'serie_ou_filiere' => 'required',
-		'annee_obtention_bac' => 'required',
-		'moyenne_bac' => 'required',
-		'mention' => 'required',
-		'filiere_choisi' => 'required',
-		'status_bourse' => 'required',
-		'contact_whatsapp' => 'required',
-		'contact_parent' => 'required',
+        'user_id' => 'required',
+        'nom' => 'required',
+        'prenoms' => 'required',
+        'date_naissance' => 'required|before_or_equal:today',
+        'lieu_naissance' => 'required',
+        'sexe' => 'required',
+        'diplome_de_base' => 'required',
+        'serie_ou_filiere' => 'required',
+        'annee_obtention_bac' => 'required',
+        'moyenne_bac' => 'required',
+        'mention' => 'required',
+        'niveau_sollicite' => 'required|in:LICENCE,MASTER,DOCTORAT,SPECIALISATION',
+        'filiere_choisi' => 'required',
+        'status_bourse' => 'required',
+        'contact_whatsapp' => 'required',
+        'contact_parent' => 'required',
     ];
-    public static function listeFiliere(){
+    public static function listeFiliere()
+    {
+
 
         return [
-            ['code'=> 'Droit', 'libelle' => "Technologie et Sciences Intelligentes", 'base'=>'BAC'],
-            ['code'=> 'Droit', 'libelle' => "Génie énergétique et ingénieurie thermo physique", 'base'=>'LICENCE'],
-            ['code'=> 'Droit', 'libelle' => "Sécurité des Systèmes d'Information et Réseaux", 'base'=>'LICENCE'],
-            ['code'=> 'Droit', 'libelle' => "Pathologie des plantes", 'base'=>'MASTER'],
-            ['code'=> 'Droit', 'libelle' => "Réanimation pédiatrique", 'base'=>'DOCTORAT'],
-            ['code'=> 'Droit', 'libelle' => "Maintenance d'Industrie agroalimentaire", 'base'=>'DOCTORAT'],
+            ['niveau' => "LICENCE", 'base'=>'BAC', 'code' => 'Technologie et sciences intelligentes', "libelle" => "Technologie et sciences intelligentes"],
+            ['niveau' => "LICENCE", 'base'=>'BAC','code' => "Maintenance d'industrie agroalimentaire", "libelle" => "Maintenance d'industrie agroalimentaire"],
+
+            ['niveau' => "MASTER", 'base'=>'LICENCE', 'code' => 'Génie énergétique et ingénierie thermo physique', "libelle" => "Génie énergétique et ingénierie thermo physique"],
+            ['niveau' => "MASTER", 'base'=>'LICENCE', 'code' => "Sécurité des systèmes d'information et réseaux", "libelle" => "Sécurité des systèmes d'information et réseaux"],
+            ['niveau' => "MASTER", 'base'=>'LICENCE', 'code' => 'Télédétection agricole', "libelle" => "Télédétection agricole"],
+            ['niveau' => "MASTER", 'base'=>'LICENCE', 'code' => 'Analyse et calcul des informations complexes', "libelle" => "Analyse et calcul des informations complexes"],
+
+            ['niveau' => "DOCTORAT", 'base'=>'MASTER', 'code' => 'Pathologie des plantes', "libelle" => "Pathologie des plantes"],
+
+            ['niveau' => "SPECIALISATION", 'base'=>'DOCTORAT', 'code' => 'Réanimation pédiatrique', "libelle" => "Réanimation pédiatrique"],
 
         ];
     }
@@ -71,7 +79,9 @@ class DemandesBourseChinoise extends Model
      */
     protected $fillable = [
         'code',
-        'user_id','NPI', 'diplome_de_base','nom','prenoms','date_naissance','lieu_naissance','sexe','serie_ou_filiere','annee_obtention_bac','moyenne_bac','mention','filiere_choisi','status_bourse','contact_whatsapp','contact_parent','imprime'];
+        'user_id', 'NPI',
+        'niveau_sollicite', 'diplome_de_base', 'nom', 'prenoms', 'date_naissance', 'lieu_naissance', 'sexe', 'serie_ou_filiere', 'annee_obtention_bac', 'moyenne_bac', 'mention', 'filiere_choisi', 'status_bourse', 'contact_whatsapp', 'contact_parent', 'imprime'
+    ];
 
 
     /**
@@ -85,7 +95,6 @@ class DemandesBourseChinoise extends Model
 
     public function pjID($id)
     {
-        return $this->hasMany(AssocPJChine::class, 'demande_id', 'id')->where('piece_jointe',$id)->get();
+        return $this->hasMany(AssocPJChine::class, 'demande_id', 'id')->where('piece_jointe', $id)->get();
     }
-
 }

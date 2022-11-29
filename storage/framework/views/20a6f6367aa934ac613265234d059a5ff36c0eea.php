@@ -3,6 +3,7 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
+
     <section class="content container-fluid">
         <div class="">
             <div class="col-md-12">

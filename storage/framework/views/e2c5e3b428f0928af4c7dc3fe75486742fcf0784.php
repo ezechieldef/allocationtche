@@ -3,7 +3,11 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
+    
+
     <section class="content container-fluid">
+        <div class="alert alert-info">Avant de télécharger votre fiche, vérifier les informations saisies et téléverser les
+            pièces jointes requise</div>
         <div class="row">
             <div class="col-md-12">
                 <div class="card">
@@ -12,7 +16,8 @@
                             <span class="card-title">Détail Demandes Bourse Chinoise</span>
                         </div>
                         <div class="float-right">
-                            <a class="btn btn-primary" href="<?php echo e(route('demandes-bourse-chinoise.index')); ?>"> Retour</a>
+                            <a class="btn btn-warning text-dark " href="<?php echo e(route('demandes-bourse-chinoise.index')); ?>">
+                                Retour</a>
                         </div>
                     </div>
 
@@ -55,28 +60,29 @@
                                     readonly />
                             </div>
                             <div class="col-md-3 col-12 my-2">
-                                <strong>Serie Ou Filiere:</strong>
+                                <strong>Serie / Filiere:</strong>
                                 <input type="text" value="<?php echo e($demandesBourseChinoise->serie_ou_filiere); ?>"
                                     class="form-control" readonly />
                             </div>
                             <div class="col-md-2 col-12 my-2">
-                                <strong>Annee Obtention Bac:</strong>
+                                <strong>Annee Obtention du diplome de base:</strong>
                                 <input type="text" value="<?php echo e($demandesBourseChinoise->annee_obtention_bac); ?>"
                                     class="form-control" readonly />
                             </div>
                             <div class="col-md-2 col-12 my-2">
-                                <strong>Moyenne Bac:</strong>
+                                <strong>Moyenne du diplome de base:</strong>
                                 <input type="text" value="<?php echo e($demandesBourseChinoise->moyenne_bac); ?>"
                                     class="form-control" readonly />
                             </div>
                             <div class="col-md-2 col-12 my-2">
-                                <strong>Mention:</strong>
+                                <strong>Mention du diplome de base:</strong>
                                 <input type="text" value="<?php echo e($demandesBourseChinoise->mention); ?>" class="form-control"
                                     readonly />
                             </div>
                             <div class="col-md-5 col-12 my-2">
-                                <strong>Filiere Choisi:</strong>
-                                <input type="text" value="<?php echo e($demandesBourseChinoise->filiere_choisi); ?>"
+                                <strong>Niveau & Filiere sollicité:</strong>
+                                <input type="text"
+                                    value="<?php echo e($demandesBourseChinoise->niveau_sollicite . ' | ' . $demandesBourseChinoise->filiere_choisi); ?>"
                                     class="form-control" readonly />
                             </div>
                             <div class="col-md-2 col-12 my-2">

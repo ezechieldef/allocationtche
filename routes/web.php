@@ -89,7 +89,9 @@ Route::middleware(["auth", 'role:super-admin|President-CNABAU'])->group(function
     Route::post('/retirer-du-lot/{codelot}/{codedemande}', [App\Http\Controllers\LotController::class, 'retirerDuLot']);
     Route::get('/cloturer-pv/{pv_id}', [App\Http\Controllers\PvController::class, 'cloturerPV']);
 });
-
+Route::middleware(["auth", 'role:statistique'])->group(function () {
+    Route::any('/preview', [App\Http\Controllers\HomeController::class,'preview']);
+});
 Route::middleware(["auth", 'role:super-admin'])->group(function () {
 
     Route::resource('/derogations', App\Http\Controllers\DerogationController::class);

@@ -24,10 +24,11 @@ class DemandesBourseChinoiseController extends Controller
      */
     public function index()
     {
-        $demandesBourseChinoises = DemandesBourseChinoise::paginate();
+
+        $demandesBourseChinoises = Auth::user()->demandesBourseChinoise();;
 
         return view('demandes-bourse-chinoise.index', compact('demandesBourseChinoises'))
-            ->with('i', (request()->input('page', 1) - 1) * $demandesBourseChinoises->perPage());
+            ->with('i',0);
     }
 
     /**
@@ -50,18 +51,20 @@ class DemandesBourseChinoiseController extends Controller
     public function store(Request $request)
     {
         request()->validate(DemandesBourseChinoise::$rules);
-        $a=$request->all();
-        $str = Str::upper( Str::random(12));
-        $i=4;
-        while($i< strlen($str) ){
+        $a = $request->all();
+        $str = Str::upper(Str::random(12));
+        $i = 4;
+        while ($i < strlen($str)) {
             $str = substr($str, 0, $i) . '-' . substr($str, $i);
-            $i=$i+5;
+            $i = $i + 5;
         }
-        $a['code']= $str;
+        $a['code'] = $str;
+        $a['nom']= strtoupper($a['nom']);
+        $a['prenoms']= ucfirst($a['prenoms']);
         $demandesBourseChinoise = DemandesBourseChinoise::create($a);
 
         return redirect()->route('demandes-bourse-chinoise.index')
-            ->with('success', 'DemandesBourseChinoise créé avec succès.');
+            ->with('success', 'Demandes Bourse Chinoise effectuée avec succès.');
     }
 
     /**
@@ -86,7 +89,9 @@ class DemandesBourseChinoiseController extends Controller
     public function edit($id)
     {
         $demandesBourseChinoise = DemandesBourseChinoise::find($id);
-
+        if ($demandesBourseChinoise->imprime) {
+            return back()->with('error', "La modification de cette demande n'est plus possible");
+        }
         return view('demandes-bourse-chinoise.edit', compact('demandesBourseChinoise'));
     }
 
@@ -99,7 +104,9 @@ class DemandesBourseChinoiseController extends Controller
      */
     public function update(Request $request, DemandesBourseChinoise $demandesBourseChinoise)
     {
-
+        if ($demandesBourseChinoise->imprime) {
+            return back()->with('error', "La modification de cette demande n'est plus possible");
+        }
 
         $a = $request->all();
         foreach ($request->allFiles() as  $fname => $v) {
@@ -150,8 +157,13 @@ class DemandesBourseChinoiseController extends Controller
      */
     public function destroy($id)
     {
-        $demandesBourseChinoise = DemandesBourseChinoise::find($id)->delete();
-
+        $dem= DemandesBourseChinoise::find($id);
+        if (!is_null($dem) && $dem->imprime) {
+            return back()->with('error', "La suppression de cette demande n'est plus possible");
+        }
+        if (!is_null($dem)) {
+            $dem->delete();
+        }
         return redirect()->route('demandes-bourse-chinoise.index')
             ->with('success', 'DemandesBourseChinoise supprimé avec succès');
     }
@@ -159,22 +171,22 @@ class DemandesBourseChinoiseController extends Controller
     public function imprimer_pdf(int $id)
     {
 
-            $demandesBourseChinoise = \App\Models\DemandesBourseChinoise::findOrFail($id);
-            if ($demandesBourseChinoise->user_id != Auth::user()->id) {
-                //Alert::alert('Title', 'Message', 'danger');
-                return abort(404, 'Page not found.');
-            }
-            // share data to view
-            PDF::setOptions([
-                "isHtml5ParserEnabled" => true,
-                "isRemoteEnabled" => true,
-                "defaultPaperSize" => "a4",
-                "dpi" => 130
-            ]);
+        $demandesBourseChinoise = \App\Models\DemandesBourseChinoise::findOrFail($id);
+        if ($demandesBourseChinoise->user_id != Auth::user()->id) {
+            //Alert::alert('Title', 'Message', 'danger');
+            return abort(404, 'Page not found.');
+        }
+        // share data to view
+        PDF::setOptions([
+            "isHtml5ParserEnabled" => true,
+            "isRemoteEnabled" => true,
+            "defaultPaperSize" => "a4",
+            "dpi" => 130
+        ]);
 
-            $pdf = PDF::loadView('demandes-bourse-chinoise.pdf', compact('demandesBourseChinoise'));
-            $demandesBourseChinoise->update(['imprime' => true]);
-            return view('demandes-bourse-chinoise.pdf', compact('demandesBourseChinoise'));
-            return $pdf->download('pdf_file.pdf');
+        $pdf = PDF::loadView('demandes-bourse-chinoise.pdf', compact('demandesBourseChinoise'));
+        $demandesBourseChinoise->update(['imprime' => true]);
+        // return view('demandes-bourse-chinoise.pdf', compact('demandesBourseChinoise'));
+        return $pdf->download('pdf_file.pdf');
     }
 }

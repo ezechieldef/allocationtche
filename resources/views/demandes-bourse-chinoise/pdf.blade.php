@@ -54,7 +54,7 @@
     <center>
         <h2 style="text-decoration: underline">Direction des Bourses et Aides Universitaire</h2>
 
-        <h3 class="mb-3"> Fiche d'inscription : Bourse Chinoise </h4>
+        <h3 class="mb-3"> Fiche d'inscription : Bourse de Coopération Chinoise </h4>
     </center>
 
 
@@ -80,47 +80,55 @@
             </td>
         </tr>
         <tr>
-            <td>
+            <td colspan="2">
                 <strong>Date Naissance:</strong>
                 <div class='btn-style'>{{ $demandesBourseChinoise->date_naissance }}</div>
-            </td>
-            <td>
-                <strong>Lieu Naissance:</strong>
-                <div class='btn-style'>{{ $demandesBourseChinoise->lieu_naissance }}</div>
             </td>
 
             <td>
                 <strong>Sexe:</strong>
                 <div class='btn-style'>{{ $demandesBourseChinoise->sexe }}</div>
             </td>
-            <td>
-                <strong>Diplome de base:</strong>
-                <div class='btn-style'>{{ $demandesBourseChinoise->diplome_de_base .' | '.$demandesBourseChinoise->serie_ou_filiere }}</div>
+
+            <td colspan="3">
+                <strong>Lieu Naissance:</strong>
+                <div class='btn-style'>{{ $demandesBourseChinoise->lieu_naissance }}</div>
             </td>
-            <td>
-                <strong>Baccalauréat :</strong>
-                <div class='btn-style'>{{ $demandesBourseChinoise->annee_obtention_bac.' | '.$demandesBourseChinoise->moyenne_bac.' | '.$demandesBourseChinoise->mention }}</div>
-            </td>
+
+
 
         </tr>
         <tr>
-            <td colspan="2">
-                <strong>Filière choisi:</strong>
-                <div class='btn-style'>{{ $demandesBourseChinoise->filiere_choisi }}</div>
+            <td colspan="3">
+                <strong>Diplome de base:</strong>
+                <div class='btn-style'>{{ $demandesBourseChinoise->diplome_de_base .' | '.$demandesBourseChinoise->serie_ou_filiere }}</div>
+            </td>
+            <td colspan="3">
+                <strong>Diplome de base (Année | Moy | Mention ) :</strong>
+                <div class='btn-style'>{{ $demandesBourseChinoise->annee_obtention_bac.' | '.$demandesBourseChinoise->moyenne_bac.' | '.$demandesBourseChinoise->mention }}</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6">
+                <strong>Niveau & Filière sollicité:</strong>
+                <div class='btn-style'>{{ $demandesBourseChinoise->niveau_sollicite .' | '.$demandesBourseChinoise->filiere_choisi }}</div>
             </td>
 
+
+        </tr>
+        <tr>
             <td> <strong>Status Bourse:</strong>
                 <div class='btn-style'>{{ $demandesBourseChinoise->status_bourse }}</div>
             </td>
-            <td><strong>Contact Whatsapp:</strong>
+            <td colspan="3"><strong>Contact Whatsapp:</strong>
                 <div class='btn-style'>{{ $demandesBourseChinoise->contact_whatsapp }}</div>
             </td>
-            <td><strong>Contact Parent:</strong>
+            <td colspan="2"><strong>Contact Parent:</strong>
                 <div class='btn-style'>{{ $demandesBourseChinoise->contact_parent }}</div>
             </td>
         </tr>
         <tr>
-            <td colspan="5">
+            <td colspan="6">
 
                 @forelse (App\Models\PieceJointeChine::all() as $pj)
                     {{-- @forelse ($demandesBourseChinoise->pieceJointes() as $pj) --}}
@@ -211,14 +219,12 @@
         </tr>
     </table>
     <div style="text-align: end ; margin-top:15px; width: 100%; float:right;">
-        <label for=""> <strong>Demande émis le : </strong> <br>
+        <label for=""> <strong>Demande émise le : </strong> <br>
             {{ \Carbon\Carbon::parse($demandesBourseChinoise->created_at)->translatedFormat('d F Y à H\hi') }}</label>
         <br>
-        <label for=""> <strong> Imprimé le :</strong> <br>
-            {{ \Carbon\Carbon::parse(date('d-m-Y'))->translatedFormat('d F Y ') }} par
-            {{ Auth::user()->name }}</label> <br>
-        <label for=""> <strong> Référence : </strong>
-            D22-ISSI{{ $demandesBourseChinoise->id }}</label>
+        <label for=""> <strong> Imprimée le :</strong> <br>
+            {{ \Carbon\Carbon::parse(date('d-m-Y'))->translatedFormat('d F Y ') }}
+
     </div>
 
 

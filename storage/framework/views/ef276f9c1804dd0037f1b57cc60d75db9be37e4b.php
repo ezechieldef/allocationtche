@@ -192,6 +192,13 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Lots</span></a></li>
                         <?php endif; ?>
+                        <?php if(auth()->check() && auth()->user()->hasRole('statistique')): ?>
+                            <li class="sidebar-item <?php if(Request::is('preview*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/preview"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Statistique Simplifié</span></a></li>
+                        <?php endif; ?>
+
                         <?php if(count(Auth::user()->getRoleNames()) == 0): ?>
                             <li class="sidebar-item <?php if(Request::is('nouvelle-demande-allocation/*')): ?> selected <?php endif; ?>"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link"

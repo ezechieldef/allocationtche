@@ -239,6 +239,13 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Lots</span></a></li>
                         @endrole
+                        @role('statistique')
+                            <li class="sidebar-item @if (Request::is('preview*')) selected @endif"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/preview"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Statistique Simplifié</span></a></li>
+                        @endrole
+
                         @if (count(Auth::user()->getRoleNames()) == 0)
                             <li class="sidebar-item @if (Request::is('nouvelle-demande-allocation/*')) selected @endif"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link"
