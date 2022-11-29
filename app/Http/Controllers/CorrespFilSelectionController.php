@@ -18,10 +18,10 @@ class CorrespFilSelectionController extends Controller
      */
     public function index()
     {
-        $correspFilSelections = CorrespFilSelection::paginate();
+        $correspFilSelections = CorrespFilSelection::all();
 
         return view('corresp-fil-selection.index', compact('correspFilSelections'))
-            ->with('i', (request()->input('page', 1) - 1) * $correspFilSelections->perPage());
+            ->with('i', 0);
     }
 
     /**
@@ -31,6 +31,7 @@ class CorrespFilSelectionController extends Controller
      */
     public function create()
     {
+        //ini_set("memory_limit","200M");
         $correspFilSelection = new CorrespFilSelection();
         return view('corresp-fil-selection.create', compact('correspFilSelection'));
     }

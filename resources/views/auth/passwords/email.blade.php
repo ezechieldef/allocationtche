@@ -21,7 +21,7 @@
                     name="email" value="{{ old('email') }}" required autocomplete="email" autofocus>
                 <small id="email" class="text-muted ">
                     <i class="fa-solid fa-circle-info text-italic me-1 "></i>
-                    Il s'agit de l'adresse email que vous aviez utilisé pour inscrire sur cette plateforme
+                    Il s'agit de l'adresse email que vous aviez utilisé pour vous inscrire sur cette plateforme
                 </small>
                 @error('email')
                     <span class="invalid-feedback" role="alert">

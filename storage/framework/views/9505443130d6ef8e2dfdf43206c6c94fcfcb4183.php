@@ -6,6 +6,7 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('content'); ?>
+
     <div class="container-fluid">
         <div class="row">
             <div class="col-sm-12">
@@ -71,7 +72,6 @@
                         </div>
                     </div>
                 </div>
-                <?php echo $users->links(); ?>
 
             </div>
         </div>

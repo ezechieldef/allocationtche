@@ -72,7 +72,7 @@ unset($__errorArgs, $__bag); ?>
                 <label for="" class="text-dark text-bold">Confirmer Mot De Passe</label>
 
                 <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required
-                    autocomplete="new-password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&amp;*_=+-]).{8,12}$" title="Doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un symbole ( ! @ # $ % ^ &amp; * _ = + - )" minlength="8">
+                    autocomplete="new-password" pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&amp;*_=+-]).{8,}$" title="Doit contenir au moins une lettre majuscule, une lettre minuscule, un chiffre et un symbole ( ! @ # $ % ^ &amp; * _ = + - )" minlength="8">
                     <small id="password" class="text-muted">
                         <i class="fa-solid fa-circle-info text-italic me-1"></i>
                         Confirmer le mot de passe précédemment saisi

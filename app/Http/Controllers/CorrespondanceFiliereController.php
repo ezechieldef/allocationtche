@@ -31,6 +31,8 @@ class CorrespondanceFiliereController extends Controller
      */
     public function create()
     {
+        ini_set("memory_limit","3000M");
+
         $correspondanceFiliere = new CorrespondanceFiliere();
         return view('correspondance-filiere.create', compact('correspondanceFiliere'));
     }

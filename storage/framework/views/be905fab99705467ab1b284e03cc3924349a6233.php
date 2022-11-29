@@ -142,82 +142,29 @@
 
                     <?php $__currentLoopData = Illuminate\Support\Facades\DB::select('SELECT distinct R.libfiliere from resultats R '); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $an): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                         <option value="<?php echo e($an->libfiliere); ?>">
-                            <?php echo e($an->libfiliere); ?> </option>
+                            <?php if(DB::select('SELECT count(*) as nbr from corresp_fil_selection C WHERE C.filiereSelection=? ', [
+                                $an->libfiliere,
+                            ])[0]->nbr > 0): ?>
+                                <strong>
+                                    <?php echo e($an->libfiliere); ?> (---- <?php echo e(DB::select('SELECT count(*) as nbr from corresp_fil_selection C WHERE C.filiereSelection=? ', [
+                                        $an->libfiliere,
+                                    ])[0]->nbr); ?> ----)
+                                </strong>
+                            <?php else: ?>
+                                <?php echo e($an->libfiliere); ?>
+
+                            <?php endif; ?>
+                        </option>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                 </select>
 
             </div>
         </div>
     </div>
-    <div class="box-footer mt20">
+    <div class="box-footer mt20 w-100">
         <button type="submit" class="btn btn-primary">Soumettre</button>
     </div>
 
-    <p class="my-5">
-        <button class="btn btn-primary text-white text-bold w-100" type="button" data-bs-toggle="collapse"
-            data-bs-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample">
-            Liste des Filières de sélection, n'ayant pas de correspondance.
-        </button>
-    </p>
-    <div class="collapse w-100" id="collapseExample2">
-        <div class="table-responsive w-100">
-        <table class="table w-100" id="datatable">
-            <thead>
-                <th>Université Sélection</th>
-                <th>Etablissement Sélection</th>
-                <th>Filière Sélection</th>
-                <th>Filière</th>
-            </thead>
-            <tbody>
-                <?php $__currentLoopData = Illuminate\Support\Facades\DB::select('SELECT distinct R.libfiliere, R.etablissementSelection, R.universiteSelection  , R.CodeUniversite from resultats R
-                WHERE R.etablissementSelection NOT IN (SELECT C.filiereSelection from corresp_fil_selection C ) '); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sel): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <tr>
-                        <td><?php echo e($sel->universiteSelection); ?></td>
-                        <td><?php echo e($sel->etablissementSelection); ?></td>
-                        <td><?php echo e($sel->libfiliere); ?></td>
-                        <td>
-
-                            <form method="POST" action="<?php echo e(route('correspondance-fil-selection.store')); ?>"
-                                role="form" enctype="multipart/form-data" class="d-flex">
-                                <?php echo csrf_field(); ?>
-                                <input type="text" name="filiereSelection" value="<?php echo e($sel->libfiliere); ?>"
-                                    class="hide">
-                                <?php echo e(Form::select(
-                                    'CodeEtablissement1',
-                                    App\Models\Etablissement::where('CodeUniversite', $sel->CodeUniversite)->pluck(
-                                        'LibelleEtablissement',
-                                        'CodeEtablissement',
-                                    ),
-                                    null,
-                                    [
-                                        'id' => 'sel-ets',
-                                        'onchange' => 'arrange(this.parentNode);',
-                                        'class' => 'form-select',
-                                        'placeholder' => '-- Etablissement --',
-                                        'required' => 'required',
-                                    ],
-                                )); ?>
-
-
-
-                                <select id="sel-fil" class="form-select mx-1" onchange="" name="CodeFiliere"
-                                    required>
-                                    <option value=""> --Filière -- </option>
-
-                                    <?php $__currentLoopData = \App\Models\Filiere::all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $an): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                        <option value="<?php echo e($an->CodeFiliere); ?>" parent='<?php echo e($an->CodeEtablissement); ?>'
-                                            hidden>
-                                            <?php echo e($an->LibelleFiliere); ?> </option>
-                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                </select>
-                                <button type="submit" class="btn btn-success btn-sm mx-3">Valider</button>
-                            </form>
-
-                        </td>
-                    </tr>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </tbody>
-        </table></div>
-    </div>
+    
 </div>
 <?php /**PATH /home/ezechiel/AllocationTche/resources/views/corresp-fil-selection/form.blade.php ENDPATH**/ ?>

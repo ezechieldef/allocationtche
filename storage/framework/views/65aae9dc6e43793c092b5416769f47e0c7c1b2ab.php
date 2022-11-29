@@ -64,7 +64,7 @@
 
                         <p class="mb-0">Procédez maintenant au paiement en cliquant sur le bouton <strong>Payer</strong>,
                             sans cela, votre
-                            demande ne sera pas prise en compte.</p>
+                            demande ne sera pas prise en compte. Vous pourez ensuite télécharger votre fiche d'inscription</p>
                     </div>
 
 
@@ -122,13 +122,14 @@
                                     <?php if($dem->CodeTypeDemande != '' &&
                                         $dem->idtransaction == '' &&
                                         \App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique ?? $dem->Annee)->taux != 0): ?>
-                                        <button code="<?php echo e($dem->CodeDemandeAllocation); ?>" onclick="loadmodal(this);"
-                                            data-bs-toggle="modal" data-bs-target="#modalPayer"
-                                            title="Payer les frais d'études de ma demande"
-                                            montant="<?php echo e(\App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique ?? $dem->Annee)->taux); ?>"
-                                            class="btn btn-sm btn-warning text-dark text-bold my-1"> <i
-                                                class="fa fa-credit-card me-2"></i>
-                                            Payer </button>
+                                        
+                                            <button code="<?php echo e($dem->CodeDemandeAllocation); ?>" onclick="paiementplustard();"
+
+                                                title="Payer les frais d'études de ma demande"
+                                                montant="<?php echo e(\App\Models\AnneeAcademique::find($dem->CodeAnneeAcademique ?? $dem->Annee)->taux); ?>"
+                                                class="btn btn-sm btn-warning text-dark text-bold my-1"> <i
+                                                    class="fa fa-credit-card me-2"></i>
+                                                Payer </button>
                                     <?php endif; ?>
 
 
@@ -262,10 +263,25 @@
         btnprobleme.setAttribute('code', btn.getAttribute('code'));
     }
 
+    function paiementplustard() {
+//         swal("Paiement non disponible temporairement. Veillez patienter, puis réessayer dans une semaine ", {
+//   buttons: [true],
+// });
+// swal({
+// 	title: "Good job!",
+// 	text: "You clicked the button!",
+// 	icon: "success",
+// 	button: "Aww yiss!"
+// });
+alert("Paiement non disponible temporairement. Veillez patienter, puis réessayer dans une semaine ");
+    }
+
     function payer(btn) {
+        paiementplustard();
+        return ;
         var code = btn.getAttribute('code');
         var montant = btn.getAttribute('montant');
-        //alert(<?php echo e(env('KKIA_SANBOX') ? 'true' : 'false'); ?>);
+        // alert(<?php echo e(env('KKIA_SANBOX') ? 'true' : 'false'); ?>);
         openKkiapayWidget({
             amount: montant,
             position: "center",

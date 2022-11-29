@@ -39,6 +39,7 @@ Route::middleware(["auth"])->group(function () {
 
     Route::get('/step2', [DemandeAllocController::class, 'step2']);
     Route::post('/step2', [DemandeAllocController::class, 'step2post']);
+    Route::any('/step2/cancel', [DemandeAllocController::class, 'step2cancel']);
 
     Route::get('/export-excel/{codebanque}', [App\Http\Controllers\ExcelController::class, 'exportRIBValidation']);
     Route::post('/importerRIB/{codebanque}', [App\Http\Controllers\ExcelController::class, 'importer']);
@@ -55,8 +56,6 @@ Route::middleware(["auth"])->group(function () {
     Route::post('/profile/{user_id}', [App\Http\Controllers\UserController::class, 'editprofile']);
     Route::post('/profile/{user_id}/delete', [App\Http\Controllers\UserController::class, 'deleteprofile']);
     Route::post('/profile/{user_id}/changepass', [App\Http\Controllers\UserController::class, 'changepass']);
-
-
 });
 
 Route::redirect('/', 'nouvelle-demande-allocation', 302);
@@ -82,7 +81,6 @@ Route::middleware(["auth", 'role:super-admin|commissaire-CNABAU'])->group(functi
     Route::post('/avis-UPB/{demande_id}', [App\Http\Controllers\AvisUPB::class, 'aviser']);
     Route::any('/exporter-lot/{codelot}', [App\Http\Controllers\LotController::class, 'exporter']);
     Route::any('/exporter-lot-stats/{codelot}', [App\Http\Controllers\LotController::class, 'exporterStats']);
-
 });
 Route::middleware(["auth", 'role:super-admin|President-CNABAU'])->group(function () {
     Route::resource('/pv', App\Http\Controllers\PvController::class);
@@ -113,6 +111,20 @@ Route::middleware(["auth", 'role:super-admin'])->group(function () {
     ]);
 });
 
+Route::any('/uploader-PJ-chine/{demande-id}', [App\Http\Controllers\DemandesBourseChinoiseController::class, 'upload_file'])->name('uploader-fichier-bourse-chine')->middleware('auth');
+
+
+Route::resource('/demandes-bourse-chinoise', App\Http\Controllers\DemandesBourseChinoiseController::class, [
+    //'except' => ['index']
+])->middleware('auth');
+
+Route::get(
+    'pdf-bourse-chine/{id}',
+    [\App\Http\Controllers\DemandesBourseChinoiseController::class, 'imprimer_pdf']
+)->middleware('auth')->name('pdf-issi');
+
+
+
 Route::get('/sudo', function () {
     Auth::user()->assignRole("super-admin");
 })->middleware('auth');
@@ -126,4 +138,3 @@ Route::get('/temp', function () {
 /* ADMINISTRATION */
 Route::get('/administration/dashboard', [App\Http\Controllers\Administration\DashboardController::class, 'index'])->name('dashboard.index');
 Route::post('/administration/dashboard/consulter', [App\Http\Controllers\Administration\DashboardController::class, 'consulter'])->name('dashboard.stat.consulter');
-

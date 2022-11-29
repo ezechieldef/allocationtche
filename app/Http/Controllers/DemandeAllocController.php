@@ -30,12 +30,17 @@ class DemandeAllocController extends Controller
     //
     public function index()
     {
+        $deja =false;
+        $demTemp =null;
         if (DemandeTemp::where('user_id', Auth::user()->id)->exists()) {
-            return redirect('/step2');
+            //return redirect('/step2');
+            $deja=true;
+            $demTemp=DemandeTemp::where('user_id', Auth::user()->id)->get();
         }
 
-        return view('upb.form-demande');
+        return view('upb.form-demande', compact('deja','demTemp'));
     }
+
     public function premier_traitement()
     {
         // Validation du formulaire
@@ -125,8 +130,8 @@ class DemandeAllocController extends Controller
         }
         // echo '<br>'.$codeAnnee.'<br>';
         //var_dump($apiResponse);
-        $this->insererInscription($apiResponse);
         $apiResponse = $this->preparerDB($univ, $apiResponse);
+        $this->insererInscription($apiResponse);
 
         if (str_contains($apiResponse['DateNaissanceEtudiant'], '-')) {
             $apiResponse['DateNaissanceEtudiant'] = date("d/m/Y", strtotime($apiResponse['DateNaissanceEtudiant']));
@@ -152,9 +157,9 @@ class DemandeAllocController extends Controller
 
         $archive = ArchiveAllocataire::rechercher($codeAnnee - 1, $apiResponse);
         if (!is_null($archive)) {
-            $complement['TresorMatricule'] = Universite::find($univ)->PrefixMatriculeTresor . $apiResponse['Matricule'];
+             $complement['TresorMatricule'] = $archive->TresorMatricule;
         } else {
-            //$complement['TresorMatricule'] = $archive->;
+            $complement['TresorMatricule'] = Universite::find($univ)->PrefixMatriculeTresor . $apiResponse['Matricule'];
         }
         //dd($apiResponse);
         //var_dump($apiResponse);
@@ -520,6 +525,7 @@ class DemandeAllocController extends Controller
             if (!is_null($selection)) {
 
                 // Si il y a correspondance entre les filiere de sa sélection et la filiere de l'API :: Attribution confirmé
+
                 if (
                     $selection->CodeUniversite == $univ &&
                     Etablissement::correspondreSelection($map['CodeEtablissement'], $selection->etablissementSelection) &&
@@ -534,6 +540,7 @@ class DemandeAllocController extends Controller
                 } else {
                     $this->putError('Cas d\'une probable Attribution');
                     $this->putError("L'étudiant a été retrouvé dans la liste des sélections, mais ne s'est pas inscrit dans la bonne filière / bon Etablissement ... Filière de sélection : " . $selection->libfiliere . ' | ' . " Filière d'inscription : " . $map['CodeFiliere'] . ' | ' . " Etablissement de sélection : " . $selection->etablissementSelection . ' | ' . " Etablissement d'inscription : " . $map['CodeEtablissement']);
+                    $this->putError("Si vous pensez qu'il s'agit de la même filière / Etablissement , veuillez signaler cela à la DBAU ");
                 }
             } else {
                 $this->putError('Cas d\'une probable Attribution');
@@ -567,6 +574,7 @@ class DemandeAllocController extends Controller
                 ]);
                 $this->putError("Cas d'un renouvellement");
                 $this->putError("La filière / etablissement de l'année précédente, n'est pas conforme à celle de cette année ... Filiere Année précédente : " . $allocAnnePasse->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement année précédente : " . $allocAnnePasse->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
+                $this->putError("Si vous pensez qu'il s'agit de la même filière / Etablissement , veuillez signaler cela à la DBAU ");
             }
         } elseif (!is_null($allocAnneSurpasse) && ($allocAnneSurpasse->CodeAnneeEtude + 1) == $map['CodeAnneeEtude']) {
             // ^^ Si demande de l'année surpassé trouvé et est passé en classe supérieur : cas d'un rétablissement
@@ -617,6 +625,7 @@ class DemandeAllocController extends Controller
             } else {
                 $this->putError("Cas d'une dérogation ");
                 $this->putError("La filière / etablissement de la dérogation , n'est pas conforme à celle de l'inscription ... Filiere dérogation : " . $derogation->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement derogation : " . $derogation->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
+                $this->putError("Si vous pensez qu'il s'agit de la même filière / Etablissement , veuillez signaler cela à la DBAU ");
             }
         } else {
             // if ($codeAnnee == 2022) {
@@ -641,6 +650,11 @@ class DemandeAllocController extends Controller
         return view('upb.step2', ['demTemp' => $v->get()])->with([
             'cursus' => $cursus
         ]);
+    }
+    public function step2cancel()
+    {
+        DemandeTemp::where('user_id', Auth::user()->id)->delete();
+        return redirect('/');
     }
     public function step2post()
     {

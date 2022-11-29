@@ -144,18 +144,29 @@
 
                     @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct R.libfiliere from resultats R ') as $an)
                         <option value="{{ $an->libfiliere }}">
-                            {{ $an->libfiliere }} </option>
+                            @if (DB::select('SELECT count(*) as nbr from corresp_fil_selection C WHERE C.filiereSelection=? ', [
+                                $an->libfiliere,
+                            ])[0]->nbr > 0)
+                                <strong>
+                                    {{ $an->libfiliere }} (---- {{ DB::select('SELECT count(*) as nbr from corresp_fil_selection C WHERE C.filiereSelection=? ', [
+                                        $an->libfiliere,
+                                    ])[0]->nbr }} ----)
+                                </strong>
+                            @else
+                                {{ $an->libfiliere }}
+                            @endif
+                        </option>
                     @endforeach
                 </select>
 
             </div>
         </div>
     </div>
-    <div class="box-footer mt20">
+    <div class="box-footer mt20 w-100">
         <button type="submit" class="btn btn-primary">Soumettre</button>
     </div>
 
-    <p class="my-5">
+    {{-- <p class="my-5">
         <button class="btn btn-primary text-white text-bold w-100" type="button" data-bs-toggle="collapse"
             data-bs-target="#collapseExample2" aria-expanded="false" aria-controls="collapseExample">
             Liste des Filières de sélection, n'ayant pas de correspondance.
@@ -163,61 +174,66 @@
     </p>
     <div class="collapse w-100" id="collapseExample2">
         <div class="table-responsive w-100">
-        <table class="table w-100" id="datatable">
-            <thead>
-                <th>Université Sélection</th>
-                <th>Etablissement Sélection</th>
-                <th>Filière Sélection</th>
-                <th>Filière</th>
-            </thead>
-            <tbody>
-                @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct R.libfiliere, R.etablissementSelection, R.universiteSelection  , R.CodeUniversite from resultats R
-                WHERE R.etablissementSelection NOT IN (SELECT C.filiereSelection from corresp_fil_selection C ) ') as $sel)
-                    <tr>
-                        <td>{{ $sel->universiteSelection }}</td>
-                        <td>{{ $sel->etablissementSelection }}</td>
-                        <td>{{ $sel->libfiliere }}</td>
-                        <td>
+            <table class="table w-100" id="datatable">
+                <thead>
+                    <th>Université Sélection</th>
+                    <th>Etablissement Sélection</th>
+                    <th>Filière Sélection</th>
+                    <th>Filière</th>
+                </thead>
+                <tbody>
+                    @php
+                        $fils = [];
+                        $fil_all = \App\Models\Filiere::all();
 
-                            <form method="POST" action="{{ route('correspondance-fil-selection.store') }}"
-                                role="form" enctype="multipart/form-data" class="d-flex">
-                                @csrf
-                                <input type="text" name="filiereSelection" value="{{ $sel->libfiliere }}"
-                                    class="hide">
-                                {{ Form::select(
-                                    'CodeEtablissement1',
-                                    App\Models\Etablissement::where('CodeUniversite', $sel->CodeUniversite)->pluck(
-                                        'LibelleEtablissement',
-                                        'CodeEtablissement',
-                                    ),
-                                    null,
-                                    [
+                    @endphp
+                    @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct R.libfiliere, R.etablissementSelection, R.universiteSelection  , R.CodeUniversite from resultats R
+                WHERE R.libfiliere NOT IN (SELECT C.filiereSelection from corresp_fil_selection C ) ') as $sel)
+                        @php
+                            if (!in_array($sel->CodeUniversite, $fils)) {
+                                $fils[$sel->CodeUniversite] = App\Models\Etablissement::where('CodeUniversite', $sel->CodeUniversite)->pluck('LibelleEtablissement', 'CodeEtablissement');
+                            }
+                        @endphp
+                        <tr>
+                            <td>{{ $sel->universiteSelection }}</td>
+                            <td>{{ $sel->etablissementSelection }}</td>
+                            <td>{{ $sel->libfiliere }}</td>
+                            <td>
+
+                                <form method="POST" action="{{ route('correspondance-fil-selection.store') }}"
+                                    role="form" enctype="multipart/form-data" class="d-flex">
+                                    @csrf
+
+                                    <input type="text" name="filiereSelection" value="{{ $sel->libfiliere }}"
+                                        class="hide">
+                                    {{ Form::select('CodeEtablissement1', $fils[$sel->CodeUniversite], null, [
                                         'id' => 'sel-ets',
                                         'onchange' => 'arrange(this.parentNode);',
                                         'class' => 'form-select',
                                         'placeholder' => '-- Etablissement --',
                                         'required' => 'required',
-                                    ],
-                                ) }}
+                                    ]) }}
 
 
-                                <select id="sel-fil" class="form-select mx-1" onchange="" name="CodeFiliere"
-                                    required>
-                                    <option value=""> --Filière -- </option>
+                                    <select id="sel-fil" class="form-select mx-1" onchange="" name="CodeFiliere"
+                                        required>
+                                        <option value=""> --Filière -- </option>
 
-                                    @foreach (\App\Models\Filiere::all() as $an)
-                                        <option value="{{ $an->CodeFiliere }}" parent='{{ $an->CodeEtablissement }}'
-                                            hidden>
-                                            {{ $an->LibelleFiliere }} </option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="btn btn-success btn-sm mx-3">Valider</button>
-                            </form>
+                                        @foreach ($fil_all as $an)
+                                            <option value="{{ $an->CodeFiliere }}"
+                                                parent='{{ $an->CodeEtablissement }}' hidden>
+                                                {{ $an->LibelleFiliere }} </option>
+                                        @endforeach
+                                    </select>
+                                    <button type="submit" class="btn btn-success btn-sm mx-3">Valider</button>
+                                </form>
 
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table></div>
-    </div>
+                            </td>
+                        </tr>
+                    @endforeach
+
+                </tbody>
+            </table>
+        </div>
+    </div> --}}
 </div>

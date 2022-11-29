@@ -26,6 +26,10 @@ class RouteServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        if ($this->app->environment('production')) {
+            \URL::forceRootUrl(\Config::get('app.url'));
+        }
+
         $this->configureRateLimiting();
 
         $this->routes(function () {

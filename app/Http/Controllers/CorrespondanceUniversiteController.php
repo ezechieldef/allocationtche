@@ -21,8 +21,7 @@ class CorrespondanceUniversiteController extends Controller
 
         $correspondanceUniversites = CorrespondanceUniversite::distinct('champ1')->get();
 
-        return view('correspondance-universite.index', compact('correspondanceUniversites'))
-        ;
+        return view('correspondance-universite.index', compact('correspondanceUniversites'));
     }
 
     /**

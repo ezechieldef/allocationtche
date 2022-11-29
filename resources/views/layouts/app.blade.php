@@ -251,6 +251,11 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Suivre sa demande <br>en ligne </span></a>
                             </li>
+                            <li class="sidebar-item @if (Request::is('demandes-bourse-chinoise/*')) selected @endif"> <a
+                                class="sidebar-link waves-effect waves-dark sidebar-link" href="/demandes-bourse-chinoise"
+                                aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                    class="hide-menu">Bourse Chinoise</span></a>
+                        </li>
                         @endif
 
 

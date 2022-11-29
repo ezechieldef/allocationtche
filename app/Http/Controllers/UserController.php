@@ -27,7 +27,7 @@ class UserController extends Controller
     public function index()
     {
 
-        $users = User::paginate();
+        $users = User::all();
         if ($message = Session::get('success')) {
             Alert::toast($message, 'success', '#fff')->position('bottom-end')->autoClose(10000)->timerProgressBar()->background('#f5cb42');
         }
@@ -36,7 +36,7 @@ class UserController extends Controller
         }
 
         return view('user.index', compact('users'))
-            ->with('i', (request()->input('page', 1) - 1) * $users->perPage());
+            ->with('i', (0));
     }
 
     /**

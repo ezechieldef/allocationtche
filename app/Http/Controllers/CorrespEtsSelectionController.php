@@ -18,10 +18,10 @@ class CorrespEtsSelectionController extends Controller
      */
     public function index()
     {
-        $correspEtsSelections = CorrespEtsSelection::paginate();
+        $correspEtsSelections = CorrespEtsSelection::all();
 
         return view('corresp-ets-selection.index', compact('correspEtsSelections'))
-            ->with('i', (request()->input('page', 1) - 1) * $correspEtsSelections->perPage());
+            ->with('i', 0);
     }
 
     /**
