@@ -133,7 +133,7 @@
                           </div>
                           <div class="col">
                             <div class="font-weight-medium">
-                              {{$nombre_demandes_total_year}} 
+                              {{$a}} 
                             </div>
                             <div class="text-muted">
                               Demandes {{$annees_acad[0]->LibelleAnneeAcademique}}
@@ -227,7 +227,8 @@
                           <div class="form-group mb-3 ">
                             <label class="form-label">Année Académique</label>
                             <div >
-                              <select class="form-select" name="annee_academique">
+                              <select class="form-select" name="CodeAnneeAcademique">
+                                <option value="">--------</option>
                                 @foreach($annees_acad as $annee)
                                 <option value="{{$annee->CodeAnneeAcademique}}">{{$annee->LibelleAnneeAcademique}}</option>
                                 @endforeach
@@ -237,33 +238,10 @@
                         </div>
                         <div class="col-md-4">
                           <div class="form-group mb-3 ">
-                            <label class="form-label">Université</label>
-                            <div >
-                              <select class="form-select" name="universite">
-                                @foreach($universites as $universite)
-                                <option value="{{$universite->CodeUniversite}}">{{$universite->LibelleLongUniversite}}</option>
-                                @endforeach
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-md-4">
-                          <div class="form-group mb-3 ">
-                            <label class="form-label">Etablissement</label>
-                            <div >
-                              <select class="form-select" name="etablissement">
-                                @foreach($etablissements as $etablissement)
-                                <option value="{{$etablissement->CodeEtablissement}}">{{$etablissement->LibelleEtablissement}}</option>
-                                @endforeach
-                              </select>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="col-md-4">
-                          <div class="form-group mb-3 ">
                             <label class="form-label">Année d'étude</label>
                             <div >
-                              <select class="form-select" name="annee_etude">
+                              <select class="form-select" name="CodeAnneeEtude">
+                                <option value="">--------</option>
                                 <option>1</option>
                                 <option>2</option>
                                 <option>3</option>
@@ -277,9 +255,62 @@
                         </div>
                         <div class="col-md-4">
                           <div class="form-group mb-3 ">
+                            <label class="form-label">Sexe</label>
+                            <div>
+                              <select class="form-select" name="SexeEtudiant">
+                                <option value="">--------</option>
+                                <option>F</option>
+                                <option>M</option>
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group mb-3 ">
+                            <label class="form-label">Université</label>
+                            <div >
+                              <select class="form-select" name="CodeUniversite" id="CodeUniversite" onChange="getEtab(this.value);">
+                                <option value="">--------</option>
+                                @foreach($universites as $universite)
+                                <option value="{{$universite->CodeUniversite}}">{{$universite->LibelleLongUniversite}}</option>
+                                @endforeach
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group mb-3 ">
+                            <label class="form-label">Etablissement</label>
+                            <div >
+                              <select class="form-select" name="etablissement_CodeEtablissement" id="CodeEtablissement" onChange="getFil(this.value);">
+                                <option value="">--------</option>
+                                {{--@foreach($etablissements as $etablissement)
+                                <option value="{{$etablissement->CodeEtablissement}}">{{$etablissement->LibelleEtablissement}}</option>
+                                @endforeach--}}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                          <div class="form-group mb-3 ">
+                            <label class="form-label">Filières</label>
+                            <div >
+                              <select class="form-select" name="filiere_CodeFiliere" id="CodeFiliere">
+                                <option value="">--------</option>
+                                {{--@foreach($filieres as $filiere)
+                                <option value="{{$filiere->CodeFiliere}}">{{$filiere->LibelleFiliere}}</option>
+                                @endforeach--}}
+                              </select>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div class="col-md-4">
+                          <div class="form-group mb-3 ">
                             <label class="form-label">Type Allocation</label>
                             <div >
-                              <select class="form-select" name="type_allocation">
+                              <select class="form-select" name="CodeTypeDemande">
+                                <option value="">--------</option>
                                 <option value="Attribution">Attribution</option>
                                 <option value="Renouvellement">Renouvellement</option>
                                 <option value="Rétablissement">Rétablissement</option>
@@ -291,7 +322,8 @@
                           <div class="form-group mb-3 ">
                             <label class="form-label">Nature Allocation</label>
                             <div >
-                              <select class="form-select" name="nature_allocation">
+                              <select class="form-select" name="CodeNatureAllocation">
+                                <option value="">--------</option>
                                 <option value="AIDES">Aides Universitaires</option>
                                 <option value="BOURSE">BOURSE</option>
                                 <option value="BRSDUT">Bourse pour les formations professionnelles DUT et les classes prépa</option>
@@ -307,7 +339,8 @@
                           <div class="form-group mb-3 ">
                             <label class="form-label">Avis CnaBAU</label>
                             <div >
-                              <select class="form-select" name="avis">
+                              <select class="form-select" name="Avicommission">
+                                <option value="">--------</option>
                                 <option value="Favorable">Favorable</option>
                                 <option value="Réservé">Réservé</option>
                                 <option value="Défavorable">Défavorable</option>
@@ -315,22 +348,13 @@
                             </div>
                           </div>
                         </div>
-                        <div class="col-md-4">
-                          <div class="form-group mb-3 ">
-                            <label class="form-label">Sexe</label>
-                            <div>
-                              <select class="form-select" name="sexe">
-                                <option>F</option>
-                                <option>M</option>
-                              </select>
-                            </div>
-                          </div>
-                        </div>
+                        
                         <div class="col-md-4">
                           <div class="form-group mb-3 ">
                             <label class="form-label">Frais de demande</label>
                             <div >
-                              <select class="form-select" name="paiement_frais">
+                              <select class="form-select" name="StatutPaiement">
+                                <option value="">--------</option>
                                 <option>Payé</option>
                                 <option>Non Payé</option>
                               </select>
@@ -502,6 +526,72 @@
       });
       // @formatter:on
     </script>
+
+    <script
+    
+      src="https://code.jquery.com/jquery-3.6.1.min.js"
+      integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
+      crossorigin="anonymous">
+    </script>
+  
+<!--
+<script src="{{url('distdash/js/jquery-3.6.1.min.js')}}" 
+      integrity="sha256-o88AwQnZB+VDvE9tvIXrMQaPlFFSUTR+nldQm1LuPXQ="
+      crossorigin="anonymous">
+</script>-->
+
+
+    <script type="">
+      function getEtab(val) {
+        $.ajax({
+          type: "GET",
+          url: "{{route('admin.dashboard.getetablissement')}}",
+          data:'code_univ='+val,
+          success: function(data){
+            $('#CodeEtablissement').empty();
+            $('#CodeFiliere').empty();
+            $('#CodeEtablissement').append($('<option>', { 
+                value: "",
+                text : "----------" 
+            }));
+            $('#CodeFiliere').append($('<option>', { 
+                value: "",
+                text : "----------" 
+            }));
+            $.each(data, function(index, etabs) {
+                $('#CodeEtablissement').append($('<option>', { 
+                    value: etabs.CodeEtablissement,
+                    text : etabs.LibelleEtablissement 
+                }));
+            });
+          }
+        });
+      }
+    </script>
+
+<script type="">
+  function getFil(val) {
+    $.ajax({
+      type: "GET",
+      url: "{{route('admin.dashboard.getfiliere')}}",
+      data:'code_etab='+val,
+      success: function(data){
+        $('#CodeFiliere').empty();
+        $('#CodeFiliere').append($('<option>', { 
+            value: "",
+            text : "----------" 
+        }));
+        $.each(data, function(index, etabs) {
+            $('#CodeFiliere').append($('<option>', { 
+                value: etabs.CodeFiliere,
+                text : etabs.LibelleFiliere 
+            }));
+        });
+      }
+    });
+  }
+</script>
+
 
   </body>
 </html>

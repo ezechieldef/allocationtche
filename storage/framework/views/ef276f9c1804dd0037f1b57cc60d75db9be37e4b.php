@@ -144,6 +144,16 @@
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/correspondance-filiere"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Correspondance Filière</span></a></li>
+                            <li class="sidebar-item <?php if(Request::is('correspondance-filiere/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                                    href="/correspondance-temporaire" aria-expanded="false"><i
+                                        class="mdi mdi-border-all"></i><span class="hide-menu">Corresp. Temp. </span></a>
+                            </li>
+                            <li class="sidebar-item <?php if(Request::is('correspondance-filiere/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                                    href="/correspondance-temporaire-sel" aria-expanded="false"><i
+                                        class="mdi mdi-border-all"></i><span class="hide-menu">Corresp. Temp. Sel</span></a>
+                            </li>
                         <?php endif; ?>
 
                         <?php if(auth()->check() && auth()->user()->hasRole('banquier|super-admin')): ?>
@@ -158,10 +168,7 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Demandes
                                         Admin</span></a></li>
-                            <li class="sidebar-item <?php if(Request::is('consulter/*')): ?> selected <?php endif; ?>"> <a
-                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/consulter"
-                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
-                                        class="hide-menu">Consulter Etudiant</span></a></li>
+
                             <li class="sidebar-item <?php if(Request::is('utilisateur/*')): ?> selected <?php endif; ?>"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/utilisateur"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
@@ -175,6 +182,14 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Motifs
                                         Rejets</span></a></li>
+                        <?php endif; ?>
+                        <?php if(auth()->check() && auth()->user()->hasRole('consulteur-Etudiant')): ?>
+                            <li class="sidebar-item <?php if(Request::is('consulter/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link" href="/consulter"
+                                    aria-expanded="false"><i class="mdi mdi-border-all"></i><span
+                                        class="hide-menu">Consulter Etudiant</span></a></li>
+                        <?php endif; ?>
+                        <?php if(auth()->check() && auth()->user()->hasRole('Ouverture-Fermeture')): ?>
                             <li class="sidebar-item <?php if(Request::is('ouverture')): ?> selected <?php endif; ?>"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/ouverture"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
@@ -196,7 +211,13 @@
                             <li class="sidebar-item <?php if(Request::is('preview*')): ?> selected <?php endif; ?>"> <a
                                     class="sidebar-link waves-effect waves-dark sidebar-link" href="/preview"
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
-                                        class="hide-menu">Statistique Simplifié</span></a></li>
+                                        class="hide-menu">Statistique Simplifiée</span></a></li>
+
+                            <li class="sidebar-item <?php if(Request::is('administration/dashboard*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                                    href="/administration/dashboard" aria-expanded="false"><i
+                                        class="mdi mdi-border-all"></i><span class="hide-menu">Statistique
+                                        Complete</span></a></li>
                         <?php endif; ?>
 
                         <?php if(count(Auth::user()->getRoleNames()) == 0): ?>
@@ -211,11 +232,17 @@
                                     aria-expanded="false"><i class="mdi mdi-border-all"></i><span
                                         class="hide-menu">Suivre sa demande <br>en ligne </span></a>
                             </li>
-                            <li class="sidebar-item <?php if(Request::is('demandes-bourse-chinoise/*')): ?> selected <?php endif; ?>"> <a
-                                class="sidebar-link waves-effect waves-dark sidebar-link" href="/demandes-bourse-chinoise"
-                                aria-expanded="false"><i class="mdi mdi-border-all"></i><span
-                                    class="hide-menu">Bourse Chinoise</span></a>
-                        </li>
+                            <!-- <li class="sidebar-item <?php if(Request::is('demandes-bourse-chinoise/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                                    href="/demandes-bourse-chinoise" aria-expanded="false"><i
+                                        class="mdi mdi-border-all"></i><span class="hide-menu">Bourse
+                                        Chinoise</span></a>
+                            <li class="sidebar-item <?php if(Request::is('demandes-bourse-russie/*')): ?> selected <?php endif; ?>"> <a
+                                    class="sidebar-link waves-effect waves-dark sidebar-link"
+                                    href="/demandes-bourse-russie" aria-expanded="false"><i
+                                        class="mdi mdi-border-all"></i><span class="hide-menu">Bourse
+                                        Russe</span></a>
+                            </li> -->
                         <?php endif; ?>
 
 

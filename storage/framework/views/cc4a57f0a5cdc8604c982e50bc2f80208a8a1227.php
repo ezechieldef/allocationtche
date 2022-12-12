@@ -251,7 +251,7 @@
                             <label for="moyenne_au_bac">Moyenne du diplome</label>
                         </strong>
 
-                        <?php echo e(Form::number('moyenne_bac', $demandesBourseChinoise->moyenne_bac, ['step' => '0.01', 'min' => '0', 'max' => '20', 'class' => 'form-control' . ($errors->has('moyenne_bac') ? ' is-invalid' : ''), 'placeholder' => 'Moyenne Bac'])); ?>
+                        <?php echo e(Form::number('moyenne_bac', $demandesBourseChinoise->moyenne_bac, ['step' => '0.01', 'min' => '0', 'max' => '20', 'class' => 'form-control' . ($errors->has('moyenne_bac') ? ' is-invalid' : ''), 'placeholder' => 'Moyenne'])); ?>
 
                         <?php echo $errors->first('moyenne_bac', '<div class="invalid-feedback">:message</div>'); ?>
 

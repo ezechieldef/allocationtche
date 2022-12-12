@@ -179,11 +179,14 @@ class MesDemandes extends Controller
                 "RIB" => "required|regex:/^" . $banque->regex . '/',
             ]);
         }
-
-
+        $all['CodeBanque']= $all['Banque'];
+//DemandeAllocationUPB::findOrFail($CodeDemandeAllocation)->update($all);
+//Etudiant::findOrFail($demandeAllocation->CodeEtudiant)->update($all);
         $demandeAllocation->update($all);
-        $etu->update($all);
-
+         $etu->update($all);
+         // $demandeAllocation->save();
+         // $etu->save();
+        //dd(DemandeAllocationUPB::findOrFail($CodeDemandeAllocation));
         return redirect('/mes-demandes')->with('success', 'Demande d\'Allocation modifié avec succèss');
     }
     public function voirDemande(int $CodeDemandeAllocation)

@@ -53,4 +53,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(DemandesBourseChinoise::class, 'user_id', 'id')->get();
     }
+   
+    public function demandesBourseRussie()
+    {
+        return $this->hasMany(DemandesBourseRussie::class, 'user_id', 'id');
+    }
 }

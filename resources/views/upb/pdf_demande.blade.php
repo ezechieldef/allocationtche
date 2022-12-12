@@ -100,7 +100,7 @@
     <center><img width="100%" src="http://127.0.0.1/dbau-barner.png" alt=""></center>
 
     <div class="text-center text-underline my-3 text-up">
-        <h3>Direction des Bourses et Aides Universitaire</h3>
+        <h3>Direction des Bourses et Aides Universitaires</h3>
     </div>
     <div class="text-center py-3">
         <label>

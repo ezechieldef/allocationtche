@@ -1,4 +1,14 @@
 <?php $__env->startSection('content'); ?>
+<div class="row my-3">
+    <div class="col-md-6 col-12 my-2">
+        <strong>Nombre total d'utilisateur</strong>
+        <input type="text" readonly class="form-control" value="<?php echo e(\App\Models\User::all()->count()); ?>">
+    </div>
+    <div class="col-md-6 col-12 my-2">
+        <strong>Nombre Total de dmande </strong>
+        <input type="text" readonly class="form-control" value="<?php echo e(\App\Models\DemandeAllocationUPB::all()->count()); ?>">
+    </div>
+</div>
     <div class="card">
         <div class="card-header">
             Statistique Simplifié
@@ -6,7 +16,7 @@
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table w-100">
-                    <thead>
+                    <thead class="text-dark">
                         <th>Université</th>
                         <th>Bourses</th>
                         <th>Aides</th>

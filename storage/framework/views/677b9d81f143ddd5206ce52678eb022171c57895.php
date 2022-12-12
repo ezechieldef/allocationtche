@@ -128,6 +128,14 @@
                 <?php
                     Session::forget('errorsDem');
                 ?>
+
+            <?php if(\App\Models\DemandeAllocationUPB::where('UtilisateurDemande',Auth::user()->id)->get()->count()!=0): ?>
+                <div class="alert alert-warning">
+                    <strong>Information :</strong> Vous avez déjà une demande . 
+                    <a href="/mes-demandes">cliquez ici pour suivre votre demande</a>
+                </div>
+            <?php endif; ?>
+
                 <div class="alert alert-info">
                     <strong>Information :</strong> Les étudiants admis aux concours doivent utiliser le
                     numéro de table des concours.

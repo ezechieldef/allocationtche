@@ -13,9 +13,10 @@
         <a href="<?php echo e(route('demandes-bourse-chinoise.create')); ?>" class="btn btn-warning text-dark w-100 my-3 fw-bold">Faire
             une demande de bourse de coopération chinoise</a>
         <div class="">
-            <img src="<?php echo e(asset('communique/c1.jpg')); ?>" class="w-100 shadow my-2" alt="">
-            <img src="<?php echo e(asset('communique/c2.jpg')); ?>" class="w-100 shadow my-2" alt="">
-            <img src="<?php echo e(asset('communique/c3.jpg')); ?>" class="w-100 shadow my-2" alt="">
+            <img src="<?php echo e(asset('communique/cm1.jpg')); ?>" class="w-100 shadow my-2" alt="">
+            <img src="<?php echo e(asset('communique/cm2.jpg')); ?>" class="w-100 shadow my-2" alt="">
+            <img src="<?php echo e(asset('communique/cm3.jpg')); ?>" class="w-100 shadow my-2" alt="">
+            <img src="<?php echo e(asset('communique/cm4.jpg')); ?>" class="w-100 shadow my-2" alt="">
         </div>
     <?php else: ?>
         <div class=" my-2">

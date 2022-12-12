@@ -7,9 +7,9 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge"/>
     <title>Tableau-de-bord - DBAU</title>
     <!-- CSS files -->
-    <link href="{{asset('distdash/css/tabler.min.css')}}" rel="stylesheet"/>
-    <link href="{{asset('distdash/css/tabler-vendors.min.css')}}" rel="stylesheet"/>
-    <link href="{{asset('distdash/css/demo.min.css')}}" rel="stylesheet"/>
+    <link href="{{asset('dist_dash/css/tabler.min.css')}}" rel="stylesheet"/>
+    <link href="{{asset('dist_dash/css/tabler-vendors.min.css')}}" rel="stylesheet"/>
+    <link href="{{asset('dist_dash/css/demo.min.css')}}" rel="stylesheet"/>
     <link href="https://cdn.datatables.net/1.10.21/css/jquery.dataTables.min.css" rel="stylesheet"/>
     <link href="https://cdn.datatables.net/buttons/1.6.2/css/buttons.dataTables.min.css" rel="stylesheet"/>
   </head>
@@ -148,11 +148,11 @@
     </div>
    
     <!-- Libs JS -->
-    <script src="{{asset('distdash/libs/list.js/dist/list.min.js')}}" defer></script>
+    <script src="{{asset('dist_dash/libs/list.js/dist/list.min.js')}}" defer></script>
 
     <!-- Tabler Core -->
-    <script src="{{asset('/distdash/js/tabler.min.js')}}" defer></script>
-    <script src="{{asset('/distdash/js/demo.min.js')}}" defer></script>
+    <script src="{{asset('/dist_dash/js/tabler.min.js')}}" defer></script>
+    <script src="{{asset('/dist_dash/js/demo.min.js')}}" defer></script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     <script src="https://cdn.datatables.net/1.10.21/js/jquery.dataTables.min.js"></script>
@@ -171,9 +171,9 @@
                   'excelHtml5',
                   'csvHtml5',
                   {
-		          extend: 'pdfHtml5',
-		          orientation: 'landscape',
-		          pageSize: 'LEGAL'
+                    extend: 'pdfHtml5',
+                    orientation: 'landscape',
+                    pageSize: 'LEGAL'
                   }
               ],
               language: {

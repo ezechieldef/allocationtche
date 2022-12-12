@@ -93,7 +93,8 @@ class DemandeAllocController extends Controller
             }
         }
 
-        //dd($cursus);
+        dd($cursus);
+        //Session::put('cursus', $cursus);
         //Si cursus ne contient que des false, c'est qu'il ne peut rien faire
         $queDesFalse = true;
         $newDemandeDispo = false;
@@ -121,11 +122,17 @@ class DemandeAllocController extends Controller
         //$response = $this->callAPI($all['Universite'], $all['Matricule'], $codeAnnee);
         $apiResponse = null;
         if (!is_null($UnivParams['api']) && $UnivParams['api'] != '') {
+            //echo "API<br>";
             $apiResponse = $this->callAPI($univ, $all['Matricule'], $codeAnnee);
         } elseif (!is_null($UnivParams['table']) && $UnivParams['table'] != '') {
+            //echo "Local<br>";
+
             $apiResponse = $this->apiLocal($UnivParams['table'], $codeAnnee, $all['Matricule'], $univ);
         }
+
+
         if (is_null($apiResponse)) {
+
             return false;
         }
         // echo '<br>'.$codeAnnee.'<br>';
@@ -196,6 +203,7 @@ class DemandeAllocController extends Controller
 
     public function callAPI($univ, $matricule, $codeAnnee)
     {
+        //var_dump($matricule);
         $params = Parametres::UNIVERSITE[$univ . $codeAnnee] ?? null;
         $champ_validation = '';
         $champ_type_alloc = '';
@@ -243,6 +251,7 @@ class DemandeAllocController extends Controller
                 ];
 
                 $matricule = str_replace('UNA', '', $matricule);
+                $matricule = str_replace('una', '', $matricule);
                 $matricule .= 'UNA';
                 break;
             case 'UNSTIM':
@@ -283,9 +292,10 @@ class DemandeAllocController extends Controller
         $url_api = str_replace('{Matricule}', $tempmatri, $params['api']);
         $url_api = str_replace('{AnneeAcademique}', $tempAnne, $url_api);
 
-
+echo '<br>'.$url_api.'<br>';
         $r = Http::withoutVerifying()->accept('application/json')->withToken($params['token'])->withHeaders(['apiToken' => $params['token']])->get($url_api);
         $response = $r->json();
+        var_dump($response);
         $anne_lib = AnneeAcademique::find($codeAnnee)->LibelleAnneeAcademique;
         //dd($response);
         switch ($univ) {
@@ -541,6 +551,14 @@ class DemandeAllocController extends Controller
                     $this->putError('Cas d\'une probable Attribution');
                     $this->putError("L'étudiant a été retrouvé dans la liste des sélections, mais ne s'est pas inscrit dans la bonne filière / bon Etablissement ... Filière de sélection : " . $selection->libfiliere . ' | ' . " Filière d'inscription : " . $map['CodeFiliere'] . ' | ' . " Etablissement de sélection : " . $selection->etablissementSelection . ' | ' . " Etablissement d'inscription : " . $map['CodeEtablissement']);
                     $this->putError("Si vous pensez qu'il s'agit de la même filière / Etablissement , veuillez signaler cela à la DBAU ");
+                    try {
+                        if (!\App\Models\CorrespTemporaireSel::where('nouveau',$selection->libfiliere)->where('ancien',$map['CodeFiliere'])->exists()) {
+                            \App\Models\CorrespTemporaireSel::create(["ancien"=>$map['CodeFiliere'], "nouveau"=>$selection->libfiliere]);
+                        }
+
+                    } catch (Exception $e) {
+
+                    }
                 }
             } else {
                 $this->putError('Cas d\'une probable Attribution');
@@ -565,16 +583,26 @@ class DemandeAllocController extends Controller
 
                 return ['TYPE' => $type_demande, 'DISPO' => 'MAINTENANT', 'COMPLEMENT' => $complement];
             } else {
-                echo 'cas renew fil echec';
+                /* echo 'cas renew fil echec';
                 var_dump($map);
                 dd([
 
                     'ets' =>    Etablissement::correspondre($map['CodeEtablissement'], $allocAnnePasse->CodeEtablissement),
                     'fil' => Filiere::correspondre($map['CodeFiliere'], $allocAnnePasse->CodeFiliere)
-                ]);
+                ]); */
                 $this->putError("Cas d'un renouvellement");
                 $this->putError("La filière / etablissement de l'année précédente, n'est pas conforme à celle de cette année ... Filiere Année précédente : " . $allocAnnePasse->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement année précédente : " . $allocAnnePasse->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
                 $this->putError("Si vous pensez qu'il s'agit de la même filière / Etablissement , veuillez signaler cela à la DBAU ");
+                    try {
+                        if (!\App\Models\CorrespTemporaire::where('nouveau',$allocAnnePasse->CodeFiliere)->where('ancien',$map['CodeFiliere'])->exists()) {
+                            \App\Models\CorrespTemporaire::create(["ancien"=>$map['CodeFiliere'], "nouveau"=>$allocAnnePasse->CodeFiliere]);
+                        }
+                        // \App\Models\CorrespTemporaire::create(["ancien"=>$map['CodeFiliere'], "nouveau"=>$allocAnnePasse->CodeFiliere]);
+                    } catch (Exception $e) {
+
+                    }
+
+
             }
         } elseif (!is_null($allocAnneSurpasse) && ($allocAnneSurpasse->CodeAnneeEtude + 1) == $map['CodeAnneeEtude']) {
             // ^^ Si demande de l'année surpassé trouvé et est passé en classe supérieur : cas d'un rétablissement
@@ -608,6 +636,16 @@ class DemandeAllocController extends Controller
                 $this->putError("Cas d'un rétablissement ");
                 $this->putError("La filière / etablissement de l'année précédente, n'est pas conforme à celle de cette année ... Filiere Année précédente : " . $allocAnnePasse->CodeFiliere . " |  Filière inscription actuel : " . $map['CodeFiliere'] . " || Etablissement année précédente : " . $allocAnnePasse->CodeEtablissement . "  | Etablissement inscription actuel : " . $map['CodeEtablissement']);
                 $this->putError("Si vous pensez qu'il s'agit de la même filière / Etablissement , veuillez signaler cela à la DBAU ");
+                try {
+                    if (!\App\Models\CorrespTemporaire::where('nouveau',$allocAnneSurpasse->CodeFiliere)->where('ancien',$map['CodeFiliere'])->exists()) {
+                            \App\Models\CorrespTemporaire::create(["ancien"=>$map['CodeFiliere'], "nouveau"=>$allocAnneSurpasse->CodeFiliere]);
+                        }
+
+                    // \App\Models\CorrespTemporaire::create(["ancien"=>$map['CodeFiliere'], "nouveau"=>$allocAnneSurpasse->CodeFiliere]);
+                } catch (Exception $e) {
+
+                }
+
             }
         }
         //S'il dispose d'une dérogation

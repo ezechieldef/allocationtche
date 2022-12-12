@@ -70,8 +70,8 @@
                             <i class="fa fa-check text-success mx-2"></i>Ce RIB a déjà été validé par votre Banque en votre
                             nom, vous ne pourrez plus le modifier
                         @else
-                            <i class="fa fa-close text-danger mx-2"></i>Ce RIB n'a pas encore été validé par votre Banque en
-                            votre nom
+                            {{-- <i class="fa fa-close text-danger mx-2"></i>Ce RIB n'a pas encore été validé par votre Banque en
+                            votre nom --}}
                         @endif
                     </label>
                 </div>

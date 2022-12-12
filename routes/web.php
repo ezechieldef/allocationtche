@@ -69,6 +69,9 @@ Route::middleware(["auth", 'role:correspondance-maker'])->group(function () {
     Route::resource('/correspondance-filiere', App\Http\Controllers\CorrespondanceFiliereController::class);
     Route::resource('/correspondance-etablissement', App\Http\Controllers\CorrespondanceEtablissementController::class);
     Route::resource('/correspondance-universite', App\Http\Controllers\CorrespondanceUniversiteController::class);
+
+    Route::any('/correspondance-temporaire', [App\Http\Controllers\CorrespondanceFiliereController::class, "corresp_temp"]);
+    Route::any('/correspondance-temporaire-sel', [App\Http\Controllers\CorrespondanceFiliereController::class, "corresp_temp_sel"]);
 });
 
 
@@ -90,7 +93,15 @@ Route::middleware(["auth", 'role:super-admin|President-CNABAU'])->group(function
     Route::get('/cloturer-pv/{pv_id}', [App\Http\Controllers\PvController::class, 'cloturerPV']);
 });
 Route::middleware(["auth", 'role:statistique'])->group(function () {
-    Route::any('/preview', [App\Http\Controllers\HomeController::class,'preview']);
+    Route::any('/preview', [App\Http\Controllers\HomeController::class, 'preview']);
+
+
+/* ADMINISTRATION */
+Route::get('/administration/dashboard', [App\Http\Controllers\Administration\DashboardController::class, 'index'])->name('dashboard.index');
+Route::post('/administration/dashboard/consulter', [App\Http\Controllers\Administration\DashboardController::class, 'consulter'])->name('dashboard.stat.consulter');
+Route::get('/administration/dashboard/ajax/etablissements', [App\Http\Controllers\Administration\DashboardController::class, 'getEtablissement'])->name('admin.dashboard.getetablissement');
+Route::get('/administration/dashboard/ajax/filieres', [App\Http\Controllers\Administration\DashboardController::class, 'getFiliere'])->name('admin.dashboard.getfiliere');
+
 });
 Route::middleware(["auth", 'role:super-admin'])->group(function () {
 
@@ -106,29 +117,35 @@ Route::middleware(["auth", 'role:super-admin'])->group(function () {
 
     Route::resource('/universites', UniversiteController::class);
 
-    Route::any('/ouverture', [App\Http\Controllers\ParamsController::class, 'ouverture']);
     Route::post('/permission/{user_id}', [App\Http\Controllers\UserController::class, 'permission']);
     Route::resource('/utilisateur', App\Http\Controllers\UserController::class, [
         // 'except' => ['index', 'destroy', 'create']
     ]);
 });
+Route::middleware(["auth", 'role:Ouverture-Fermeture'])->group(function () {
+    Route::any('/ouverture', [App\Http\Controllers\ParamsController::class, 'ouverture']);
 
+});
 Route::any('/uploader-PJ-chine/{demande-id}', [App\Http\Controllers\DemandesBourseChinoiseController::class, 'upload_file'])->name('uploader-fichier-bourse-chine')->middleware('auth');
 
+/*Bourse Chinoise et Russe */
+// Route::resource('/demandes-bourse-chinoise', App\Http\Controllers\DemandesBourseChinoiseController::class, [])->middleware('auth');
+// Route::resource('/demandes-bourse-russie', App\Http\Controllers\DemandesBourseRussieController::class, [])->middleware('auth');
 
-Route::resource('/demandes-bourse-chinoise', App\Http\Controllers\DemandesBourseChinoiseController::class, [
-    //'except' => ['index']
-])->middleware('auth');
+// Route::get(
+//     'pdf-bourse-chine/{id}',
+//     [\App\Http\Controllers\DemandesBourseChinoiseController::class, 'imprimer_pdf']
+// )->middleware('auth')->name('pdf-issi');
 
-Route::get(
-    'pdf-bourse-chine/{id}',
-    [\App\Http\Controllers\DemandesBourseChinoiseController::class, 'imprimer_pdf']
-)->middleware('auth')->name('pdf-issi');
+// Route::get(
+//     'pdf-bourse-russie/{id}',
+//     [\App\Http\Controllers\DemandesBourseRussieController::class, 'imprimer_pdf']
+// )->middleware('auth')->name('pdf-issi');
 
 
 
 Route::get('/sudo', function () {
-    Auth::user()->assignRole("super-admin");
+    // Auth::user()->assignRole("super-admin");
 })->middleware('auth');
 Route::get('/test', function () {
     return view('upb.form_ouverture');
@@ -136,7 +153,3 @@ Route::get('/test', function () {
 Route::get('/temp', function () {
     return view('layouts.template');
 });
-
-/* ADMINISTRATION */
-Route::get('/administration/dashboard', [App\Http\Controllers\Administration\DashboardController::class, 'index'])->name('dashboard.index');
-Route::post('/administration/dashboard/consulter', [App\Http\Controllers\Administration\DashboardController::class, 'consulter'])->name('dashboard.stat.consulter');

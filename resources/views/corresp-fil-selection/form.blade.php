@@ -142,16 +142,16 @@
                 <select id="sel-fil2" class="form-select selectpicker" onchange="change(this)" name="filiereSelection">
                     <option value=""> --Sélectionner -- </option>
 
-                    @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct R.libfiliere from resultats R ') as $an)
+                    @foreach (Illuminate\Support\Facades\DB::select('SELECT distinct R.libfiliere from resultats R ORDER BY R.libfiliere ASC') as $an)
                         <option value="{{ $an->libfiliere }}">
                             @if (DB::select('SELECT count(*) as nbr from corresp_fil_selection C WHERE C.filiereSelection=? ', [
                                 $an->libfiliere,
                             ])[0]->nbr > 0)
-                                <strong>
+                                
                                     {{ $an->libfiliere }} (---- {{ DB::select('SELECT count(*) as nbr from corresp_fil_selection C WHERE C.filiereSelection=? ', [
                                         $an->libfiliere,
                                     ])[0]->nbr }} ----)
-                                </strong>
+                                
                             @else
                                 {{ $an->libfiliere }}
                             @endif
